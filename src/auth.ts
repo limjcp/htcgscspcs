@@ -78,18 +78,6 @@ const authOptions: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax", // Consider using "strict" if "lax" doesn't work
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: process.env.COOKIE_DOMAIN, // Use the environment variable here
-      },
-    },
-  },
   callbacks: {
     async session({ session, token }) {
       session.user.id = token.id;
