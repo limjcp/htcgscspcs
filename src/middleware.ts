@@ -8,7 +8,9 @@ export async function middleware(request: NextRequest) {
     secret: process.env.AUTH_SECRET,
   });
 
-  // Allow access to login, register, logo, and API routes
+  console.log("Token:", token);
+  console.log("Request URL:", request.nextUrl.pathname);
+
   if (
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/api/auth") ||
@@ -17,12 +19,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  //If there's no token, redirect to the sign-in page
   if (!token) {
     return NextResponse.redirect(new URL("/api/auth/signin", request.url));
   }
 
-  // Redirect users based on their roles to the appropriate dashboard
   if (request.nextUrl.pathname === "/") {
     if (token.role && Array.isArray(token.role)) {
       if (token.role.includes("admin")) {
