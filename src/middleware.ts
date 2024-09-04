@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  If there's no token, redirect to the sign-in page
+  //If there's no token, redirect to the sign-in page
   if (!token) {
     return NextResponse.redirect(new URL("/api/auth/signin", request.url));
   }
@@ -43,10 +43,10 @@ export async function middleware(request: NextRequest) {
       }
     }
   }
-  
+
   // Authorization checks for specific routes
   const pathname = request.nextUrl.pathname;
-  
+
   if (
     (pathname.startsWith("/register") ||
       pathname.startsWith("/admin-dashboard")) &&
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  
+
   if (
     (pathname.startsWith("/staff-dashboard") ||
       pathname.startsWith("/staff-approve") ||
@@ -63,7 +63,7 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  
+
   if (
     (pathname.startsWith("/signatory-dashboard") ||
       pathname.startsWith("/signatory-sign")) &&
@@ -71,7 +71,7 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  
+
   if (
     (pathname.startsWith("/student-dashboard") ||
       pathname.startsWith("/student-clearance") ||
