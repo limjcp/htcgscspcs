@@ -17,70 +17,70 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If there's no token, redirect to the sign-in page
-  // if (!token) {
-  //   return NextResponse.redirect(new URL("/api/auth/signin", request.url));
-  // }
+  If there's no token, redirect to the sign-in page
+  if (!token) {
+    return NextResponse.redirect(new URL("/api/auth/signin", request.url));
+  }
 
-  // // Redirect users based on their roles to the appropriate dashboard
-  // if (request.nextUrl.pathname === "/") {
-  //   if (token.role && Array.isArray(token.role)) {
-  //     if (token.role.includes("admin")) {
-  //       return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-  //     }
-  //     if (token.role.includes("staff")) {
-  //       return NextResponse.redirect(new URL("/staff-dashboard", request.url));
-  //     }
-  //     if (token.role.includes("signatory")) {
-  //       return NextResponse.redirect(
-  //         new URL("/signatory-dashboard", request.url)
-  //       );
-  //     }
-  //     if (token.role.includes("student")) {
-  //       return NextResponse.redirect(
-  //         new URL("/student-dashboard", request.url)
-  //       );
-  //     }
-  //   }
-  // }
-  //
-  // // Authorization checks for specific routes
-  // const pathname = request.nextUrl.pathname;
-  //
-  // if (
-  //   (pathname.startsWith("/register") ||
-  //     pathname.startsWith("/admin-dashboard")) &&
-  //   !token.role.includes("admin")
-  // ) {
-  //   return NextResponse.redirect(new URL("/unauthorized", request.url));
-  // }
-  //
-  // if (
-  //   (pathname.startsWith("/staff-dashboard") ||
-  //     pathname.startsWith("/staff-approve") ||
-  //     pathname.startsWith("/staff-requirements")) &&
-  //   !token.role.includes("staff")
-  // ) {
-  //   return NextResponse.redirect(new URL("/unauthorized", request.url));
-  // }
-  //
-  // if (
-  //   (pathname.startsWith("/signatory-dashboard") ||
-  //     pathname.startsWith("/signatory-sign")) &&
-  //   !token.role.includes("signatory")
-  // ) {
-  //   return NextResponse.redirect(new URL("/unauthorized", request.url));
-  // }
-  //
-  // if (
-  //   (pathname.startsWith("/student-dashboard") ||
-  //     pathname.startsWith("/student-clearance") ||
-  //     pathname.startsWith("/student-requirements") ||
-  //     pathname.startsWith("/student-clearance/track-clearance")) &&
-  //   !token.role.includes("student")
-  // ) {
-  //   return NextResponse.redirect(new URL("/unauthorized", request.url));
-  // }
+  // Redirect users based on their roles to the appropriate dashboard
+  if (request.nextUrl.pathname === "/") {
+    if (token.role && Array.isArray(token.role)) {
+      if (token.role.includes("admin")) {
+        return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+      }
+      if (token.role.includes("staff")) {
+        return NextResponse.redirect(new URL("/staff-dashboard", request.url));
+      }
+      if (token.role.includes("signatory")) {
+        return NextResponse.redirect(
+          new URL("/signatory-dashboard", request.url)
+        );
+      }
+      if (token.role.includes("student")) {
+        return NextResponse.redirect(
+          new URL("/student-dashboard", request.url)
+        );
+      }
+    }
+  }
+  
+  // Authorization checks for specific routes
+  const pathname = request.nextUrl.pathname;
+  
+  if (
+    (pathname.startsWith("/register") ||
+      pathname.startsWith("/admin-dashboard")) &&
+    !token.role.includes("admin")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  
+  if (
+    (pathname.startsWith("/staff-dashboard") ||
+      pathname.startsWith("/staff-approve") ||
+      pathname.startsWith("/staff-requirements")) &&
+    !token.role.includes("staff")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  
+  if (
+    (pathname.startsWith("/signatory-dashboard") ||
+      pathname.startsWith("/signatory-sign")) &&
+    !token.role.includes("signatory")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  
+  if (
+    (pathname.startsWith("/student-dashboard") ||
+      pathname.startsWith("/student-clearance") ||
+      pathname.startsWith("/student-requirements") ||
+      pathname.startsWith("/student-clearance/track-clearance")) &&
+    !token.role.includes("student")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
 
   return NextResponse.next();
 }
