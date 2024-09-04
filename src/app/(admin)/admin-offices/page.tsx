@@ -10,7 +10,7 @@ const Office = () => {
     try {
       const response = await fetch("/api/offices");
       const data = await response.json();
-      console.log("Fetched offices:", data);
+
       if (Array.isArray(data)) {
         setOffices(data);
       } else {

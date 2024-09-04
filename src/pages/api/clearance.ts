@@ -28,11 +28,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const signedSteps = student.clearances.flatMap((clearance) =>
-      clearance.steps.filter((step) => step.status === ClearanceStatus.CLEARED),
+      clearance.steps.filter((step) => step.status === ClearanceStatus.SIGNED)
     ).length;
 
     const notSignedSteps = student.clearances.flatMap((clearance) =>
-      clearance.steps.filter((step) => step.status !== ClearanceStatus.CLEARED),
+      clearance.steps.filter((step) => step.status !== ClearanceStatus.SIGNED)
     ).length;
 
     res.status(200).json({ signedSteps, notSignedSteps });

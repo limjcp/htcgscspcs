@@ -5,13 +5,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
-  }
+  const { studentId, stepId, officeId, staffName } = req.body;
 
-  const { studentId, stepId, officeId } = req.body;
+  console.log("Received request body:", req.body);
 
-  if (!studentId || !stepId || !officeId) {
+  if (!studentId || !stepId || !officeId || !staffName) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -27,6 +25,8 @@ export default async function handler(
       },
       data: {
         status: "APPROVED",
+        signedAt: new Date(),
+        signedBy: staffName,
       },
     });
 

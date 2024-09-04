@@ -26,6 +26,13 @@ export default async function handler(
       },
     });
 
+    const pendingStudentsCount = await prisma.clearanceStep.count({
+      where: {
+        officeId: String(officeId),
+        status: "PENDING",
+      },
+    });
+
     const approvedStudentsCount = await prisma.clearanceStep.count({
       where: {
         officeId: String(officeId),
@@ -42,8 +49,10 @@ export default async function handler(
 
     res.status(200).json({
       allStudents: allStudentsCount,
+      pendingStudents: pendingStudentsCount,
       approvedStudents: approvedStudentsCount,
       signedStudents: signedStudentsCount,
+      approvedsignedStudents: approvedStudentsCount + signedStudentsCount,
     });
   } catch (error) {
     console.error("Error fetching student counts:", error);

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import React from "react";
 
@@ -8,6 +8,32 @@ const CreateRequirementPage = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+  const [requirements, setRequirements] = useState([]);
+
+  useEffect(() => {
+    if (session && session.user && session.user.officeId) {
+      fetchRequirements(session.user.officeId);
+    } else {
+      console.log("Session or officeId not available:", session);
+    }
+  }, [session]);
+
+  const fetchRequirements = async (officeId) => {
+    try {
+      const response = await fetch(`/api/getRequirements?officeId=${officeId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setRequirements(data);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch requirements.");
+        console.error("Error fetching requirements:", errorData);
+      }
+    } catch (error) {
+      setError("Failed to fetch requirements.");
+      console.error("Error fetching requirements:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,14 +52,40 @@ const CreateRequirementPage = () => {
         name,
         description,
         staffId: session.user.staffId,
+        officeId: session.user.officeId,
       }),
     });
 
     if (response.ok) {
       alert("Requirement created successfully");
+      fetchRequirements(session.user.officeId); // Refresh the requirements list
     } else {
       const data = await response.json();
       setError(data.message || "Failed to create requirement.");
+    }
+  };
+
+  const handleDelete = async (requirementId) => {
+    try {
+      const response = await fetch(`/api/deleteRequirement`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ requirementId }),
+      });
+
+      if (response.ok) {
+        alert("Requirement deleted successfully");
+        fetchRequirements(session.user.officeId); // Refresh the requirements list
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to delete requirement.");
+        console.error("Error deleting requirement:", errorData);
+      }
+    } catch (error) {
+      setError("Failed to delete requirement.");
+      console.error("Error deleting requirement:", error);
     }
   };
 
@@ -67,6 +119,35 @@ const CreateRequirementPage = () => {
           Create
         </button>
       </form>
+
+      <h2 className="text-xl font-bold mt-8">Requirements</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200 mt-4">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Name</th>
+              <th className="py-2 px-4 border-b">Description</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requirements.map((requirement) => (
+              <tr key={requirement.id}>
+                <td className="border px-4 py-2">{requirement.name}</td>
+                <td className="border px-4 py-2">{requirement.description}</td>
+                <td className="border px-4 py-2">
+                  <button
+                    onClick={() => handleDelete(requirement.id)}
+                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   try {
     const offices = await prisma.office.findMany({
@@ -22,7 +22,7 @@ export default async function handler(
       },
     });
 
-    console.log("Fetched offices:", JSON.stringify(offices, null, 2)); // Add logging
+    // Add logging
 
     const result = offices.map((office) => ({
       id: office.id,

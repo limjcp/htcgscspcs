@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import React from "react";
 
 export default function AssignOfficers() {
   const [offices, setOffices] = useState([]);
@@ -22,7 +23,6 @@ export default function AssignOfficers() {
       const usersWithRolesResponse = await axios.get("/api/users-with-roles");
       const registeredUsersResponse = await axios.get("/api/users");
       const response = await axios.get("/api/offices-with-users");
-      console.log("Fetched data:", response.data);
 
       setOffices(response.data);
       setStaff(staffResponse.data);
@@ -54,7 +54,7 @@ export default function AssignOfficers() {
     setSelectedOffice(office);
     setSelectedStaff(office.staff.length > 0 ? office.staff[0].id : "");
     setSelectedSignatory(
-      office.signatories.length > 0 ? office.signatories[0].id : "",
+      office.signatories.length > 0 ? office.signatories[0].id : ""
     );
   };
 

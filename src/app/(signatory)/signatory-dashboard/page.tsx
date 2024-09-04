@@ -43,11 +43,6 @@ export default function Home() {
   return (
     <div>
       <h1>Signatory</h1>
-      <p>
-        This is the home page. You can access the{" "}
-        <Link href="/admin-dashboard">Admin Dashboard</Link> or the{" "}
-        <Link href="/student-dashboard">Student Dashboard</Link>.
-      </p>
       {error && <p className="text-red-500">{error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div className="bg-white shadow-md rounded-lg p-4">
@@ -55,12 +50,12 @@ export default function Home() {
           <p className="text-2xl">{counts.allStudents}</p>
         </div>
         <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-xl font-bold">Approved Students</h2>
-          <p className="text-2xl">{counts.approvedStudents}</p>
+          <h2 className="text-xl text-red-700 font-bold">Approved Students</h2>
+          <p className="text-2xl text-red-700">{counts.approvedStudents}</p>
         </div>
         <div className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-xl font-bold">Signed Students</h2>
-          <p className="text-2xl">{counts.signedStudents}</p>
+          <h2 className="text-xl text-green-700 font-bold">Signed Students</h2>
+          <p className="text-2xl text-green-700">{counts.signedStudents}</p>
         </div>
       </div>
     </div>

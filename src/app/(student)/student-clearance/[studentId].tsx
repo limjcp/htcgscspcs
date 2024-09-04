@@ -30,7 +30,7 @@ const ClearancePage = () => {
 
   const { data, error } = useSWR(
     studentId ? `/api/clearance/${studentId}` : null,
-    fetcher,
+    fetcher
   );
 
   if (!studentId) return <div>Missing student ID</div>;
@@ -64,16 +64,18 @@ const ClearancePage = () => {
                     {step.office.name}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    {step.name} - {step.description}
+                    {step.signedBy} - {step.comments}
                   </p>
                 </div>
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    step.status === "CLEARED"
+                    step.status === "SIGNED"
                       ? "bg-green-200 text-green-800"
                       : step.status === "PENDING"
                         ? "bg-yellow-200 text-yellow-800"
-                        : "bg-red-200 text-red-800"
+                        : step.status === "APPROVED"
+                          ? "bg-blue-200 text-blue-800"
+                          : "bg-red-200 text-red-800"
                   }`}
                 >
                   {step.status}
@@ -83,7 +85,7 @@ const ClearancePage = () => {
                 {new Date(step.signedAt).toLocaleString()}
               </time>
             </div>
-          )),
+          ))
         )}
       </div>
     </div>
