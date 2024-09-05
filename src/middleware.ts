@@ -2,57 +2,51 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.AUTH_SECRET,
-  });
+export async function middleware(req: NextRequest) {
+  const secret = process.env.AUTH_SECRET;
 
-  console.log("Token:", token);
-  console.log("Request URL:", request.nextUrl.pathname);
+  if (!secret) {
+    throw new Error("AUTH_SECRET environment variable is not set");
+  }
+
+  const token = await getToken({ req, secret });
 
   if (
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/api/auth") ||
-    request.nextUrl.pathname === "/htc-new-seal.png"
+    req.nextUrl.pathname.startsWith("/login") ||
+    req.nextUrl.pathname.startsWith("/api/auth")
   ) {
     return NextResponse.next();
   }
 
   if (!token) {
-    return NextResponse.redirect(new URL("/api/auth/signin", request.url));
+    return NextResponse.redirect(new URL("/api/auth/signin", req.url));
   }
 
-  if (request.nextUrl.pathname === "/") {
+  if (req.nextUrl.pathname === "/") {
     if (token.role && Array.isArray(token.role)) {
       if (token.role.includes("admin")) {
-        return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+        return NextResponse.redirect(new URL("/admin-dashboard", req.url));
       }
       if (token.role.includes("staff")) {
-        return NextResponse.redirect(new URL("/staff-dashboard", request.url));
+        return NextResponse.redirect(new URL("/staff-dashboard", req.url));
       }
       if (token.role.includes("signatory")) {
-        return NextResponse.redirect(
-          new URL("/signatory-dashboard", request.url)
-        );
+        return NextResponse.redirect(new URL("/signatory-dashboard", req.url));
       }
       if (token.role.includes("student")) {
-        return NextResponse.redirect(
-          new URL("/student-dashboard", request.url)
-        );
+        return NextResponse.redirect(new URL("/student-dashboard", req.url));
       }
     }
   }
 
-  // Authorization checks for specific routes
-  const pathname = request.nextUrl.pathname;
+  const pathname = req.nextUrl.pathname;
 
   if (
     (pathname.startsWith("/register") ||
       pathname.startsWith("/admin-dashboard")) &&
     !token.role.includes("admin")
   ) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
   if (
@@ -61,7 +55,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/staff-requirements")) &&
     !token.role.includes("staff")
   ) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
   if (
@@ -69,7 +63,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/signatory-sign")) &&
     !token.role.includes("signatory")
   ) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
   if (
@@ -79,7 +73,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/student-clearance/track-clearance")) &&
     !token.role.includes("student")
   ) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
   return NextResponse.next();
@@ -87,14 +81,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for:
-     * - static files
-     * - API routes
-     * - login page
-     * - logo file
-     * - any other public assets
-     */
     "/((?!_next/static|_next/image|favicon.ico|login|htc-new-seal.png|unauthorized|api).*)",
   ],
 };
