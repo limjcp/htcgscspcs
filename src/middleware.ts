@@ -11,6 +11,9 @@ export async function middleware(req: NextRequest) {
 
   const token = await getToken({ req, secret });
 
+  console.log("Token:", token);
+  console.log("Request URL:", req.nextUrl.pathname);
+
   if (
     req.nextUrl.pathname.startsWith("/login") ||
     req.nextUrl.pathname.startsWith("/api/auth")
@@ -19,21 +22,26 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!token) {
+    console.log("No token found, redirecting to signin");
     return NextResponse.redirect(new URL("/api/auth/signin", req.url));
   }
 
   if (req.nextUrl.pathname === "/") {
     if (token.role && Array.isArray(token.role)) {
       if (token.role.includes("admin")) {
+        console.log("Redirecting to admin-dashboard");
         return NextResponse.redirect(new URL("/admin-dashboard", req.url));
       }
       if (token.role.includes("staff")) {
+        console.log("Redirecting to staff-dashboard");
         return NextResponse.redirect(new URL("/staff-dashboard", req.url));
       }
       if (token.role.includes("signatory")) {
+        console.log("Redirecting to signatory-dashboard");
         return NextResponse.redirect(new URL("/signatory-dashboard", req.url));
       }
       if (token.role.includes("student")) {
+        console.log("Redirecting to student-dashboard");
         return NextResponse.redirect(new URL("/student-dashboard", req.url));
       }
     }
@@ -46,6 +54,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/admin-dashboard")) &&
     !token.role.includes("admin")
   ) {
+    console.log("Unauthorized access to admin area, redirecting");
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
@@ -55,6 +64,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/staff-requirements")) &&
     !token.role.includes("staff")
   ) {
+    console.log("Unauthorized access to staff area, redirecting");
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
@@ -63,6 +73,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/signatory-sign")) &&
     !token.role.includes("signatory")
   ) {
+    console.log("Unauthorized access to signatory area, redirecting");
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
@@ -73,6 +84,7 @@ export async function middleware(req: NextRequest) {
       pathname.startsWith("/student-clearance/track-clearance")) &&
     !token.role.includes("student")
   ) {
+    console.log("Unauthorized access to student area, redirecting");
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
