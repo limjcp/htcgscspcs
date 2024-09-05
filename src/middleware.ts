@@ -13,6 +13,7 @@ export async function middleware(req: NextRequest) {
 
   console.log("Token:", token);
   console.log("Request URL:", req.nextUrl.pathname);
+  console.log("Cookies:", req.cookies);
 
   if (
     req.nextUrl.pathname.startsWith("/login") ||
