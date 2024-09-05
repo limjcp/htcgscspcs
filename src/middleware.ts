@@ -1,99 +1,49 @@
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const secret = process.env.AUTH_SECRET;
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
-  if (!secret) {
-    throw new Error("AUTH_SECRET environment variable is not set");
-  }
-
-  const token = await getToken({ req, secret });
-
-  console.log("Token:", token);
-  console.log("Request URL:", req.nextUrl.pathname);
-  console.log("Cookies:", req.cookies);
-
+  // Public routes that don't require authentication
   if (
-    req.nextUrl.pathname.startsWith("/login") ||
-    req.nextUrl.pathname.startsWith("/api/auth")
+    nextUrl.pathname.startsWith("/login") ||
+    nextUrl.pathname.startsWith("/api/auth") ||
+    nextUrl.pathname === "/htc-new-seal.png"
   ) {
     return NextResponse.next();
   }
 
-  if (!token) {
-    console.log("No token found, redirecting to signin");
-    return NextResponse.redirect(new URL("/api/auth/signin", req.url));
+  // Redirect unauthenticated users to login page
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
   }
 
-  if (req.nextUrl.pathname === "/") {
-    if (token.role && Array.isArray(token.role)) {
-      if (token.role.includes("admin")) {
-        console.log("Redirecting to admin-dashboard");
-        return NextResponse.redirect(new URL("/admin-dashboard", req.url));
-      }
-      if (token.role.includes("staff")) {
-        console.log("Redirecting to staff-dashboard");
-        return NextResponse.redirect(new URL("/staff-dashboard", req.url));
-      }
-      if (token.role.includes("signatory")) {
-        console.log("Redirecting to signatory-dashboard");
-        return NextResponse.redirect(new URL("/signatory-dashboard", req.url));
-      }
-      if (token.role.includes("student")) {
-        console.log("Redirecting to student-dashboard");
-        return NextResponse.redirect(new URL("/student-dashboard", req.url));
+  // Role-based redirects
+  if (nextUrl.pathname === "/") {
+    const userRole = req.auth?.user?.role;
+    if (Array.isArray(userRole)) {
+      if (userRole.includes("admin")) {
+        return NextResponse.redirect(new URL("/admin-dashboard", nextUrl));
+      } else if (userRole.includes("staff")) {
+        return NextResponse.redirect(new URL("/staff-dashboard", nextUrl));
+      } else if (userRole.includes("signatory")) {
+        return NextResponse.redirect(new URL("/signatory-dashboard", nextUrl));
+      } else if (userRole.includes("student")) {
+        return NextResponse.redirect(new URL("/student-dashboard", nextUrl));
       }
     }
   }
 
-  const pathname = req.nextUrl.pathname;
-
-  if (
-    (pathname.startsWith("/register") ||
-      pathname.startsWith("/admin-dashboard")) &&
-    !token.role.includes("admin")
-  ) {
-    console.log("Unauthorized access to admin area, redirecting");
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
-
-  if (
-    (pathname.startsWith("/staff-dashboard") ||
-      pathname.startsWith("/staff-approve") ||
-      pathname.startsWith("/staff-requirements")) &&
-    !token.role.includes("staff")
-  ) {
-    console.log("Unauthorized access to staff area, redirecting");
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
-
-  if (
-    (pathname.startsWith("/signatory-dashboard") ||
-      pathname.startsWith("/signatory-sign")) &&
-    !token.role.includes("signatory")
-  ) {
-    console.log("Unauthorized access to signatory area, redirecting");
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
-
-  if (
-    (pathname.startsWith("/student-dashboard") ||
-      pathname.startsWith("/student-clearance") ||
-      pathname.startsWith("/student-requirements") ||
-      pathname.startsWith("/student-clearance/track-clearance")) &&
-    !token.role.includes("student")
-  ) {
-    console.log("Unauthorized access to student area, redirecting");
-    return NextResponse.redirect(new URL("/unauthorized", req.url));
-  }
+  // Add your authorization checks here
+  // For example:
+  // if (nextUrl.pathname.startsWith("/admin") && !req.auth?.user?.role?.includes("admin")) {
+  //   return NextResponse.redirect(new URL("/unauthorized", nextUrl))
+  // }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|login|htc-new-seal.png|unauthorized|api).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
