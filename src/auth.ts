@@ -31,7 +31,6 @@ const authOptions: NextAuthConfig = {
           return null;
         }
 
-        // Fetch the user along with their related student, staff, and signatory records
         const user = await prisma.user.findUnique({
           where: {
             username: credentials.username as string,
@@ -47,7 +46,6 @@ const authOptions: NextAuthConfig = {
           return null;
         }
 
-        // Check if the password is valid
         const isPasswordValid =
           user.password && user.password.length > 20
             ? await bcrypt.compare(
@@ -60,7 +58,6 @@ const authOptions: NextAuthConfig = {
           return null;
         }
 
-        // Fetch the officeId if the user is staff or signatory
         let officeId = null;
         if (user.staff) {
           officeId = user.staff.officeId;
@@ -68,7 +65,6 @@ const authOptions: NextAuthConfig = {
           officeId = user.signatory.officeId;
         }
 
-        // Return the user object, which now includes related student, staff, signatory models, and officeId
         return { ...user, officeId };
       },
     }),
@@ -82,8 +78,6 @@ const authOptions: NextAuthConfig = {
     async session({ session, token }) {
       session.user.id = token.id;
       session.user.role = token.role;
-
-      // Include studentId, staffId, signatoryId, and officeId in the session object
       session.user.studentId = token.studentId || null;
       session.user.staffId = token.staffId || null;
       session.user.signatoryId = token.signatoryId || null;
@@ -95,8 +89,6 @@ const authOptions: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-
-        // Include the studentId, staffId, signatoryId, and officeId from the user object
         token.studentId = user.student?.id || null;
         token.staffId = user.staff?.id || null;
         token.signatoryId = user.signatory?.id || null;
