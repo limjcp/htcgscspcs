@@ -17,12 +17,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: { role: { has: "staff" } },
     });
 
+    const clearedStudents = await prisma.clearance.count({
+      where: { status: "CLEARED" },
+    });
+    const notClearedStudents = await prisma.clearance.count({
+      where: { status: { not: "CLEARED" } },
+    });
+
     res.status(200).json({
       totalUsers,
       totalStudents,
       totalAdmins,
       totalSignatories,
       totalStaff,
+      clearedStudents,
+      notClearedStudents,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

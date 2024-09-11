@@ -11,6 +11,8 @@ import {
   Calendar,
   MessageCircleWarning,
   Settings,
+  Library,
+  UserRound,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
@@ -67,19 +69,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/admin-dashboard"
             />
             <Sidebar.Nav.Section.Item
-              icon={<UserRoundPlus />}
+              icon={<UserRound />}
               label="Officers"
               href="/admin-officers"
             />
             <Sidebar.Nav.Section.Item
               icon={<LampDesk />}
-              label="Offices"
+              label="Offices/Departments"
               href="/admin-offices"
             />
             <Sidebar.Nav.Section.Item
               icon={<Calendar />}
               label="Semesters"
               href="/admin-semesters"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<Library />}
+              label="Programs"
+              href="/admin-programs"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<UserRoundPlus />}
+              label="Personnel"
+              href="/admin-personnel"
             />
             <Sidebar.Nav.Section.Item
               icon={<MessageCircleWarning />}

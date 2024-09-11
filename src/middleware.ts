@@ -35,6 +35,34 @@ export default auth((req) => {
     }
   }
 
+  if (
+    nextUrl.pathname.startsWith("/admin") &&
+    !req.auth?.user?.role?.includes("admin")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+  }
+
+  if (
+    nextUrl.pathname.startsWith("/staff") &&
+    !req.auth?.user?.role?.includes("staff")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+  }
+
+  if (
+    nextUrl.pathname.startsWith("/signatory") &&
+    !req.auth?.user?.role?.includes("signatory")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+  }
+
+  if (
+    nextUrl.pathname.startsWith("/student") &&
+    !req.auth?.user?.role?.includes("student")
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+  }
+
   // Add your authorization checks here
   // For example:
   // if (nextUrl.pathname.startsWith("/admin") && !req.auth?.user?.role?.includes("admin")) {
