@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 // app/register/page.tsx
 import { useState } from "react";
 
@@ -12,7 +13,7 @@ export default function Register() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, selectedOptions } = e.target;
     if (name === "roles") {

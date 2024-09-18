@@ -79,11 +79,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/admin-offices"
             />
             <Sidebar.Nav.Section.Item
-              icon={<Calendar />}
-              label="Semesters"
-              href="/admin-semesters"
-            />
-            <Sidebar.Nav.Section.Item
               icon={<Library />}
               label="Programs"
               href="/admin-programs"
@@ -92,6 +87,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               icon={<UserRoundPlus />}
               label="Personnel"
               href="/admin-personnel"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<UserRoundPlus />}
+              label="Students"
+              href="/admin-students"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<Calendar />}
+              label="School Year"
+              href="/admin-schoolyear"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<Calendar />}
+              label="Semesters"
+              href="/admin-semesters"
             />
             <Sidebar.Nav.Section.Item
               icon={<MessageCircleWarning />}

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -97,6 +91,8 @@ model Student {
   userId        String      @unique
   studentNumber String      @unique
   clearances    Clearance[]
+  program       Program     @relation(fields: [programId], references: [id])
+  programId     String
 }
 
 model Staff {
@@ -122,35 +118,66 @@ model Office {
   signatory      Signatory[]
   requirements   Requirement[]
   clearanceSteps ClearanceStep[]
+  programs       Program[]
+}
+
+model Program {
+  id       String    @id @default(cuid())
+  name     String
+  office   Office    @relation(fields: [officeId], references: [id])
+  officeId String
+  students Student[]
 }
 
 model Requirement {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  office      Office   @relation(fields: [officeId], references: [id])
-  officeId    String
-  createdAt   DateTime @default(now())
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  office       Office     @relation(fields: [officeId], references: [id])
+  officeId     String
+  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])
+  schoolYearId String
+  semester     Semester   @relation(fields: [semesterId], references: [id])
+  semesterId   String
+  createdAt    DateTime   @default(now())
+}
+
+model SchoolYear {
+  id        String     @id @default(cuid())
+  startYear Int
+  endYear   Int
+  semesters Semester[]
+  year      String
+
+  Clearance Clearance[]
+
+  Requirement Requirement[]
 }
 
 model Semester {
-  id         String      @id @default(cuid())
-  name       String
-  startDate  DateTime
-  endDate    DateTime
-  clearances Clearance[]
+  id           String      @id @default(cuid())
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
+  schoolYearId String
+  clearances   Clearance[]
+
+  Requirement Requirement[]
 }
 
 model Clearance {
-  id         String          @id @default(cuid())
-  student    Student         @relation(fields: [studentId], references: [id])
-  studentId  String
-  semester   Semester        @relation(fields: [semesterId], references: [id])
-  semesterId String
-  status     ClearanceStatus @default(PENDING)
-  steps      ClearanceStep[]
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  id           String          @id @default(cuid())
+  student      Student         @relation(fields: [studentId], references: [id])
+  studentId    String
+  semester     Semester        @relation(fields: [semesterId], references: [id])
+  semesterId   String
+  schoolYear   SchoolYear      @relation(fields: [schoolYearId], references: [id])
+  schoolYearId String
+  status       ClearanceStatus @default(PENDING)
+  steps        ClearanceStep[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
 
 model ClearanceStep {
@@ -166,11 +193,14 @@ model ClearanceStep {
 }
 
 model Report {
-  id               String   @id @default(cuid())
-  semesterId       String
-  totalStudents    Int
-  clearedStudents  Int
-  pendingStudents  Int
-  rejectedStudents Int
-  generatedAt      DateTime @default(now())
+  id                     String   @id @default(cuid())
+  semesterId             String
+  totalStudents          Int
+  clearedStudents        Int
+  pendingStudents        Int
+  rejectedStudents       Int
+  generatedAt            DateTime @default(now())
+  schoolYear             String
+  clearedStudentsList    String[]
+  notClearedStudentsList String[]
 }
