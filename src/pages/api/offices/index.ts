@@ -6,7 +6,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (req.method === "GET") {
     try {
-      const offices = await prisma.office.findMany();
+      const offices = await prisma.office.findMany({
+        include: {
+          programs: true,
+        },
+      });
       console.log("Fetched offices:", offices);
       res.status(200).json(offices);
     } catch (error) {

@@ -14,6 +14,7 @@ enum Role {
   student
   signatory
   staff
+  personnel
   admin
 }
 
@@ -26,6 +27,18 @@ enum ClearanceStatus {
   SIGNED
 }
 
+enum SemesterStatus {
+  NULL
+  ONGOING
+  FINISHED
+}
+
+enum SchoolYearStatus {
+  NULL
+  ONGOING
+  FINISHED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -34,9 +47,8 @@ model User {
   image         String?
   password      String?
   username      String?   @unique
-  accounts      Account[]
-  sessions      Session[]
-  role          Role[]    @default([unverified])
+
+  role Role[] @default([unverified])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -44,45 +56,6 @@ model User {
   student   Student?
   staff     Staff?
   signatory Signatory?
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
 }
 
 model Student {
@@ -113,20 +86,20 @@ model Signatory {
 
 model Office {
   id             String          @id @default(cuid())
-  name           String
+  name           String          @unique
   staff          Staff[]
   signatory      Signatory[]
   requirements   Requirement[]
   clearanceSteps ClearanceStep[]
-  programs       Program[]
+  programs       Program[] // Many-to-many relation with Program
 }
 
 model Program {
-  id       String    @id @default(cuid())
-  name     String
-  office   Office    @relation(fields: [officeId], references: [id])
-  officeId String
-  students Student[]
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String
+  students    Student[]
+  offices     Office[] // Many-to-many relation with Office
 }
 
 model Requirement {
@@ -152,6 +125,7 @@ model SchoolYear {
   Clearance Clearance[]
 
   Requirement Requirement[]
+  status      SchoolYearStatus @default(NULL)
 }
 
 model Semester {
@@ -164,6 +138,7 @@ model Semester {
   clearances   Clearance[]
 
   Requirement Requirement[]
+  status      SemesterStatus @default(NULL)
 }
 
 model Clearance {

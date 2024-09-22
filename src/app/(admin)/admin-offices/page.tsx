@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 const Office = () => {
   const [name, setName] = useState("");
   const [offices, setOffices] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [selectedPrograms, setSelectedPrograms] = useState([]);
   const [editingOffice, setEditingOffice] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [currentOffice, setCurrentOffice] = useState(null);
 
   const fetchOffices = async () => {
     try {
@@ -23,8 +28,26 @@ const Office = () => {
     }
   };
 
+  const fetchPrograms = async () => {
+    try {
+      const response = await fetch("/api/programs");
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setPrograms(data);
+      } else {
+        console.error("Data is not an array:", data);
+        setPrograms([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch programs:", error);
+      setPrograms([]);
+    }
+  };
+
   useEffect(() => {
     fetchOffices();
+    fetchPrograms();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,6 +64,7 @@ const Office = () => {
       alert("Office created successfully!");
       setName("");
       fetchOffices();
+      setIsFormModalOpen(false);
     } else {
       alert("Failed to create office.");
     }
@@ -49,6 +73,7 @@ const Office = () => {
   const handleEdit = (office) => {
     setEditingOffice(office);
     setName(office.name);
+    setIsFormModalOpen(true);
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -66,6 +91,7 @@ const Office = () => {
       setName("");
       setEditingOffice(null);
       fetchOffices();
+      setIsFormModalOpen(false);
     } else {
       alert("Failed to update office.");
     }
@@ -84,42 +110,59 @@ const Office = () => {
     }
   };
 
+  const handleAssignPrograms = async () => {
+    const response = await fetch(`/api/assign-programs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        officeId: currentOffice.id,
+        programIds: selectedPrograms,
+      }),
+    });
+
+    if (response.ok) {
+      alert("Programs assigned successfully!");
+      setIsModalOpen(false);
+      fetchOffices();
+    } else {
+      alert("Failed to assign programs.");
+    }
+  };
+
+  const handleProgramChange = (programId) => {
+    setSelectedPrograms((prevSelected) =>
+      prevSelected.includes(programId)
+        ? prevSelected.filter((id) => id !== programId)
+        : [...prevSelected, programId]
+    );
+  };
+
+  const openModal = (office) => {
+    setCurrentOffice(office);
+    setSelectedPrograms(
+      office.programs ? office.programs.map((program) => program.id) : []
+    );
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Create Office</h1>
-      <form
-        onSubmit={editingOffice ? handleUpdate : handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6"
-      >
-        <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="name"
-          >
-            Office Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
-        </div>
+      <div className="flex justify-between">
+        <h2 className="text-2xl font-bold mb-4">Offices/Deparments</h2>
         <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          onClick={() => setIsFormModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
         >
-          {editingOffice ? "Update Office" : "Create Office"}
+          + Add Office/Department
         </button>
-      </form>
-
-      <h2 className="text-2xl font-bold mb-4">Offices</h2>
+      </div>
       <table className="min-w-full bg-white">
         <thead>
           <tr>
             <th className="py-2 px-4 border-b">Name</th>
+            <th className="py-2 px-4 border-b">Programs</th>
             <th className="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -127,8 +170,13 @@ const Office = () => {
           {Array.isArray(offices) ? (
             offices.map((office) => (
               <tr key={office.id}>
-                <td className="py-2 px-4 border-b">{office.name}</td>
-                <td className="py-2 px-4 border-b">
+                <td className="py-2 px-4 border-b text-center">
+                  {office.name}
+                </td>
+                <td className="py-2 px-4 border-b text-center">
+                  {office.programs?.map((program) => program.name).join(", ")}
+                </td>
+                <td className="py-2 px-4 border-b text-center">
                   <button
                     onClick={() => handleEdit(office)}
                     className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
@@ -141,18 +189,103 @@ const Office = () => {
                   >
                     Delete
                   </button>
+                  <button
+                    onClick={() => openModal(office)}
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+                  >
+                    Assign Programs
+                  </button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="2" className="py-2 px-4 border-b">
+              <td colSpan="3" className="py-2 px-4 border-b">
                 No offices available.
               </td>
             </tr>
           )}
         </tbody>
       </table>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <h2 className="text-2xl font-bold mb-4">Assign Programs</h2>
+            <div className="mb-4">
+              {programs.map((program) => (
+                <div key={program.id} className="mb-2">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox"
+                      checked={selectedPrograms.includes(program.id)}
+                      onChange={() => handleProgramChange(program.id)}
+                    />
+                    <span className="ml-2">{program.name}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleAssignPrograms}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+            >
+              Assign
+            </button>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isFormModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <h2 className="text-2xl font-bold mb-4">
+              {editingOffice ? "Update Office" : "Create Office"}
+            </h2>
+            <form
+              onSubmit={editingOffice ? handleUpdate : handleSubmit}
+              className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6"
+            >
+              <div className="mb-4">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="name"
+                >
+                  Office Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value.toUpperCase())}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                {editingOffice ? "Update Office" : "Create Office"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsFormModalOpen(false)}
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ async function main() {
   // Create a school year
   const schoolYear1 = await prisma.schoolYear.create({
     data: {
-      year: "2024-2025", // Ensure this matches the required field in your schema
+      year: "2024-2025",
       startYear: 2024,
       endYear: 2025,
     },
@@ -80,14 +80,20 @@ async function main() {
   const program1 = await prisma.program.create({
     data: {
       name: "BSIT",
-      officeId: office3.id,
+      description: "Bachelor of Science in Information Technology",
+      offices: {
+        connect: [{ id: office3.id }],
+      },
     },
   });
 
   const program2 = await prisma.program.create({
     data: {
       name: "BSED",
-      officeId: office4.id,
+      description: "Bachelor of Secondary Education",
+      offices: {
+        connect: [{ id: office4.id }],
+      },
     },
   });
 

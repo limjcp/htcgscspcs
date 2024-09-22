@@ -22,8 +22,6 @@ export default async function handler(
       },
     });
 
-    // Add logging
-
     const result = offices.map((office) => ({
       id: office.id,
       name: office.name,
@@ -39,7 +37,7 @@ export default async function handler(
 
     res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching offices:", error); // Add logging
+    console.error("Error fetching offices:", error);
     res.status(500).json({ error: "Failed to fetch offices" });
   }
 }

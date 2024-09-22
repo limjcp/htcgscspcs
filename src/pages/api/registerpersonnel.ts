@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const { name, email, username, role, officeId, password } = req.body;
+  const { name, email, username, role, password } = req.body;
 
   try {
     const user = await prisma.user.create({
@@ -12,8 +12,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         username,
         password,
         role: [role],
-        staff: role === "staff" ? { create: { officeId } } : undefined,
-        signatory: role === "signatory" ? { create: { officeId } } : undefined,
       },
     });
     res.status(200).json(user);
