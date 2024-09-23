@@ -28,6 +28,7 @@ const RegisterSchoolYear: React.FC = () => {
 
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true); // Add state for loading
 
   useEffect(() => {
     if (schoolYear.startYear) {
@@ -107,6 +108,8 @@ const RegisterSchoolYear: React.FC = () => {
         setSchoolYears(response.data);
       } catch (error) {
         console.error("Error fetching school years:", error);
+      } finally {
+        setLoading(false); // Set loading to false when fetching ends
       }
     };
 
@@ -115,70 +118,78 @@ const RegisterSchoolYear: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">School Years</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          + Add School Year
-        </button>
-      </div>
-      <table className="min-w-full bg-white">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b">Year</th>
-            <th className="py-2 px-4 border-b">1st Semester</th>
-            <th className="py-2 px-4 border-b">2nd Semester</th>
-            <th className="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {schoolYears.map((sy) => {
-            const firstSemester = sy.semesters?.find((sem) =>
-              sem.name.startsWith("1st Semester")
-            );
-            const secondSemester = sy.semesters?.find((sem) =>
-              sem.name.startsWith("2nd Semester")
-            );
-            return (
-              <tr key={sy.id}>
-                <td className="py-2 px-4 border-b">{sy.year}</td>
-                <td className="py-2 px-4 border-b">
-                  {firstSemester?.name} (
-                  {firstSemester?.startDate
-                    ? new Date(firstSemester.startDate).toLocaleDateString()
-                    : "N/A"}{" "}
-                  -{" "}
-                  {firstSemester?.endDate
-                    ? new Date(firstSemester.endDate).toLocaleDateString()
-                    : "N/A"}
-                  )
-                </td>
-                <td className="py-2 px-4 border-b">
-                  {secondSemester?.name} (
-                  {secondSemester?.startDate
-                    ? new Date(secondSemester.startDate).toLocaleDateString()
-                    : "N/A"}{" "}
-                  -{" "}
-                  {secondSemester?.endDate
-                    ? new Date(secondSemester.endDate).toLocaleDateString()
-                    : "N/A"}
-                  )
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <button
-                    onClick={() => handleDelete(sy.id)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Delete
-                  </button>
-                </td>
+      {loading ? (
+        <p className="text-center">Loading...</p>
+      ) : (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">School Years</h2>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              + Add School Year
+            </button>
+          </div>
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b">Year</th>
+                <th className="py-2 px-4 border-b">1st Semester</th>
+                <th className="py-2 px-4 border-b">2nd Semester</th>
+                <th className="py-2 px-4 border-b">Actions</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {schoolYears.map((sy) => {
+                const firstSemester = sy.semesters?.find((sem) =>
+                  sem.name.startsWith("1st Semester")
+                );
+                const secondSemester = sy.semesters?.find((sem) =>
+                  sem.name.startsWith("2nd Semester")
+                );
+                return (
+                  <tr key={sy.id}>
+                    <td className="py-2 px-4 border-b">{sy.year}</td>
+                    <td className="py-2 px-4 border-b">
+                      {firstSemester?.name} (
+                      {firstSemester?.startDate
+                        ? new Date(firstSemester.startDate).toLocaleDateString()
+                        : "N/A"}{" "}
+                      -{" "}
+                      {firstSemester?.endDate
+                        ? new Date(firstSemester.endDate).toLocaleDateString()
+                        : "N/A"}
+                      )
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      {secondSemester?.name} (
+                      {secondSemester?.startDate
+                        ? new Date(
+                            secondSemester.startDate
+                          ).toLocaleDateString()
+                        : "N/A"}{" "}
+                      -{" "}
+                      {secondSemester?.endDate
+                        ? new Date(secondSemester.endDate).toLocaleDateString()
+                        : "N/A"}
+                      )
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      <button
+                        onClick={() => handleDelete(sy.id)}
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

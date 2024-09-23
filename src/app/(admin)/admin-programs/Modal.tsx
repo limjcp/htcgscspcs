@@ -23,6 +23,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
           &times;
         </button>
         {children}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );

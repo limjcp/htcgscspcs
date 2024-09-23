@@ -10,8 +10,10 @@ const Office = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [currentOffice, setCurrentOffice] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchOffices = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/offices");
       const data = await response.json();
@@ -25,6 +27,8 @@ const Office = () => {
     } catch (error) {
       console.error("Failed to fetch offices:", error);
       setOffices([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,7 +154,7 @@ const Office = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-between">
-        <h2 className="text-2xl font-bold mb-4">Offices/Deparments</h2>
+        <h2 className="text-2xl font-bold mb-4">Offices/Departments</h2>
         <button
           onClick={() => setIsFormModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
@@ -158,55 +162,59 @@ const Office = () => {
           + Add Office/Department
         </button>
       </div>
-      <table className="min-w-full bg-white">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b">Name</th>
-            <th className="py-2 px-4 border-b">Programs</th>
-            <th className="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(offices) ? (
-            offices.map((office) => (
-              <tr key={office.id}>
-                <td className="py-2 px-4 border-b text-center">
-                  {office.name}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {office.programs?.map((program) => program.name).join(", ")}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button
-                    onClick={() => handleEdit(office)}
-                    className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(office.id)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                  >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => openModal(office)}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
-                  >
-                    Assign Programs
-                  </button>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">Name</th>
+              <th className="py-2 px-4 border-b">Programs</th>
+              <th className="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(offices) ? (
+              offices.map((office) => (
+                <tr key={office.id}>
+                  <td className="py-2 px-4 border-b text-center">
+                    {office.name}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {office.programs?.map((program) => program.name).join(", ")}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    <button
+                      onClick={() => handleEdit(office)}
+                      className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(office.id)}
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => openModal(office)}
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
+                    >
+                      Assign Programs
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="py-2 px-4 border-b">
+                  No offices available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="3" className="py-2 px-4 border-b">
-                No offices available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">

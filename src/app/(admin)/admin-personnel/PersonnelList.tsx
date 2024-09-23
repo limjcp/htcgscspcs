@@ -14,17 +14,21 @@ const PersonnelList: React.FC = () => {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [message, setMessage] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false); // Add state for loading
 
   useEffect(() => {
     fetchPersonnel();
   }, []);
 
   const fetchPersonnel = async () => {
+    setLoading(true); // Set loading to true when fetching starts
     try {
       const response = await axios.get("/api/personnel");
       setPersonnel(response.data);
     } catch (error) {
       setMessage("Error fetching personnel list.");
+    } finally {
+      setLoading(false); // Set loading to false when fetching ends
     }
   };
 
@@ -50,41 +54,45 @@ const PersonnelList: React.FC = () => {
         </button>
       </div>
       {message && <p className="text-center text-red-500 mb-4">{message}</p>}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b text-center">Name</th>
-              <th className="py-2 px-4 border-b text-center">Email</th>
-              <th className="py-2 px-4 border-b text-center">Username</th>
-              <th className="py-2 px-4 border-b text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {personnel.map((person) => (
-              <tr key={person.id}>
-                <td className="py-2 px-4 border-b text-center">
-                  {person.name}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {person.email}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  {person.username}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button
-                    onClick={() => handleDelete(person.id)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+      {loading ? (
+        <p className="text-center">Loading...</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b text-center">Name</th>
+                <th className="py-2 px-4 border-b text-center">Email</th>
+                <th className="py-2 px-4 border-b text-center">Username</th>
+                <th className="py-2 px-4 border-b text-center">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {personnel.map((person) => (
+                <tr key={person.id}>
+                  <td className="py-2 px-4 border-b text-center">
+                    {person.name}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {person.email}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {person.username}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    <button
+                      onClick={() => handleDelete(person.id)}
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <RegisterStaffSignatory onClose={() => setIsModalOpen(false)} />
       </Modal>

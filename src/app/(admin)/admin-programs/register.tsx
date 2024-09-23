@@ -10,14 +10,18 @@ export default function RegisterProgram() {
   const [editProgramId, setEditProgramId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState(""); // Add state for message
+  const [loading, setLoading] = useState(false); // Add state for loading
 
   const fetchPrograms = async () => {
+    setLoading(true); // Set loading to true when fetching starts
     try {
       const response = await fetch("/api/getPrograms");
       const data = await response.json();
       setPrograms(data.programs);
     } catch (error) {
       console.error("Error fetching programs:", error);
+    } finally {
+      setLoading(false); // Set loading to false when fetching ends
     }
   };
 
@@ -88,47 +92,51 @@ export default function RegisterProgram() {
         </button>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 mt-4">
-          <thead>
-            <tr>
-              <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
-                Name
-              </th>
-              <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
-                Description
-              </th>
-              <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {programs.map((program) => (
-              <tr key={program.id} className="hover:bg-gray-100">
-                <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
-                  {program.name}
-                </td>
-                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {program.description}
-                </td>
-                <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-center">
-                  <button
-                    onClick={() => handleEdit(program)}
-                    className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 mr-2 transition duration-200"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(program.id)}
-                    className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-200"
-                  >
-                    Delete
-                  </button>
-                </td>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <table className="min-w-full bg-white border border-gray-200 mt-4">
+            <thead>
+              <tr>
+                <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
+                  Name
+                </th>
+                <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
+                  Description
+                </th>
+                <th className="py-3 px-6 bg-gray-200 text-center text-xs font-medium text-gray-600 uppercase tracking-wider border-b">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {programs.map((program) => (
+                <tr key={program.id} className="hover:bg-gray-100">
+                  <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
+                    {program.name}
+                  </td>
+                  <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500 text-center">
+                    {program.description}
+                  </td>
+                  <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-center">
+                    <button
+                      onClick={() => handleEdit(program)}
+                      className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 mr-2 transition duration-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(program.id)}
+                      className="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition duration-200"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
