@@ -11,7 +11,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(500).json({ error: "Failed to fetch semesters" });
     }
   } else if (req.method === "POST") {
-    const { name, startDate, endDate } = req.body;
+    const { name, startDate, endDate, schoolYearId } = req.body;
 
     try {
       const semester = await prisma.semester.create({
@@ -19,6 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name,
           startDate: new Date(startDate),
           endDate: new Date(endDate),
+          schoolYearId,
         },
       });
       res.status(201).json(semester);

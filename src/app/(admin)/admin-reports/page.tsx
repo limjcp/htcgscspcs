@@ -45,6 +45,14 @@ const Reports = () => {
         ],
       ],
     });
+    doc.autoTable({
+      head: [["Cleared Students"]],
+      body: report.clearedStudentsList.map((name) => [name]),
+    });
+    doc.autoTable({
+      head: [["Not Cleared Students"]],
+      body: report.notClearedStudentsList.map((name) => [name]),
+    });
     doc.save(`report_${report.semesterId}.pdf`);
   };
 
@@ -85,6 +93,27 @@ const Reports = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="mt-6">
+        {reports.map((report) => (
+          <div key={report.id} className="mb-6">
+            <h2 className="text-2xl font-bold mb-2">
+              Report for Semester: {report.semesterId}
+            </h2>
+            <h3 className="text-xl font-semibold">Cleared Students</h3>
+            <ul className="list-disc list-inside mb-4">
+              {report.clearedStudentsList.map((name, index) => (
+                <li key={index}>{name}</li>
+              ))}
+            </ul>
+            <h3 className="text-xl font-semibold">Not Cleared Students</h3>
+            <ul className="list-disc list-inside">
+              {report.notClearedStudentsList.map((name, index) => (
+                <li key={index}>{name}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   );
