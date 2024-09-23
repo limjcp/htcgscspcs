@@ -1,8 +1,6 @@
 // File: src/pages/api/assign-officers.ts
+import prisma from "@/lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,7 +10,23 @@ export default async function handler(
     const { officeId, staffId, signatoryId } = req.body;
 
     try {
-      // Ensure the staff and signatory exist, if not create them
+      // Check if the user exists for staff
+      const staffUser = await prisma.user.findUnique({
+        where: { id: staffId },
+      });
+      if (!staffUser) {
+        return res.status(404).json({ error: "Staff user not found" });
+      }
+
+      // Check if the user exists for signatory
+      const signatoryUser = await prisma.user.findUnique({
+        where: { id: signatoryId },
+      });
+      if (!signatoryUser) {
+        return res.status(404).json({ error: "Signatory user not found" });
+      }
+
+      // Ensure the staff exists, if not create them
       let staffExists = await prisma.staff.findUnique({
         where: { id: staffId },
       });
@@ -40,6 +54,7 @@ export default async function handler(
         });
       }
 
+      // Ensure the signatory exists, if not create them
       let signatoryExists = await prisma.signatory.findUnique({
         where: { id: signatoryId },
       });
