@@ -63,12 +63,6 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/unauthorized", nextUrl));
   }
 
-  // Add your authorization checks here
-  // For example:
-  // if (nextUrl.pathname.startsWith("/admin") && !req.auth?.user?.role?.includes("admin")) {
-  //   return NextResponse.redirect(new URL("/unauthorized", nextUrl))
-  // }
-
   return NextResponse.next();
 });
 
