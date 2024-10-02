@@ -1,56 +1,52 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Modal from "./Modal";
 import RegisterStaffSignatory from "./RegisterStaffSignatory";
+import Modal from "./Modal"; // Import the Modal component
 
-interface Personnel {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-}
-
-const PersonnelList: React.FC = () => {
-  const [personnel, setPersonnel] = useState<Personnel[]>([]);
-  const [message, setMessage] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false); // Add state for loading
+const PersonnelList = () => {
+  const [personnel, setPersonnel] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPersonnel();
   }, []);
 
   const fetchPersonnel = async () => {
-    setLoading(true); // Set loading to true when fetching starts
+    setLoading(true);
     try {
       const response = await axios.get("/api/personnel");
       setPersonnel(response.data);
+      setLoading(false);
     } catch (error) {
-      setMessage("Error fetching personnel list.");
-    } finally {
-      setLoading(false); // Set loading to false when fetching ends
+      setMessage("Error fetching personnel data.");
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`/api/personnel/${id}`);
-      setMessage("Personnel deleted successfully.");
-      fetchPersonnel(); // Refresh the list
+      fetchPersonnel(); // Refresh the data after deletion
     } catch (error) {
       setMessage("Error deleting personnel.");
     }
   };
 
+  const handleRegisterSuccess = () => {
+    fetchPersonnel(); // Refresh the data after successful registration
+  };
+
   return (
-    <div className="mt-10 px-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Personnel List</h2>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Personnel List</h1>
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          + Add Personnel
+          Register Personnel
         </button>
       </div>
       {message && <p className="text-center text-red-500 mb-4">{message}</p>}
@@ -64,6 +60,7 @@ const PersonnelList: React.FC = () => {
                 <th className="py-2 px-4 border-b text-center">Name</th>
                 <th className="py-2 px-4 border-b text-center">Email</th>
                 <th className="py-2 px-4 border-b text-center">Username</th>
+                <th className="py-2 px-4 border-b text-center">Role</th>
                 <th className="py-2 px-4 border-b text-center">Actions</th>
               </tr>
             </thead>
@@ -71,13 +68,16 @@ const PersonnelList: React.FC = () => {
               {personnel.map((person) => (
                 <tr key={person.id}>
                   <td className="py-2 px-4 border-b text-center">
-                    {person.name}
+                    {person.firstName} {person.lastName}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     {person.email}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     {person.username}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {person.role}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     <button
@@ -94,7 +94,10 @@ const PersonnelList: React.FC = () => {
         </div>
       )}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <RegisterStaffSignatory onClose={() => setIsModalOpen(false)} />
+        <RegisterStaffSignatory
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleRegisterSuccess} // Pass the success callback
+        />
       </Modal>
     </div>
   );

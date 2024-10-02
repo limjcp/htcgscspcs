@@ -5,16 +5,18 @@ import prisma from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { name, username, email, password, roles } = req.body;
+  const { firstName, middleName, lastName, username, email, password, roles } =
+    req.body;
 
   if (
-    !name ||
+    !firstName ||
+    !lastName ||
     !username ||
     !email ||
     !password ||
@@ -29,7 +31,9 @@ export default async function handler(
   try {
     const newUser = await prisma.user.create({
       data: {
-        name,
+        firstName,
+        middleName,
+        lastName,
         username,
         email,
         password: hashedPassword,

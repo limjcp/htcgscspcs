@@ -13,6 +13,7 @@ import {
   Settings,
   Library,
   UserRound,
+  FilePlus2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
@@ -27,7 +28,7 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session } = useSession();
-  const userName = session?.user?.name || "Guest";
+  const userName = session?.user?.firstName || "Guest";
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();
@@ -75,8 +76,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
             <Sidebar.Nav.Section.Item
               icon={<LampDesk />}
-              label="Offices/Departments"
+              label="Offices"
               href="/admin-offices"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<LampDesk />}
+              label="Departments"
+              href="/admin-departments"
             />
             <Sidebar.Nav.Section.Item
               icon={<Library />}
@@ -99,9 +105,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               href="/admin-schoolyear"
             />
             <Sidebar.Nav.Section.Item
-              icon={<Calendar />}
-              label="Semesters"
-              href="/admin-semesters"
+              icon={<FilePlus2 />}
+              label="Clearance"
+              href="/admin-generate-clearance"
             />
             <Sidebar.Nav.Section.Item
               icon={<MessageCircleWarning />}

@@ -2,6 +2,7 @@
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { signIn, signOut } from "@/helpers";
+import React from "react";
 
 export default function AuthButton() {
   const session = useSession();
@@ -14,7 +15,7 @@ export default function AuthButton() {
         await signIn();
       }}
     >
-      {session.data?.user?.name} : Sign Out
+      {session.data?.user?.firstName} : Sign Out
     </Button>
   ) : (
     <Button onClick={async () => await signIn()}>Sign In</Button>

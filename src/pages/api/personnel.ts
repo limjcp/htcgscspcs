@@ -6,7 +6,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
       const personnel = await prisma.user.findMany({
-        where: { role: { has: "personnel" } },
+        where: {
+          OR: [
+            { role: { has: "personnel" } },
+            { role: { has: "staff" } },
+            { role: { has: "signatory" } },
+          ],
+        },
       });
       res.status(200).json(personnel);
     } catch (error) {

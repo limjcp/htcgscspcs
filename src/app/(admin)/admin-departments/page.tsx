@@ -1,32 +1,32 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
-const Office = () => {
+const DepartmentPage = () => {
   const [name, setName] = useState("");
-  const [offices, setOffices] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [selectedPrograms, setSelectedPrograms] = useState([]);
-  const [editingOffice, setEditingOffice] = useState(null);
+  const [editingDepartment, setEditingDepartment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [currentOffice, setCurrentOffice] = useState(null);
+  const [currentDepartment, setCurrentDepartment] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchOffices = async () => {
+  const fetchDepartments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/offices");
+      const response = await fetch("/api/departments");
       const data = await response.json();
 
       if (Array.isArray(data)) {
-        setOffices(data);
+        setDepartments(data);
       } else {
         console.error("Data is not an array:", data);
-        setOffices([]);
+        setDepartments([]);
       }
     } catch (error) {
-      console.error("Failed to fetch offices:", error);
-      setOffices([]);
+      console.error("Failed to fetch departments:", error);
+      setDepartments([]);
     } finally {
       setLoading(false);
     }
@@ -50,13 +50,13 @@ const Office = () => {
   };
 
   useEffect(() => {
-    fetchOffices();
+    fetchDepartments();
     fetchPrograms();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("/api/offices", {
+    const response = await fetch("/api/departments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -65,24 +65,24 @@ const Office = () => {
     });
 
     if (response.ok) {
-      alert("Office created successfully!");
+      alert("Department created successfully!");
       setName("");
-      fetchOffices();
+      fetchDepartments();
       setIsFormModalOpen(false);
     } else {
-      alert("Failed to create office.");
+      alert("Failed to create department.");
     }
   };
 
-  const handleEdit = (office) => {
-    setEditingOffice(office);
-    setName(office.name);
+  const handleEdit = (department) => {
+    setEditingDepartment(department);
+    setName(department.name);
     setIsFormModalOpen(true);
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch(`/api/offices/${editingOffice.id}`, {
+    const response = await fetch(`/api/departments/${editingDepartment.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -91,26 +91,26 @@ const Office = () => {
     });
 
     if (response.ok) {
-      alert("Office updated successfully!");
+      alert("Department updated successfully!");
       setName("");
-      setEditingOffice(null);
-      fetchOffices();
+      setEditingDepartment(null);
+      fetchDepartments();
       setIsFormModalOpen(false);
     } else {
-      alert("Failed to update office.");
+      alert("Failed to update department.");
     }
   };
 
   const handleDelete = async (id) => {
-    const response = await fetch(`/api/offices/${id}`, {
+    const response = await fetch(`/api/departments/${id}`, {
       method: "DELETE",
     });
 
     if (response.ok) {
-      alert("Office deleted successfully!");
-      fetchOffices();
+      alert("Department deleted successfully!");
+      fetchDepartments();
     } else {
-      alert("Failed to delete office.");
+      alert("Failed to delete department.");
     }
   };
 
@@ -121,7 +121,7 @@ const Office = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        officeId: currentOffice.id,
+        departmentId: currentDepartment.id,
         programIds: selectedPrograms,
       }),
     });
@@ -129,7 +129,7 @@ const Office = () => {
     if (response.ok) {
       alert("Programs assigned successfully!");
       setIsModalOpen(false);
-      fetchOffices();
+      fetchDepartments();
     } else {
       alert("Failed to assign programs.");
     }
@@ -143,10 +143,12 @@ const Office = () => {
     );
   };
 
-  const openModal = (office) => {
-    setCurrentOffice(office);
+  const openModal = (department) => {
+    setCurrentDepartment(department);
     setSelectedPrograms(
-      office.programs ? office.programs.map((program) => program.id) : []
+      department.programs
+        ? department.programs.map((program) => program.id)
+        : []
     );
     setIsModalOpen(true);
   };
@@ -154,12 +156,12 @@ const Office = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-between">
-        <h2 className="text-2xl font-bold mb-4">Offices</h2>
+        <h2 className="text-2xl font-bold mb-4">Departments</h2>
         <button
           onClick={() => setIsFormModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
         >
-          + Add Office
+          + Add Department
         </button>
       </div>
       {loading ? (
@@ -168,36 +170,38 @@ const Office = () => {
         <table className="min-w-full bg-white">
           <thead>
             <tr>
-              <th className="py-2 px-4 border-b">Office</th>
+              <th className="py-2 px-4 border-b">Department</th>
               <th className="py-2 px-4 border-b">Programs</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(offices) ? (
-              offices.map((office) => (
-                <tr key={office.id}>
+            {Array.isArray(departments) ? (
+              departments.map((department) => (
+                <tr key={department.id}>
                   <td className="py-2 px-4 border-b text-center">
-                    {office.name}
+                    {department.name}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
-                    {office.programs?.map((program) => program.name).join(", ")}
+                    {department.programs
+                      ?.map((program) => program.name)
+                      .join(", ")}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     <button
-                      onClick={() => handleEdit(office)}
+                      onClick={() => handleEdit(department)}
                       className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(office.id)}
+                      onClick={() => handleDelete(department.id)}
                       className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
                     >
                       Delete
                     </button>
                     <button
-                      onClick={() => openModal(office)}
+                      onClick={() => openModal(department)}
                       className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
                     >
                       Assign Programs
@@ -208,7 +212,7 @@ const Office = () => {
             ) : (
               <tr>
                 <td colSpan="3" className="py-2 px-4 border-b">
-                  No offices available.
+                  No departments available.
                 </td>
               </tr>
             )}
@@ -255,10 +259,10 @@ const Office = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <h2 className="text-2xl font-bold mb-4">
-              {editingOffice ? "Update Office" : "Create Office"}
+              {editingDepartment ? "Update Department" : "Create Department"}
             </h2>
             <form
-              onSubmit={editingOffice ? handleUpdate : handleSubmit}
+              onSubmit={editingDepartment ? handleUpdate : handleSubmit}
               className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6"
             >
               <div className="mb-4">
@@ -266,7 +270,7 @@ const Office = () => {
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="name"
                 >
-                  Office Name
+                  Department Name
                 </label>
                 <input
                   type="text"
@@ -281,7 +285,7 @@ const Office = () => {
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                {editingOffice ? "Update Office" : "Create Office"}
+                {editingDepartment ? "Update Department" : "Create Department"}
               </button>
               <button
                 type="button"
@@ -298,4 +302,4 @@ const Office = () => {
   );
 };
 
-export default Office;
+export default DepartmentPage;

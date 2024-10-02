@@ -5,11 +5,13 @@ import { useState } from "react";
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     username: "",
     email: "",
     password: "",
-    roles: ["student"], // default role
+    roles: ["unverified"], // default role
   });
 
   const handleChange = (
@@ -53,15 +55,46 @@ export default function Register() {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
-            htmlFor="name"
+            htmlFor="firstName"
             className="block text-sm font-medium text-gray-700"
           >
-            Name:
+            First Name:
           </label>
           <input
             type="text"
-            id="name"
-            name="name"
+            id="firstName"
+            name="firstName"
+            onChange={handleChange}
+            required
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="middleName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Middle Name:
+          </label>
+          <input
+            type="text"
+            id="middleName"
+            name="middleName"
+            onChange={handleChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Last Name:
+          </label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
             onChange={handleChange}
             required
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -130,10 +163,12 @@ export default function Register() {
             required
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           >
+            <option value="unverified">Unverified</option>
             <option value="student">Student</option>
             <option value="staff">Staff</option>
             <option value="signatory">Signatory</option>
             <option value="admin">Admin</option>
+            <option value="personnel">Personnel</option>
           </select>
         </div>
         <button

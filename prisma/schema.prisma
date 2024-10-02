@@ -18,6 +18,19 @@ enum Role {
   admin
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum StudentStatus {
+  ENROLLED
+  GRADUATED
+  DROPPED
+  SUSPENDED
+}
+
 enum ClearanceStatus {
   PENDING
   IN_PROGRESS
@@ -25,6 +38,13 @@ enum ClearanceStatus {
   CLEARED
   REJECTED
   SIGNED
+}
+
+enum yearLevel {
+  FIRST
+  SECOND
+  THIRD
+  FOURTH
 }
 
 enum SemesterStatus {
@@ -39,14 +59,22 @@ enum SchoolYearStatus {
   FINISHED
 }
 
+enum RequirementStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  username      String?   @unique
+  id         String  @id @default(cuid())
+  firstName  String
+  middleName String?
+  lastName   String
+  email      String  @unique
+  image      String?
+  password   String
+  username   String  @unique
 
   role Role[] @default([unverified])
 
@@ -59,66 +87,102 @@ model User {
 }
 
 model Student {
-  id            String      @id @default(cuid())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        String      @unique
-  studentNumber String      @unique
-  clearances    Clearance[]
-  program       Program     @relation(fields: [programId], references: [id])
-  programId     String
+  id             String        @id @default(cuid())
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         String?       @unique
+  studentId      String        @unique
+  firstName      String
+  middleName     String?
+  lastName       String
+  email          String
+  phone          String
+  address        String?
+  dateOfBirth    DateTime?
+  gender         Gender
+  enrollmentYear Int
+  status         StudentStatus @default(ENROLLED)
+  clearances     Clearance[]
+  program        Program       @relation(fields: [programId], references: [id])
+  programId      String
+  yearLevel      yearLevel
+
+  // Add the department field derived from the program
+  department   Department?          @relation(fields: [departmentId], references: [id])
+  departmentId String? // Nullable to indicate it's optional
+  requirements StudentRequirement[] // Track individual requirement statuses
+
+  userCreated Boolean @default(false)
+  archived    Boolean @default(false)
 }
 
 model Staff {
-  id       String @id @default(cuid())
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String @unique
-  office   Office @relation(fields: [officeId], references: [id])
-  officeId String
+  id           String      @id @default(cuid())
+  firstName    String?
+  middleName   String?
+  lastName     String?
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String      @unique
+  office       Office?     @relation(fields: [officeId], references: [id]) // Can belong to an office
+  officeId     String?
+  department   Department? @relation(fields: [departmentId], references: [id]) // Can belong to a department
+  departmentId String?
 }
 
 model Signatory {
-  id       String @id @default(cuid())
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String @unique
-  office   Office @relation(fields: [officeId], references: [id])
-  officeId String
-}
-
-model Office {
-  id             String          @id @default(cuid())
-  name           String          @unique
-  staff          Staff[]
-  signatory      Signatory[]
-  requirements   Requirement[]
-  clearanceSteps ClearanceStep[]
-  programs       Program[] // Many-to-many relation with Program
+  id           String      @id @default(cuid())
+  firstName    String?
+  middleName   String?
+  lastName     String?
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String      @unique
+  office       Office?     @relation(fields: [officeId], references: [id]) // Can belong to an office
+  officeId     String?
+  department   Department? @relation(fields: [departmentId], references: [id]) // Can belong to a department
+  departmentId String?
 }
 
 model Program {
-  id          String    @id @default(cuid())
-  name        String    @unique
+  id          String       @id @default(cuid())
+  name        String       @unique
   description String
   students    Student[]
   offices     Office[] // Many-to-many relation with Office
+  department  Department[] // Relation to Department
 }
 
 model Requirement {
-  id           String     @id @default(cuid())
-  name         String
-  description  String?
-  office       Office     @relation(fields: [officeId], references: [id])
-  officeId     String
-  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])
-  schoolYearId String
-  semester     Semester   @relation(fields: [semesterId], references: [id])
-  semesterId   String
-  createdAt    DateTime   @default(now())
+  id                  String               @id @default(cuid())
+  name                String
+  description         String?
+  office              Office               @relation(fields: [officeId], references: [id])
+  officeId            String
+  schoolYear          SchoolYear           @relation(fields: [schoolYearId], references: [id])
+  schoolYearId        String
+  semester            Semester             @relation(fields: [semesterId], references: [id])
+  semesterId          String
+  createdAt           DateTime             @default(now())
+  generalStatus       RequirementStatus    @default(PENDING) // Overall status for the office
+  studentRequirements StudentRequirement[] // Link to student-specific requirements
+
+  Department Department[]
+}
+
+model StudentRequirement {
+  id            String            @id @default(cuid())
+  student       Student           @relation(fields: [studentId], references: [id])
+  studentId     String
+  requirement   Requirement       @relation(fields: [requirementId], references: [id])
+  requirementId String
+  status        RequirementStatus @default(PENDING) // Individual status for this student
+  submittedAt   DateTime?
+  approvedAt    DateTime?
+  comments      String? // Optional feedback from the office
 }
 
 model SchoolYear {
   id        String     @id @default(cuid())
   startYear Int
-  endYear   Int
+  endYear   Int?
   semesters Semester[]
   year      String
 
@@ -131,8 +195,8 @@ model SchoolYear {
 model Semester {
   id           String      @id @default(cuid())
   name         String
-  startDate    DateTime
-  endDate      DateTime
+  startDate    DateTime?
+  endDate      DateTime?
   schoolYear   SchoolYear  @relation(fields: [schoolYearId], references: [id])
   schoolYearId String
   clearances   Clearance[]
@@ -156,15 +220,17 @@ model Clearance {
 }
 
 model ClearanceStep {
-  id          String          @id @default(cuid())
-  clearance   Clearance       @relation(fields: [clearanceId], references: [id])
-  clearanceId String
-  office      Office          @relation(fields: [officeId], references: [id])
-  officeId    String
-  status      ClearanceStatus @default(PENDING)
-  signedAt    DateTime?
-  signedBy    String?
-  comments    String?
+  id           String          @id @default(cuid())
+  clearance    Clearance       @relation(fields: [clearanceId], references: [id])
+  clearanceId  String
+  office       Office?         @relation(fields: [officeId], references: [id]) // Step linked to an office
+  officeId     String?
+  department   Department?     @relation(fields: [departmentId], references: [id]) // Step linked to a department
+  departmentId String?
+  status       ClearanceStatus @default(PENDING)
+  signedAt     DateTime?
+  signedBy     String?
+  comments     String?
 }
 
 model Report {
@@ -178,4 +244,25 @@ model Report {
   schoolYear             String
   clearedStudentsList    String[]
   notClearedStudentsList String[]
+}
+
+model Department {
+  id            String          @id @default(cuid())
+  name          String          @unique
+  programs      Program[] // Relation to the Program model
+  staff         Staff[] // Staff related to the department
+  signatory     Signatory[] // Signatories related to the department
+  requirements  Requirement[] // Requirements related to the department
+  ClearanceStep ClearanceStep[]
+  students      Student[] // Track students belonging to the department
+}
+
+model Office {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  programs       Program[] // Many-to-many relation with Program
+  staff          Staff[]
+  signatory      Signatory[]
+  requirements   Requirement[]
+  clearanceSteps ClearanceStep[]
 }

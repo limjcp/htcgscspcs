@@ -18,7 +18,7 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session } = useSession();
-  const userName = session?.user?.name || "Guest";
+  const userName = session?.user?.firstName || "Guest";
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();

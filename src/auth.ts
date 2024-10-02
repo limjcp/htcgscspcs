@@ -82,6 +82,9 @@ const authOptions: NextAuthConfig = {
       session.user.staffId = token.staffId || null;
       session.user.signatoryId = token.signatoryId || null;
       session.user.officeId = token.officeId || null;
+      session.user.firstName = token.firstName || null;
+      session.user.middleName = token.middleName || null;
+      session.user.lastName = token.lastName || null;
 
       return session;
     },
@@ -93,6 +96,9 @@ const authOptions: NextAuthConfig = {
         token.staffId = user.staff?.id || null;
         token.signatoryId = user.signatory?.id || null;
         token.officeId = user.officeId || null;
+        token.firstName = user.firstName;
+        token.middleName = user.middleName;
+        token.lastName = user.lastName;
       }
       return token;
     },

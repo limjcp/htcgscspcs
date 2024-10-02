@@ -8,38 +8,55 @@ export default async function handler(
   if (req.method === "POST") {
     const { startYear, endYear, year, semesters } = req.body;
 
-    if (
-      !startYear ||
-      !endYear ||
-      !year ||
-      !semesters ||
-      semesters.length !== 2
-    ) {
+    if (!startYear || !year || !semesters || semesters.length !== 1) {
       return res
         .status(400)
         .json({ error: "Missing or invalid required fields" });
     }
 
     try {
-      console.log("Creating school year with data:", req.body); // Log the request body
-      const schoolYear = await prisma.schoolYear.create({
-        data: {
-          startYear: parseInt(startYear),
-          endYear: parseInt(endYear),
-          year,
-          semesters: {
-            create: semesters.map((semester: any) => ({
-              name: semester.name,
-              startDate: new Date(semester.startDate),
-              endDate: new Date(semester.endDate),
-            })),
-          },
-        },
+      console.log("Creating or updating school year with data:", req.body); // Log the request body
+
+      // Check if a school year with the same year already exists
+      const existingSchoolYear = await prisma.schoolYear.findFirst({
+        where: { year },
+        include: { semesters: true },
       });
+
+      let schoolYear;
+
+      if (existingSchoolYear) {
+        // Update the existing school year by adding the new semester
+        schoolYear = await prisma.schoolYear.update({
+          where: { id: existingSchoolYear.id },
+          data: {
+            semesters: {
+              create: semesters.map((semester: any) => ({
+                name: semester.name,
+              })),
+            },
+          },
+        });
+      } else {
+        // Create a new school year
+        schoolYear = await prisma.schoolYear.create({
+          data: {
+            startYear: parseInt(startYear),
+            endYear: parseInt(endYear),
+            year,
+            semesters: {
+              create: semesters.map((semester: any) => ({
+                name: semester.name,
+              })),
+            },
+          },
+        });
+      }
+
       res.status(201).json(schoolYear);
     } catch (error) {
-      console.error("Error creating school year:", error);
-      res.status(500).json({ error: "Failed to create school year" });
+      console.error("Error creating or updating school year:", error);
+      res.status(500).json({ error: "Failed to create or update school year" });
     }
   } else if (req.method === "GET") {
     try {

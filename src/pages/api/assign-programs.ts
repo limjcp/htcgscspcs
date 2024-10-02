@@ -4,18 +4,38 @@ import prisma from "@/lib/prisma";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
-    const { officeId, programIds } = req.body;
+    const { officeId, departmentId, programIds } = req.body;
 
     try {
-      await prisma.office.update({
-        where: { id: officeId },
-        data: {
-          programs: {
-            set: programIds.map((id) => ({ id })),
+      if (officeId) {
+        await prisma.office.update({
+          where: { id: officeId },
+          data: {
+            programs: {
+              set: programIds.map((id) => ({ id })),
+            },
           },
-        },
-      });
-      res.status(200).json({ message: "Programs assigned successfully" });
+        });
+        res
+          .status(200)
+          .json({ message: "Programs assigned to office successfully" });
+      } else if (departmentId) {
+        await prisma.department.update({
+          where: { id: departmentId },
+          data: {
+            programs: {
+              set: programIds.map((id) => ({ id })),
+            },
+          },
+        });
+        res
+          .status(200)
+          .json({ message: "Programs assigned to department successfully" });
+      } else {
+        res
+          .status(400)
+          .json({ error: "officeId or departmentId must be provided" });
+      }
     } catch (error) {
       console.error("Error assigning programs:", error);
       res.status(500).json({ error: "Failed to assign programs" });

@@ -1,292 +1,296 @@
 "use client";
-// File: src/pages/assign-officers.tsx
-import React, { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import Modal from "react-modal";
+import { useEffect, useState } from "react";
+import React from "react";
+import axios from "axios";
+import AssignModal from "./AssignModal"; // Adjust the import path as needed
 
-const AssignOfficersPage = () => {
-  const { data: session } = useSession();
-  const [offices, setOffices] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [selectedOffice, setSelectedOffice] = useState(null);
+interface Staff {
+  id: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}
+
+interface Signatory {
+  id: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}
+
+interface Office {
+  id: string;
+  name: string;
+  staff: { user: Staff }[];
+  signatory: { user: Signatory }[];
+}
+
+interface Department {
+  id: string;
+  name: string;
+  staff: { user: Staff }[];
+  signatory: { user: Signatory }[];
+}
+
+const OfficesDepartmentsPage = () => {
+  const [data, setData] = useState<{
+    offices: Office[];
+    departments: Department[];
+  } | null>(null);
+  const [selection, setSelection] = useState<"offices" | "departments" | "">(
+    ""
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [staffId, setStaffId] = useState("");
-  const [signatoryId, setSignatoryId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [selectedOfficeOrDepartmentId, setSelectedOfficeOrDepartmentId] =
+    useState<string>("");
+  const [type, setType] = useState<"office" | "department">("office");
+  const [currentStaff, setCurrentStaff] = useState<string | null>(null);
+  const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOffices();
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const fetchOffices = async () => {
-    setLoading(true);
+  const fetchData = () => {
+    fetch("/api/offices-departments")
+      .then((response) => response.json())
+      .then((data) => setData(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  };
+
+  const handleReset = async (officeId: string, entityType: string) => {
     try {
-      const response = await fetch("/api/offices-with-users");
-      if (response.ok) {
-        const data = await response.json();
-        setOffices(data);
-      } else {
-        console.error("Failed to fetch offices");
-      }
-    } catch (error) {
-      console.error("Error fetching offices:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("/api/users?role=personnel");
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else {
-        console.error("Failed to fetch users");
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  const openModal = (office) => {
-    setSelectedOffice(office);
-    setIsModalOpen(true);
-    setLoading(true);
-    fetchCurrentAssignments(office.id);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOffice(null);
-    setStaffId("");
-    setSignatoryId("");
-    setLoading(false);
-  };
-
-  const fetchCurrentAssignments = async (officeId) => {
-    try {
-      const response = await fetch(`/api/get-assignments?officeId=${officeId}`);
-      const data = await response.json();
-      setStaffId(data.staffId || "");
-      setSignatoryId(data.signatoryId || "");
-    } catch (error) {
-      console.error("Error fetching current assignments:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAssign = async () => {
-    console.log("Assigning officers:", {
-      officeId: selectedOffice.id,
-      staffId,
-      signatoryId,
-    });
-    try {
-      const response = await fetch("/api/assign-officers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axios.delete("/api/assign-officers", {
+        data: {
+          entityId: officeId,
+          entityType: entityType,
         },
-        body: JSON.stringify({
-          officeId: selectedOffice.id,
-          staffId,
-          signatoryId,
-        }),
       });
-      const result = await response.json();
-      console.log("API response:", result);
-      if (response.ok) {
-        alert("Officers assigned successfully");
-        fetchOffices();
-        closeModal();
-      } else {
-        console.error("Failed to assign officers:", result);
-      }
-    } catch (error) {
-      console.error("Error assigning officers:", error);
-    }
-  };
 
-  const handleReset = async () => {
-    console.log("Resetting officers:", {
-      officeId: selectedOffice.id,
-      staffId,
-      signatoryId,
-    });
-
-    try {
-      const response = await fetch("/api/assign-officers", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          officeId: selectedOffice.id,
-          staffId: staffId || undefined,
-          signatoryId: signatoryId || undefined,
-        }),
-      });
-      const result = await response.json();
-      console.log("API response:", result);
-      if (response.ok) {
+      if (response.status === 200) {
         alert("Officers reset successfully");
-        fetchOffices();
-        closeModal();
-      } else {
-        console.error("Failed to reset officers:", result);
+        fetchData(); // Refresh the data to reflect changes
       }
     } catch (error) {
       console.error("Error resetting officers:", error);
+      alert("Failed to reset officers");
     }
   };
 
+  const handleAssignClick = (
+    id: string,
+    entityType: "office" | "department"
+  ) => {
+    setSelectedOfficeOrDepartmentId(id);
+    setType(entityType);
+
+    const entity = data[
+      entityType === "office" ? "offices" : "departments"
+    ].find((item) => item.id === id);
+
+    if (entity) {
+      setCurrentStaff(entity.staff.length > 0 ? entity.staff[0].user.id : null);
+      setCurrentSignatory(
+        entity.signatory.length > 0 ? entity.signatory[0].user.id : null
+      );
+    }
+
+    setIsModalOpen(true);
+  };
+
+  if (!data) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Assign Officers</h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Office Name</th>
-              <th className="py-2 px-4 border-b">Staff</th>
-              <th className="py-2 px-4 border-b">Signatories</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {offices.map((office) => (
-              <tr key={office.id}>
-                <td className="py-2 px-4 border-b text-center">
-                  {office.name}
-                </td>
-                <td
-                  className={`py-2 px-4 border-b text-center ${
-                    !office.staff || office.staff.length === 0
-                      ? "text-red-500"
-                      : ""
-                  }`}
-                >
-                  {office.staff && office.staff.length > 0
-                    ? office.staff.map((staff) => staff.name).join(", ")
-                    : "No staff assigned"}
-                </td>
-                <td
-                  className={`py-2 px-4 border-b text-center ${
-                    !office.signatories || office.signatories.length === 0
-                      ? "text-red-500"
-                      : ""
-                  }`}
-                >
-                  {office.signatories && office.signatories.length > 0
-                    ? office.signatories
-                        .map((signatory) => signatory.name)
-                        .join(", ")
-                    : "No signatories assigned"}
-                </td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button
-                    onClick={() => openModal(office)}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                  >
-                    Assign Officers
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <h1 className="text-3xl font-bold mb-6">Offices and Departments</h1>
 
-      {isModalOpen && (
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          contentLabel="Assign Officers"
-          className="fixed inset-0 flex items-center justify-center"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      <div className="mb-6">
+        <label className="mr-4">Select:</label>
+        <select
+          value={selection}
+          onChange={(e) =>
+            setSelection(e.target.value as "offices" | "departments" | "")
+          }
+          className="border border-gray-300 p-2 rounded"
         >
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
-            <h2 className="text-2xl font-bold mb-4">
-              Assign Officers to {selectedOffice.name}
-            </h2>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="staffId"
-                  >
-                    Staff
-                  </label>
-                  <select
-                    id="staffId"
-                    value={staffId}
-                    onChange={(e) => setStaffId(e.target.value)}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    <option value="">Select Staff</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="signatoryId"
-                  >
-                    Signatory
-                  </label>
-                  <select
-                    id="signatoryId"
-                    value={signatoryId}
-                    onChange={(e) => setSignatoryId(e.target.value)}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    <option value="">Select Signatory</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleAssign}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                  >
-                    Assign
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                  >
-                    Reset
-                  </button>
-                  <button
-                    onClick={closeModal}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </Modal>
-      )}
+          <option value="">Please select</option>
+          <option value="offices">Offices</option>
+          <option value="departments">Departments</option>
+        </select>
+      </div>
+
+      {selection === "" && <div>Please select an option to view the data.</div>}
+
+      <div className="min-h-[400px]">
+        {" "}
+        {/* Set a minimum height for the table container */}
+        {selection === "offices" && (
+          <>
+            <h2 className="text-2xl font-semibold mb-4">Offices</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border border-gray-200">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Office Name
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Staff
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Signatories
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.offices.map((office) => (
+                    <tr key={office.id} className="hover:bg-gray-100">
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {office.name}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {office.staff.map(({ user }) => (
+                          <div key={user.id}>
+                            {user.firstName} {user.middleName} {user.lastName}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {office.signatory.map(({ user }) => (
+                          <div key={user.id}>
+                            {user.firstName} {user.middleName} {user.lastName}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left">
+                        <button
+                          onClick={() => handleAssignClick(office.id, "office")}
+                          className={`px-4 py-2 rounded ${
+                            office.staff.length > 0 &&
+                            office.signatory.length > 0
+                              ? "bg-gray-500 text-white cursor-not-allowed"
+                              : "bg-blue-500 text-white"
+                          }`}
+                          disabled={
+                            office.staff.length > 0 &&
+                            office.signatory.length > 0
+                          }
+                        >
+                          Assign
+                        </button>
+                        <button
+                          onClick={() => handleReset(office.id, "office")}
+                          className="bg-red-500 text-white px-4 py-2 rounded ml-2"
+                        >
+                          Reset
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        {selection === "departments" && (
+          <>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">Departments</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border border-gray-200">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Department Name
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Staff
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                      Signatories
+                    </th>
+                    <th className="py-2 px-4 border-b border-gray-300 text-left">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.departments.map((department) => (
+                    <tr key={department.id} className="hover:bg-gray-100">
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {department.name}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {department.staff.map(({ user }) => (
+                          <div key={user.id}>
+                            {user.firstName} {user.middleName} {user.lastName}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                        {department.signatory.map(({ user }) => (
+                          <div key={user.id}>
+                            {user.firstName} {user.middleName} {user.lastName}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="py-2 px-4 border-b border-gray-300 text-left">
+                        <button
+                          onClick={() =>
+                            handleAssignClick(department.id, "department")
+                          }
+                          className={`px-4 py-2 rounded ${
+                            department.staff.length > 0 &&
+                            department.signatory.length > 0
+                              ? "bg-gray-500 text-white cursor-not-allowed"
+                              : "bg-blue-500 text-white"
+                          }`}
+                          disabled={
+                            department.staff.length > 0 &&
+                            department.signatory.length > 0
+                          }
+                        >
+                          Assign
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleReset(department.id, "department")
+                          }
+                          className="bg-red-500 text-white px-4 py-2 rounded ml-2"
+                        >
+                          Reset
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+
+      <AssignModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          fetchData(); // Refresh the data after closing the modal
+        }}
+        officeOrDepartmentId={selectedOfficeOrDepartmentId}
+        type={type}
+        currentStaff={currentStaff}
+        currentSignatory={currentSignatory}
+      />
     </div>
   );
 };
 
-export default AssignOfficersPage;
+export default OfficesDepartmentsPage;

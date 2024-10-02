@@ -7,7 +7,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { officeId, staffId, signatoryId } = req.body;
+    const { entityId, entityType, staffId, signatoryId } = req.body;
 
     try {
       // Check if the user exists for staff
@@ -28,56 +28,46 @@ export default async function handler(
 
       // Ensure the staff exists, if not create them
       let staffExists = await prisma.staff.findUnique({
-        where: { id: staffId },
+        where: { userId: staffId },
       });
       if (!staffExists) {
         staffExists = await prisma.staff.create({
           data: {
-            id: staffId,
-            user: {
-              connect: { id: staffId }, // Assuming staffId is the same as userId
-            },
-            office: {
-              connect: { id: officeId },
-            },
+            userId: staffId,
+            officeId: entityType === "office" ? entityId : undefined,
+            departmentId: entityType === "department" ? entityId : undefined,
           },
         });
       } else {
-        // Transfer staff to new office if already exists
+        // Transfer staff to new office or department if already exists
         await prisma.staff.update({
-          where: { id: staffId },
+          where: { userId: staffId },
           data: {
-            office: {
-              connect: { id: officeId },
-            },
+            officeId: entityType === "office" ? entityId : undefined,
+            departmentId: entityType === "department" ? entityId : undefined,
           },
         });
       }
 
       // Ensure the signatory exists, if not create them
       let signatoryExists = await prisma.signatory.findUnique({
-        where: { id: signatoryId },
+        where: { userId: signatoryId },
       });
       if (!signatoryExists) {
         signatoryExists = await prisma.signatory.create({
           data: {
-            id: signatoryId,
-            user: {
-              connect: { id: signatoryId }, // Assuming signatoryId is the same as userId
-            },
-            office: {
-              connect: { id: officeId },
-            },
+            userId: signatoryId,
+            officeId: entityType === "office" ? entityId : undefined,
+            departmentId: entityType === "department" ? entityId : undefined,
           },
         });
       } else {
-        // Transfer signatory to new office if already exists
+        // Transfer signatory to new office or department if already exists
         await prisma.signatory.update({
-          where: { id: signatoryId },
+          where: { userId: signatoryId },
           data: {
-            office: {
-              connect: { id: officeId },
-            },
+            officeId: entityType === "office" ? entityId : undefined,
+            departmentId: entityType === "department" ? entityId : undefined,
           },
         });
       }
@@ -87,7 +77,7 @@ export default async function handler(
         where: { id: staffId },
         data: {
           role: {
-            push: "staff",
+            set: ["staff"],
           },
         },
       });
@@ -96,13 +86,10 @@ export default async function handler(
         where: { id: signatoryId },
         data: {
           role: {
-            push: "signatory",
+            set: ["signatory"],
           },
         },
       });
-
-      console.log("Staff exists:", staffExists);
-      console.log("Signatory exists:", signatoryExists);
 
       res.status(200).json({ message: "Officers assigned successfully" });
     } catch (error) {
@@ -110,59 +97,70 @@ export default async function handler(
       res.status(500).json({ error: "Internal server error" });
     }
   } else if (req.method === "DELETE") {
-    const { officeId, staffId, signatoryId } = req.body;
+    const { entityId, entityType } = req.body;
 
     try {
-      // Delete all staff associated with the office
-      await prisma.staff.deleteMany({
-        where: { officeId },
+      // Find all staff and signatories associated with the office or department
+      const staffUsers = await prisma.staff.findMany({
+        where: {
+          OR: [
+            { officeId: entityType === "office" ? entityId : undefined },
+            {
+              departmentId: entityType === "department" ? entityId : undefined,
+            },
+          ],
+        },
+        select: { userId: true },
       });
 
-      // Delete all signatories associated with the office
+      const signatoryUsers = await prisma.signatory.findMany({
+        where: {
+          OR: [
+            { officeId: entityType === "office" ? entityId : undefined },
+            {
+              departmentId: entityType === "department" ? entityId : undefined,
+            },
+          ],
+        },
+        select: { userId: true },
+      });
+
+      // Delete all staff associated with the office or department
+      await prisma.staff.deleteMany({
+        where: {
+          OR: [
+            { officeId: entityType === "office" ? entityId : undefined },
+            {
+              departmentId: entityType === "department" ? entityId : undefined,
+            },
+          ],
+        },
+      });
+
+      // Delete all signatories associated with the office or department
       await prisma.signatory.deleteMany({
-        where: { officeId },
+        where: {
+          OR: [
+            { officeId: entityType === "office" ? entityId : undefined },
+            {
+              departmentId: entityType === "department" ? entityId : undefined,
+            },
+          ],
+        },
       });
 
       // Update user roles to personnel
-      if (staffId) {
-        const user = await prisma.user.findUnique({
-          where: { id: staffId },
-        });
-        if (user) {
-          const updatedRoles = user.role.filter(
-            (role) => role !== "staff" && role !== "signatory"
-          );
-          if (!updatedRoles.includes("personnel")) {
-            updatedRoles.push("personnel");
-          }
-          await prisma.user.update({
-            where: { id: staffId },
-            data: {
-              role: updatedRoles,
-            },
-          });
-        }
-      }
-
-      if (signatoryId) {
-        const user = await prisma.user.findUnique({
-          where: { id: signatoryId },
-        });
-        if (user) {
-          const updatedRoles = user.role.filter(
-            (role) => role !== "staff" && role !== "signatory"
-          );
-          if (!updatedRoles.includes("personnel")) {
-            updatedRoles.push("personnel");
-          }
-          await prisma.user.update({
-            where: { id: signatoryId },
-            data: {
-              role: updatedRoles,
-            },
-          });
-        }
-      }
+      const userIds = [...staffUsers, ...signatoryUsers].map(
+        (user) => user.userId
+      );
+      await prisma.user.updateMany({
+        where: { id: { in: userIds } },
+        data: {
+          role: {
+            set: ["personnel"],
+          },
+        },
+      });
 
       res.status(200).json({ message: "Officers reset successfully" });
     } catch (error) {

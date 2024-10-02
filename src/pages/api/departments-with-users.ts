@@ -1,4 +1,4 @@
-// File: `src/pages/api/offices-with-users.ts`
+// File: `src/pages/api/departments-with-users.ts`
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 
@@ -7,7 +7,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const offices = await prisma.office.findMany({
+    const departments = await prisma.department.findMany({
       include: {
         staff: {
           include: {
@@ -22,14 +22,14 @@ export default async function handler(
       },
     });
 
-    const result = offices.map((office) => ({
-      id: office.id,
-      name: office.name,
-      staff: office.staff.map((staff) => ({
+    const result = departments.map((department) => ({
+      id: department.id,
+      name: department.name,
+      staff: department.staff.map((staff) => ({
         id: staff.user.id,
         name: staff.user.firstName + " " + staff.user.lastName,
       })),
-      signatories: office.signatory.map((signatory) => ({
+      signatories: department.signatory.map((signatory) => ({
         id: signatory.user.id,
         name: signatory.user.firstName + " " + signatory.user.lastName,
       })),
@@ -37,7 +37,7 @@ export default async function handler(
 
     res.status(200).json(result);
   } catch (error) {
-    console.error("Error fetching offices:", error);
-    res.status(500).json({ error: "Failed to fetch offices" });
+    console.error("Error fetching departments:", error);
+    res.status(500).json({ error: "Failed to fetch departments" });
   }
 }

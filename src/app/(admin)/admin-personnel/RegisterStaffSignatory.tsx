@@ -5,16 +5,21 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface RegisterStaffSignatoryProps {
   onClose: () => void;
+  onSuccess: () => void; // Add a callback for successful registration
 }
 
 const RegisterStaffSignatory: React.FC<RegisterStaffSignatoryProps> = ({
   onClose,
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     email: "",
     username: "",
     password: "123", // default password
+    role: "personnel", // default role
   });
   const [message, setMessage] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -35,7 +40,6 @@ const RegisterStaffSignatory: React.FC<RegisterStaffSignatoryProps> = ({
       const hashedPassword = await bcrypt.hash(formData.password, 10);
       const updatedFormData = {
         ...formData,
-        role: "personnel",
         password: hashedPassword,
       };
       // Validate form data
@@ -45,7 +49,10 @@ const RegisterStaffSignatory: React.FC<RegisterStaffSignatoryProps> = ({
       );
       if (response.status === 200) {
         setMessage("User registered successfully.");
-        onClose(); // Close the modal on successful registration
+        onSuccess(); // Call the onSuccess callback to fetch updated data
+        setTimeout(() => {
+          onClose(); // Close the modal after a short delay to show the success message
+        }, 2000);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
@@ -58,21 +65,54 @@ const RegisterStaffSignatory: React.FC<RegisterStaffSignatoryProps> = ({
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-4">Register Staff Signatory</h2>
+      <h2 className="text-xl font-bold mb-4">Register Personnel</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="name"
+            htmlFor="firstName"
           >
-            Name
+            First Name
           </label>
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="firstName"
+            value={formData.firstName}
             onChange={handleChange}
-            placeholder="Name"
+            placeholder="First Name"
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div>
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="middleName"
+          >
+            Middle Name
+          </label>
+          <input
+            type="text"
+            name="middleName"
+            value={formData.middleName}
+            onChange={handleChange}
+            placeholder="Middle Name"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div>
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="lastName"
+          >
+            Last Name
+          </label>
+          <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            placeholder="Last Name"
             required
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
