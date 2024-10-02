@@ -1,46 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import mysql from "mysql2/promise";
 import prisma from "@/lib/prisma";
+import { PrismaClient as MySQLPrismaClient } from "../../../generated/mysql-client";
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 2 seconds
-
-async function connectToMySQL(retries = 0): Promise<mysql.Connection> {
-  try {
-    return await mysql.createConnection({
-      host: "htcgensanschoolautomate-htcgensanschoolautomate.i.aivencloud.com",
-      user: "avnadmin",
-      password: "AVNS_IDj82JAjLU_v4xhxeeP",
-      database: "defaultdb",
-      port: 22874,
-      ssl: {
-        rejectUnauthorized: false, // Allow self-signed certificates
-      },
-      connectTimeout: 10000, // 10 seconds
-    });
-  } catch (error) {
-    if (retries < MAX_RETRIES) {
-      console.warn(
-        `Retrying MySQL connection (${retries + 1}/${MAX_RETRIES})...`
-      );
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-      return connectToMySQL(retries + 1);
-    } else {
-      throw error;
-    }
-  }
-}
+const mysqlPrisma = new MySQLPrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
-    const mysqlConnection = await connectToMySQL();
-
-    const [mysqlStudents] = await mysqlConnection.execute(
-      "SELECT * FROM Student" // Corrected table name
-    );
+    // Fetch students from MySQL using Prisma
+    const mysqlStudents = await mysqlPrisma.student.findMany();
 
     console.log("Fetched students from MySQL:", mysqlStudents);
 

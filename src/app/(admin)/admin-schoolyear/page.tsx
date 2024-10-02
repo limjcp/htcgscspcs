@@ -124,6 +124,9 @@ const RegisterSchoolYear: React.FC = () => {
             </thead>
             <tbody>
               {schoolYears.map((sy) => {
+                if (!sy.semesters || !Array.isArray(sy.semesters)) {
+                  return null; // Skip if semesters is undefined or not an array
+                }
                 return sy.semesters.map((semester) => (
                   <tr key={`${sy.id}-${semester.id}`}>
                     <td className="py-2 px-4 border-b">{semester.name}</td>

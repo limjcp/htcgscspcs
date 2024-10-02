@@ -1,0 +1,46 @@
+// prisma/mysql-schema.prisma
+datasource mysql {
+    provider = "mysql"
+    url      = env("SCHOOL_DB_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/mysql-client"
+}
+
+model Student {
+    id             String        @id @default(cuid())
+    studentId      String        @unique
+    firstName      String
+    middleName     String?
+    lastName       String
+    email          String
+    phone          String
+    address        String?
+    dateOfBirth    DateTime?
+    gender         Gender
+    enrollmentYear Int
+    status         StudentStatus
+    program        String
+    yearLevel      yearLevel
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}
+
+enum StudentStatus {
+    ENROLLED
+    GRADUATED
+    DROPPED
+    SUSPENDED
+}
+
+enum yearLevel {
+    FIRST
+    SECOND
+    THIRD
+    FOURTH
+}
