@@ -19,53 +19,43 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
   }
 
-  // Role-based redirects
+  // Role-based redirects when accessing the root path "/"
   if (nextUrl.pathname === "/") {
-    const userRole = req.auth?.user?.role;
-    if (Array.isArray(userRole)) {
-      if (userRole.includes("admin")) {
-        return NextResponse.redirect(new URL("/admin-dashboard", nextUrl));
-      } else if (userRole.includes("staff")) {
-        return NextResponse.redirect(new URL("/staff-dashboard", nextUrl));
-      } else if (userRole.includes("signatory")) {
-        return NextResponse.redirect(new URL("/signatory-dashboard", nextUrl));
-      } else if (userRole.includes("student")) {
-        return NextResponse.redirect(new URL("/student-dashboard", nextUrl));
+    const roleDashboardMap: Record<string, string> = {
+      admin: "/admin-dashboard",
+      staff: "/staff-dashboard",
+      signatory: "/signatory-dashboard",
+      student: "/student-dashboard",
+    };
+
+    for (const role of req.auth?.user?.role || []) {
+      if (roleDashboardMap[role]) {
+        return NextResponse.redirect(new URL(roleDashboardMap[role], nextUrl));
       }
     }
   }
 
-  if (
-    nextUrl.pathname.startsWith("/admin") &&
-    !req.auth?.user?.role?.includes("admin")
-  ) {
-    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-  }
+  // Role-specific route protection
+  const routeRoleMap: Record<string, string> = {
+    admin: "/admin",
+    staff: "/staff",
+    signatory: "/signatory",
+    student: "/student",
+  };
 
-  if (
-    nextUrl.pathname.startsWith("/staff") &&
-    !req.auth?.user?.role?.includes("staff")
-  ) {
-    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-  }
-
-  if (
-    nextUrl.pathname.startsWith("/signatory") &&
-    !req.auth?.user?.role?.includes("signatory")
-  ) {
-    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-  }
-
-  if (
-    nextUrl.pathname.startsWith("/student") &&
-    !req.auth?.user?.role?.includes("student")
-  ) {
-    return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+  for (const role in routeRoleMap) {
+    if (
+      nextUrl.pathname.startsWith(routeRoleMap[role]) &&
+      !req.auth?.user?.role?.includes(role)
+    ) {
+      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
+    }
   }
 
   return NextResponse.next();
 });
 
+// Simplified matcher to reduce middleware footprint
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next).*)"],
 };
