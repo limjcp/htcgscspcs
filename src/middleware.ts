@@ -5,48 +5,62 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  // Public routes that don't require authentication
+  // Handle public routes
   if (
-    nextUrl.pathname.startsWith("/login") ||
-    nextUrl.pathname.startsWith("/api/auth") ||
-    nextUrl.pathname === "/htc-new-seal.png"
+    ["/login", "/htc-new-seal.png"].includes(nextUrl.pathname) ||
+    nextUrl.pathname.startsWith("/api/auth")
   ) {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users to login page
+  // Redirect unauthenticated users to the login page
   if (!isLoggedIn) {
     return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
   }
 
-  // Role-based redirects when accessing the root path "/"
+  const role = req.auth?.user?.role || [];
+
+  // Redirect logged-in users based on their role at the root "/"
   if (nextUrl.pathname === "/") {
-    const roleDashboardMap: Record<string, string> = {
+    const roleDashboardMap: Record<
+      "admin" | "staff" | "signatory" | "student",
+      string
+    > = {
       admin: "/admin-dashboard",
       staff: "/staff-dashboard",
       signatory: "/signatory-dashboard",
       student: "/student-dashboard",
     };
 
-    for (const role of req.auth?.user?.role || []) {
-      if (roleDashboardMap[role]) {
-        return NextResponse.redirect(new URL(roleDashboardMap[role], nextUrl));
+    for (const userRole of role) {
+      if (roleDashboardMap[userRole as keyof typeof roleDashboardMap]) {
+        return NextResponse.redirect(
+          new URL(
+            roleDashboardMap[userRole as keyof typeof roleDashboardMap],
+            nextUrl
+          )
+        );
       }
     }
   }
 
   // Role-specific route protection
-  const routeRoleMap: Record<string, string> = {
+  const routeRoleMap: Record<
+    "admin" | "staff" | "signatory" | "student",
+    string
+  > = {
     admin: "/admin",
     staff: "/staff",
     signatory: "/signatory",
     student: "/student",
   };
 
-  for (const role in routeRoleMap) {
+  for (const roleKey of Object.keys(
+    routeRoleMap
+  ) as (keyof typeof routeRoleMap)[]) {
     if (
-      nextUrl.pathname.startsWith(routeRoleMap[role]) &&
-      !req.auth?.user?.role?.includes(role)
+      nextUrl.pathname.startsWith(routeRoleMap[roleKey]) &&
+      !role.includes(roleKey)
     ) {
       return NextResponse.redirect(new URL("/unauthorized", nextUrl));
     }
@@ -55,7 +69,7 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
-// Simplified matcher to reduce middleware footprint
+// Use a simplified matcher
 export const config = {
   matcher: ["/((?!_next).*)"],
 };
