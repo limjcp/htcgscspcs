@@ -1,10 +1,23 @@
+import { auth } from "@/auth";
+import AuthButton from "@/components/AuthButton.server";
 import React from "react";
 
-export default function Test() {
+export default async function UserPage() {
+  const session = await auth();
+
   return (
     <div>
-      <h1>Test Page</h1>
-      <p>This is a test page. It is not protected by authentication.</p>
+      {session ? (
+        <>
+          <h1>Welcome, {session.user?.firstName || session.user?.username}!</h1>
+
+          <pre>{JSON.stringify(session, null, 2)}</pre>
+        </>
+      ) : (
+        <p>You are not logged in.</p>
+      )}
+
+      <AuthButton />
     </div>
   );
 }

@@ -1,23 +1,15 @@
 import { auth } from "@/auth";
-import AuthButton from "@/components/AuthButton.server";
+import { redirect } from "next/navigation";
 import React from "react";
 
 export default async function UserPage() {
   const session = await auth();
 
-  return (
-    <div>
-      {session ? (
-        <>
-          <h1>Welcome, {session.user?.firstName || session.user?.username}!</h1>
+  if (session) {
+    redirect("/testpage");
+  } else {
+    redirect("/api/auth/signin");
+  }
 
-          <pre>{JSON.stringify(session, null, 2)}</pre>
-        </>
-      ) : (
-        <p>You are not logged in.</p>
-      )}
-
-      <AuthButton />
-    </div>
-  );
+  return <p>Loading...</p>; // Optional: Display a loading message during redirection
 }
