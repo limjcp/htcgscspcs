@@ -13,10 +13,10 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users to login page
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
-  }
+  // // Redirect unauthenticated users to login page
+  // if (!isLoggedIn) {
+  //   return NextResponse.redirect(new URL("/api/auth/signin", nextUrl));
+  // }
 
   // // Role-based redirects when accessing the root path "/"
   // if (nextUrl.pathname === "/") {
