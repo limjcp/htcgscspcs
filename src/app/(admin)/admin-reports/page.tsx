@@ -77,6 +77,9 @@ export default function Reports() {
   }, []);
 
   const generateReport = (semesterId) => {
+    const semester = semesters.find((s) => s.id === semesterId);
+    const semesterName = semester ? semester.name : "Unknown Semester";
+
     const clearedStudentsList = students.filter(
       (student) => student.status === "cleared"
     );
@@ -93,6 +96,7 @@ export default function Reports() {
     const newReport = {
       id: Date.now(),
       semesterId,
+      semesterName,
       totalStudents: students.length,
       clearedStudents: clearedStudentsList.length,
       notClearedStudents: notClearedStudentsList.length,
@@ -105,7 +109,7 @@ export default function Reports() {
 
   const handlePrint = (report) => {
     const doc = new jsPDF();
-    doc.text(`Report for Semester: ${report.semesterId}`, 10, 10);
+    doc.text(`Report for Semester: ${report.semesterName}`, 10, 10);
     doc.autoTable({
       head: [["Total Students", "Cleared Students", "Not Cleared Students"]],
       body: [
