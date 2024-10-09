@@ -142,20 +142,21 @@ model Signatory {
 }
 
 model Program {
-  id          String       @id @default(cuid())
-  name        String       @unique
-  description String
-  students    Student[]
-  offices     Office[] // Many-to-many relation with Office
-  department  Department[] // Relation to Department
+  id           String      @id @default(cuid())
+  name         String      @unique
+  description  String
+  students     Student[]
+  offices      Office[] // Many-to-many relation with Office
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String?
 }
 
 model Requirement {
   id                  String               @id @default(cuid())
   name                String
   description         String?
-  office              Office               @relation(fields: [officeId], references: [id])
-  officeId            String
+  office              Office?              @relation(fields: [officeId], references: [id])
+  officeId            String?
   schoolYear          SchoolYear           @relation(fields: [schoolYearId], references: [id])
   schoolYearId        String
   semester            Semester             @relation(fields: [semesterId], references: [id])
@@ -164,7 +165,8 @@ model Requirement {
   generalStatus       RequirementStatus    @default(PENDING) // Overall status for the office
   studentRequirements StudentRequirement[] // Link to student-specific requirements
 
-  Department Department[]
+  department   Department? @relation(fields: [departmentId], references: [id]) // Step linked to a department
+  departmentId String?
 }
 
 model StudentRequirement {

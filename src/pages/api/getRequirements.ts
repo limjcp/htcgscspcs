@@ -5,17 +5,21 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { officeId } = req.query;
+  const { officeId, departmentId } = req.query;
 
-  if (!officeId) {
-    return res.status(400).json({ message: "Missing officeId" });
+  if (!officeId && !departmentId) {
+    return res
+      .status(400)
+      .json({ message: "Missing officeId or departmentId" });
   }
 
   try {
+    const whereClause = officeId
+      ? { officeId: String(officeId) }
+      : { departmentId: String(departmentId) };
+
     const requirements = await prisma.requirement.findMany({
-      where: {
-        officeId: String(officeId),
-      },
+      where: whereClause,
     });
 
     res.status(200).json(requirements);

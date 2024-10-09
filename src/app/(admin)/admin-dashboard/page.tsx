@@ -1,5 +1,5 @@
 "use client";
-
+import { withAuth } from "@/withAuth";
 import React, { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
@@ -74,4 +74,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default withAuth(AdminDashboard, ["admin"]);

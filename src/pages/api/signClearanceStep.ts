@@ -9,22 +9,29 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { studentId, stepId, officeId } = req.body;
+  const { studentId, stepId, officeId, departmentId, signatoryName } = req.body;
 
-  if (!studentId || !stepId || !officeId) {
+  if (!studentId || !stepId || (!officeId && !departmentId) || !signatoryName) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
-    const clearanceStep = await prisma.clearanceStep.findFirst({
-      where: {
-        id: stepId,
-        clearance: {
-          studentId: studentId,
-        },
-        officeId: String(officeId),
-        status: "APPROVED",
+    const whereClause: any = {
+      id: stepId,
+      status: "APPROVED",
+      clearance: {
+        studentId: studentId,
       },
+    };
+
+    if (officeId) {
+      whereClause.officeId = String(officeId);
+    } else if (departmentId) {
+      whereClause.departmentId = String(departmentId);
+    }
+
+    const clearanceStep = await prisma.clearanceStep.findFirst({
+      where: whereClause,
     });
 
     if (!clearanceStep) {
@@ -39,6 +46,8 @@ export default async function handler(
       },
       data: {
         status: "SIGNED",
+        signedAt: new Date(),
+        signedBy: signatoryName,
       },
     });
 

@@ -9,6 +9,7 @@ export default async function handler(
     const requirements = await prisma.requirement.findMany({
       include: {
         office: true,
+        department: true,
       },
     });
     res.status(200).json(requirements);

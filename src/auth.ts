@@ -58,6 +58,13 @@ const authOptions: NextAuthConfig = {
           return null;
         }
 
+        let departmentId = null;
+        if (user.staff) {
+          departmentId = user.staff.departmentId;
+        } else if (user.signatory) {
+          departmentId = user.signatory.departmentId;
+        }
+
         let officeId = null;
         if (user.staff) {
           officeId = user.staff.officeId;
@@ -65,7 +72,7 @@ const authOptions: NextAuthConfig = {
           officeId = user.signatory.officeId;
         }
 
-        return { ...user, officeId };
+        return { ...user, officeId, departmentId };
       },
     }),
   ],
@@ -82,6 +89,7 @@ const authOptions: NextAuthConfig = {
       session.user.staffId = token.staffId || null;
       session.user.signatoryId = token.signatoryId || null;
       session.user.officeId = token.officeId || null;
+      session.user.departmentId = token.departmentId || null;
       session.user.firstName = token.firstName || null;
       session.user.middleName = token.middleName || null;
       session.user.lastName = token.lastName || null;
@@ -96,6 +104,7 @@ const authOptions: NextAuthConfig = {
         token.staffId = user.staff?.id || null;
         token.signatoryId = user.signatory?.id || null;
         token.officeId = user.officeId || null;
+        token.departmentId = user.departmentId || null;
         token.firstName = user.firstName;
         token.middleName = user.middleName;
         token.lastName = user.lastName;

@@ -9,10 +9,12 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { officeId } = req.query;
+  const { officeId, departmentId } = req.query;
 
-  if (!officeId) {
-    return res.status(400).json({ message: "Office ID is required" });
+  if (!officeId && !departmentId) {
+    return res
+      .status(400)
+      .json({ message: "Office ID or Department ID is required" });
   }
 
   try {
@@ -22,9 +24,19 @@ export default async function handler(
         clearances: {
           include: {
             steps: {
-              where: { officeId: String(officeId) },
+              where: {
+                OR: [
+                  { officeId: officeId ? String(officeId) : undefined },
+                  {
+                    departmentId: departmentId
+                      ? String(departmentId)
+                      : undefined,
+                  },
+                ],
+              },
               include: {
                 office: true,
+                department: true,
               },
             },
           },

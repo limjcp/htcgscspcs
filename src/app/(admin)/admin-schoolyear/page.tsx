@@ -111,7 +111,7 @@ const RegisterSchoolYear: React.FC = () => {
               onClick={() => setIsModalOpen(true)}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              + Add School Year
+              + Add Academic Year
             </button>
           </div>
           <table className="min-w-full bg-white">
@@ -150,7 +150,7 @@ const RegisterSchoolYear: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">Register School Year</h2>
+            <h2 className="text-2xl font-bold mb-4">Register Academic Year</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700">Semester Type:</label>

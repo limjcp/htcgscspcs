@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   const { studentId } = req.query;
 
@@ -19,6 +19,7 @@ export default async function handler(
         steps: {
           include: {
             office: true,
+            department: true,
           },
         },
       },

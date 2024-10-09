@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Settings,
+  TrendingUp,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
@@ -72,8 +73,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Sidebar.Nav.Section.Item
               icon={<ClipboardCheck />}
               label="Clearance"
+              href="/student-clearance-view"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<TrendingUp />}
+              label="Track"
               href="/student-clearance"
             />
+
             <Sidebar.Nav.Section.Item
               icon={<Settings />}
               label="Settings"

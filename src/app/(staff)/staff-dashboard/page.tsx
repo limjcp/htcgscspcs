@@ -15,18 +15,23 @@ export default function Home() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (session && session.user && session.user.officeId) {
-      fetchCounts(session.user.officeId);
+    if (session && session.user) {
+      const { officeId, departmentId } = session.user;
+      if (officeId) {
+        fetchCounts(officeId, "office");
+      } else if (departmentId) {
+        fetchCounts(departmentId, "department");
+      } else {
+        console.log("Neither officeId nor departmentId available:", session);
+      }
     } else {
-      console.log("Session or officeId not available:", session);
+      console.log("Session not available:", session);
     }
   }, [session]);
 
-  const fetchCounts = async (officeId) => {
+  const fetchCounts = async (id, type) => {
     try {
-      const response = await fetch(
-        `/api/getStudentCounts?officeId=${officeId}`
-      );
+      const response = await fetch(`/api/getStudentCounts?${type}Id=${id}`);
       if (response.ok) {
         const data = await response.json();
         setCounts(data);

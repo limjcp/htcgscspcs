@@ -1,15 +1,32 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import React from "react";
 
 export default async function UserPage() {
   const session = await auth();
 
-  if (session) {
-    redirect("/testpage");
-  } else {
+  if (!session) {
+    // Redirect unauthenticated users to login
     redirect("/api/auth/signin");
+  } else {
+    // Role-based redirects when accessing the root path "/"
+    const roleDashboardMap: Record<string, string> = {
+      admin: "/admin-dashboard",
+      staff: "/staff-dashboard",
+      signatory: "/signatory-dashboard",
+      student: "/student-dashboard",
+    };
+
+    // Check the user's roles and redirect to the appropriate dashboard
+    for (const role of session.user?.role || []) {
+      if (roleDashboardMap[role]) {
+        redirect(roleDashboardMap[role]);
+      }
+    }
+
+    // If no role matches, redirect to a default dashboard or unauthorized page
+    redirect("/unauthorized");
   }
 
-  return <p>Loading...</p>; // Optional: Display a loading message during redirection
+  // Render nothing, since redirection happens before any UI is shown
+  return null;
 }

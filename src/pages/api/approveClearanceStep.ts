@@ -1,28 +1,40 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma";
+import prisma from "../../lib/prisma";
 
-export default async function handler(
+export default async function approveClearanceStep(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { studentId, stepId, officeId, staffName } = req.body;
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
+  const { studentId, stepId, officeId, departmentId, staffName } = req.body;
 
   console.log("Received request body:", req.body);
 
-  if (!studentId || !stepId || !officeId || !staffName) {
+  // Validate request body
+  if (!studentId || !stepId || (!officeId && !departmentId) || !staffName) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
-    const clearanceStep = await prisma.clearanceStep.updateMany({
-      where: {
-        id: stepId,
-        clearance: {
-          studentId: studentId,
-        },
-        officeId: String(officeId),
-        status: "PENDING",
+    const whereClause: any = {
+      id: stepId,
+      status: "PENDING",
+      clearance: {
+        studentId: studentId,
       },
+    };
+
+    if (officeId) {
+      whereClause.officeId = officeId;
+    } else if (departmentId) {
+      whereClause.departmentId = departmentId;
+    }
+
+    const clearanceStep = await prisma.clearanceStep.updateMany({
+      where: whereClause,
       data: {
         status: "APPROVED",
         signedAt: new Date(),

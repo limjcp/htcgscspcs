@@ -5,21 +5,25 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { officeId } = req.query;
+  const { officeId, departmentId } = req.query;
 
-  if (!officeId) {
-    return res.status(400).json({ message: "Missing officeId" });
+  if (!officeId && !departmentId) {
+    return res
+      .status(400)
+      .json({ message: "Missing officeId or departmentId" });
   }
 
   try {
+    const whereClause = officeId
+      ? { officeId: String(officeId) }
+      : { departmentId: String(departmentId) };
+
     const allStudentsCount = await prisma.student.count({
       where: {
         clearances: {
           some: {
             steps: {
-              some: {
-                officeId: String(officeId),
-              },
+              some: whereClause,
             },
           },
         },
@@ -28,21 +32,21 @@ export default async function handler(
 
     const pendingStudentsCount = await prisma.clearanceStep.count({
       where: {
-        officeId: String(officeId),
+        ...whereClause,
         status: "PENDING",
       },
     });
 
     const approvedStudentsCount = await prisma.clearanceStep.count({
       where: {
-        officeId: String(officeId),
+        ...whereClause,
         status: "APPROVED",
       },
     });
 
     const signedStudentsCount = await prisma.clearanceStep.count({
       where: {
-        officeId: String(officeId),
+        ...whereClause,
         status: "SIGNED",
       },
     });
