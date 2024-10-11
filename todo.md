@@ -1,0 +1,3 @@
+- [ ] programs checkbox all
+- [ ] department update deans
+- [ ] office rules signing

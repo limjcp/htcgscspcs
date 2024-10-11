@@ -225,19 +225,38 @@ const DepartmentPage = () => {
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <h2 className="text-2xl font-bold mb-4">Assign Programs</h2>
             <div className="mb-4">
-              {programs.map((program) => (
-                <div key={program.id} className="mb-2">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      checked={selectedPrograms.includes(program.id)}
-                      onChange={() => handleProgramChange(program.id)}
-                    />
-                    <span className="ml-2">{program.name}</span>
-                  </label>
-                </div>
-              ))}
+              <label className="inline-flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  className="form-checkbox"
+                  checked={selectedPrograms.length === programs.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedPrograms(
+                        programs.map((program) => program.id)
+                      );
+                    } else {
+                      setSelectedPrograms([]);
+                    }
+                  }}
+                />
+                <span className="ml-2">Check All</span>
+              </label>
+              <div className="grid grid-cols-4 gap-4">
+                {programs.map((program) => (
+                  <div key={program.id} className="mb-2">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox"
+                        checked={selectedPrograms.includes(program.id)}
+                        onChange={() => handleProgramChange(program.id)}
+                      />
+                      <span className="ml-2">{program.name}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
             <button
               onClick={handleAssignPrograms}

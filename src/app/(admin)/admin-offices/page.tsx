@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import AssignModal from "../admin-officers/AssignModal";
+// Adjust the import path as needed
 
 const Office = () => {
   const [name, setName] = useState("");
@@ -11,6 +13,10 @@ const Office = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [currentOffice, setCurrentOffice] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedOfficeId, setSelectedOfficeId] = useState("");
+  const [currentStaff, setCurrentStaff] = useState<string | null>(null);
+  const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
 
   const fetchOffices = async () => {
     setLoading(true);
@@ -151,6 +157,19 @@ const Office = () => {
     setIsModalOpen(true);
   };
 
+  const handleAssignClick = (office) => {
+    setSelectedOfficeId(office.id);
+    setCurrentStaff(
+      office.staff && office.staff.length > 0 ? office.staff[0].user.id : null
+    );
+    setCurrentSignatory(
+      office.signatory && office.signatory.length > 0
+        ? office.signatory[0].user.id
+        : null
+    );
+    setIsAssignModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-between">
@@ -169,7 +188,9 @@ const Office = () => {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b">Office</th>
-              <th className="py-2 px-4 border-b">Programs</th>
+              <th className="py-2 px-4 border-b">Departments</th>
+              <th className="py-2 px-4 border-b">Staff</th>
+              <th className="py-2 px-4 border-b">Signatories</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
@@ -182,6 +203,16 @@ const Office = () => {
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     {office.programs?.map((program) => program.name).join(", ")}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {office.staff
+                      ?.map(({ user }) => `${user.firstName} ${user.lastName}`)
+                      .join(", ")}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {office.signatory
+                      ?.map(({ user }) => `${user.firstName} ${user.lastName}`)
+                      .join(", ")}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     <button
@@ -202,12 +233,18 @@ const Office = () => {
                     >
                       Assign Programs
                     </button>
+                    <button
+                      onClick={() => handleAssignClick(office)}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
+                    >
+                      Assign Personnel
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="py-2 px-4 border-b">
+                <td colSpan="5" className="py-2 px-4 border-b">
                   No offices available.
                 </td>
               </tr>
@@ -219,7 +256,7 @@ const Office = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-2xl font-bold mb-4">Assign Programs</h2>
+            <h2 className="text-2xl font-bold mb-4">Assign Departments</h2>
             <div className="mb-4">
               {programs.map((program) => (
                 <div key={program.id} className="mb-2">
@@ -294,6 +331,15 @@ const Office = () => {
           </div>
         </div>
       )}
+
+      <AssignModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        officeOrDepartmentId={selectedOfficeId}
+        type="office"
+        currentStaff={currentStaff}
+        currentSignatory={currentSignatory}
+      />
     </div>
   );
 };
