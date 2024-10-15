@@ -1,35 +1,30 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import AssignModal from "../admin-officers/AssignModal";
-// Adjust the import path as needed
 
-const Office = () => {
-  const [name, setName] = useState("");
+import React, { useState, useEffect } from "react";
+import { Edit, Trash2 } from "lucide-react";
+
+export default function Office() {
   const [offices, setOffices] = useState([]);
-  const [programs, setPrograms] = useState([]);
-  const [selectedPrograms, setSelectedPrograms] = useState([]);
-  const [editingOffice, setEditingOffice] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [currentOffice, setCurrentOffice] = useState(null);
+  const [departments, setdepartments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [selectedOfficeId, setSelectedOfficeId] = useState("");
-  const [currentStaff, setCurrentStaff] = useState<string | null>(null);
-  const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
+  const [currentOffice, setCurrentOffice] = useState(null);
+  const [name, setName] = useState("");
+  const [selecteddepartments, setSelecteddepartments] = useState([]);
+  const [currentStaff, setCurrentStaff] = useState(null);
+  const [currentSignatory, setCurrentSignatory] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchOffices();
+    fetchdepartments();
+  }, []);
 
   const fetchOffices = async () => {
     setLoading(true);
     try {
       const response = await fetch("/api/offices");
       const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setOffices(data);
-      } else {
-        console.error("Data is not an array:", data);
-        setOffices([]);
-      }
+      setOffices(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch offices:", error);
       setOffices([]);
@@ -38,80 +33,44 @@ const Office = () => {
     }
   };
 
-  const fetchPrograms = async () => {
+  const fetchdepartments = async () => {
     try {
-      const response = await fetch("/api/programs");
+      const response = await fetch("/api/departments");
       const data = await response.json();
-
-      if (Array.isArray(data)) {
-        setPrograms(data);
-      } else {
-        console.error("Data is not an array:", data);
-        setPrograms([]);
-      }
+      setdepartments(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Failed to fetch programs:", error);
-      setPrograms([]);
+      console.error("Failed to fetch departments:", error);
+      setdepartments([]);
     }
   };
-
-  useEffect(() => {
-    fetchOffices();
-    fetchPrograms();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("/api/offices", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
+    const method = currentOffice ? "PUT" : "POST";
+    const url = currentOffice
+      ? `/api/offices/${currentOffice.id}`
+      : "/api/offices";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, departmentIds: selecteddepartments }),
     });
 
     if (response.ok) {
-      alert("Office created successfully!");
+      alert(`Office ${currentOffice ? "updated" : "created"} successfully!`);
       setName("");
+      setCurrentOffice(null);
+      setSelecteddepartments([]);
       fetchOffices();
-      setIsFormModalOpen(false);
+      setIsModalOpen(false);
     } else {
-      alert("Failed to create office.");
-    }
-  };
-
-  const handleEdit = (office) => {
-    setEditingOffice(office);
-    setName(office.name);
-    setIsFormModalOpen(true);
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const response = await fetch(`/api/offices/${editingOffice.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
-    });
-
-    if (response.ok) {
-      alert("Office updated successfully!");
-      setName("");
-      setEditingOffice(null);
-      fetchOffices();
-      setIsFormModalOpen(false);
-    } else {
-      alert("Failed to update office.");
+      alert(`Failed to ${currentOffice ? "update" : "create"} office.`);
     }
   };
 
   const handleDelete = async (id) => {
-    const response = await fetch(`/api/offices/${id}`, {
-      method: "DELETE",
-    });
-
+    const response = await fetch(`/api/offices/${id}`, { method: "DELETE" });
     if (response.ok) {
       alert("Office deleted successfully!");
       fetchOffices();
@@ -120,45 +79,14 @@ const Office = () => {
     }
   };
 
-  const handleAssignPrograms = async () => {
-    const response = await fetch(`/api/assign-programs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        officeId: currentOffice.id,
-        programIds: selectedPrograms,
-      }),
-    });
-
-    if (response.ok) {
-      alert("Programs assigned successfully!");
-      setIsModalOpen(false);
-      fetchOffices();
-    } else {
-      alert("Failed to assign programs.");
-    }
-  };
-
-  const handleProgramChange = (programId) => {
-    setSelectedPrograms((prevSelected) =>
-      prevSelected.includes(programId)
-        ? prevSelected.filter((id) => id !== programId)
-        : [...prevSelected, programId]
-    );
-  };
-
-  const openModal = (office) => {
+  const handleEdit = (office) => {
     setCurrentOffice(office);
-    setSelectedPrograms(
-      office.programs ? office.programs.map((program) => program.id) : []
+    setName(office.name);
+    setSelecteddepartments(
+      office.departments
+        ? office.departments.map((department) => department.id)
+        : []
     );
-    setIsModalOpen(true);
-  };
-
-  const handleAssignClick = (office) => {
-    setSelectedOfficeId(office.id);
     setCurrentStaff(
       office.staff && office.staff.length > 0 ? office.staff[0].user.id : null
     );
@@ -167,181 +95,226 @@ const Office = () => {
         ? office.signatory[0].user.id
         : null
     );
-    setIsAssignModalOpen(true);
+    setIsModalOpen(true);
+  };
+
+  const handleAssignPersonnel = async () => {
+    const response = await fetch(`/api/assign-personnel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        officeId: currentOffice.id,
+        staffId: currentStaff,
+        signatoryId: currentSignatory,
+      }),
+    });
+
+    if (response.ok) {
+      alert("Personnel assigned successfully!");
+      fetchOffices();
+    } else {
+      alert("Failed to assign personnel.");
+    }
+  };
+
+  const handleCancel = () => {
+    setName("");
+    setCurrentOffice(null);
+    setSelecteddepartments([]);
+    setCurrentStaff(null);
+    setCurrentSignatory(null);
+    setIsModalOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="flex justify-between">
-        <h2 className="text-2xl font-bold mb-4">Offices</h2>
-        <button
-          onClick={() => setIsFormModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
-        >
-          + Add Office
-        </button>
-      </div>
+    <div className="container mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-4">Offices</h2>
       {loading ? (
         <p>Loading...</p>
       ) : (
         <table className="min-w-full bg-white">
           <thead>
             <tr>
-              <th className="py-2 px-4 border-b">Office</th>
-              <th className="py-2 px-4 border-b">Departments</th>
-              <th className="py-2 px-4 border-b">Staff</th>
-              <th className="py-2 px-4 border-b">Signatories</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Office
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Departments
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Staff
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Signatories
+              </th>
+              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(offices) ? (
-              offices.map((office) => (
-                <tr key={office.id}>
-                  <td className="py-2 px-4 border-b text-center">
-                    {office.name}
-                  </td>
-                  <td className="py-2 px-4 border-b text-center">
-                    {office.programs?.map((program) => program.name).join(", ")}
-                  </td>
-                  <td className="py-2 px-4 border-b text-center">
-                    {office.staff
-                      ?.map(({ user }) => `${user.firstName} ${user.lastName}`)
-                      .join(", ")}
-                  </td>
-                  <td className="py-2 px-4 border-b text-center">
-                    {office.signatory
-                      ?.map(({ user }) => `${user.firstName} ${user.lastName}`)
-                      .join(", ")}
-                  </td>
-                  <td className="py-2 px-4 border-b text-center">
-                    <button
-                      onClick={() => handleEdit(office)}
-                      className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(office.id)}
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => openModal(office)}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Assign Programs
-                    </button>
-                    <button
-                      onClick={() => handleAssignClick(office)}
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Assign Personnel
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="py-2 px-4 border-b">
-                  No offices available.
+            {offices.map((office) => (
+              <tr key={office.id}>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                  {office.name}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                  {office.departments
+                    ?.map((department) => department.name)
+                    .join(", ")}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                  {office.staff
+                    ?.map(({ user }) =>
+                      user ? `${user.firstName} ${user.lastName}` : "No user"
+                    )
+                    .join(", ") || "No staff assigned"}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                  {office.signatory
+                    ?.map(({ user }) =>
+                      user ? `${user.firstName} ${user.lastName}` : "No user"
+                    )
+                    .join(", ") || "No signatories assigned"}
+                </td>
+                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                  <button
+                    onClick={() => handleEdit(office)}
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                    aria-label={`Edit ${office.name}`}
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(office.id)}
+                    className="text-red-600 hover:text-red-900"
+                    aria-label={`Delete ${office.name}`}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       )}
-
+      <button
+        onClick={() => {
+          setCurrentOffice(null);
+          setName("");
+          setSelecteddepartments([]);
+          setIsModalOpen(true);
+        }}
+        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        + Add Office
+      </button>
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-2xl font-bold mb-4">Assign Departments</h2>
-            <div className="mb-4">
-              {programs.map((program) => (
-                <div key={program.id} className="mb-2">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox"
-                      checked={selectedPrograms.includes(program.id)}
-                      onChange={() => handleProgramChange(program.id)}
-                    />
-                    <span className="ml-2">{program.name}</span>
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+          id="my-modal"
+        >
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                {currentOffice ? "Edit Office" : "Create New Office"}
+              </h3>
+              <form onSubmit={handleSubmit} className="mt-2 text-left">
+                <div className="mb-4">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Office Name
                   </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.toUpperCase())}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    required
+                  />
                 </div>
-              ))}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Assign Departments
+                  </h4>
+                  {departments.map((department) => (
+                    <div key={department.id} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={`department-${department.id}`}
+                        checked={selecteddepartments.includes(department.id)}
+                        onChange={(e) => {
+                          setSelecteddepartments((prev) =>
+                            e.target.checked
+                              ? [...prev, department.id]
+                              : prev.filter((id) => id !== department.id)
+                          );
+                        }}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor={`department-${department.id}`}
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        {department.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Assign Personnel
+                  </h4>
+                  <select
+                    value={currentStaff || ""}
+                    onChange={(e) =>
+                      setCurrentStaff(
+                        e.target.value ? parseInt(e.target.value) : null
+                      )
+                    }
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                  >
+                    <option value="">Select staff</option>
+                    {/* Add options for staff here */}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <select
+                    value={currentSignatory || ""}
+                    onChange={(e) =>
+                      setCurrentSignatory(
+                        e.target.value ? parseInt(e.target.value) : null
+                      )
+                    }
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                  >
+                    <option value="">Select signatory</option>
+                    {/* Add options for signatories here */}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    {currentOffice ? "Save Changes" : "Create Office"}
+                  </button>
+                </div>
+              </form>
             </div>
-            <button
-              onClick={handleAssignPrograms}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-            >
-              Assign
-            </button>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
-
-      {isFormModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-2xl font-bold mb-4">
-              {editingOffice ? "Update Office" : "Create Office"}
-            </h2>
-            <form
-              onSubmit={editingOffice ? handleUpdate : handleSubmit}
-              className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6"
-            >
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="name"
-                >
-                  Office Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase())}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                {editingOffice ? "Update Office" : "Create Office"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsFormModalOpen(false)}
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2"
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <AssignModal
-        isOpen={isAssignModalOpen}
-        onClose={() => setIsAssignModalOpen(false)}
-        officeOrDepartmentId={selectedOfficeId}
-        type="office"
-        currentStaff={currentStaff}
-        currentSignatory={currentSignatory}
-      />
     </div>
   );
-};
-
-export default Office;
+}

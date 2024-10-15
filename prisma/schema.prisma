@@ -142,11 +142,11 @@ model Signatory {
 }
 
 model Program {
-  id           String      @id @default(cuid())
-  name         String      @unique
-  description  String
-  students     Student[]
-  offices      Office[] // Many-to-many relation with Office
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String
+  students    Student[]
+
   department   Department? @relation(fields: [departmentId], references: [id])
   departmentId String?
 }
@@ -258,12 +258,14 @@ model Department {
   requirements  Requirement[] // Requirements related to the department
   ClearanceStep ClearanceStep[]
   students      Student[] // Track students belonging to the department
+
+  Office Office[]
 }
 
 model Office {
   id             String          @id @default(cuid())
   name           String          @unique
-  programs       Program[] // Many-to-many relation with Program
+  departments    Department[] // Many-to-many relation with Program
   staff          Staff[]
   signatory      Signatory[]
   requirements   Requirement[]

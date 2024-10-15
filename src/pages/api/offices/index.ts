@@ -8,7 +8,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const offices = await prisma.office.findMany({
         include: {
-          programs: true,
+          departments: true,
+
+          signatory: {
+            include: {
+              user: true,
+            },
+          },
+          staff: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
       console.log("Fetched offices:", offices);
