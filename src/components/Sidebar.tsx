@@ -5,15 +5,13 @@ import { Sidebar, useSidebar, Overlay, SidebarState } from "@rewind-ui/core";
 import Image from "next/image";
 import { Button } from "@rewind-ui/core";
 import {
-  LampDesk,
   LayoutDashboard,
-  UserRoundPlus,
-  Calendar,
   MessageCircleWarning,
   Settings,
-  Library,
-  UserRound,
-  FilePlus2,
+  Plus,
+  UserRoundCog,
+  NotebookPen,
+  Settings2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
@@ -131,65 +129,83 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 />
               </Sidebar.Nav.Section>
             </NavItem> */}
-            <NavItem icon={<FilePlus2 />} label="Clearance" as="button">
+            <NavItem icon={<Plus />} label="Register" as="button">
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Offices"
+                  label="Office"
                   href="/admin-offices"
                 />
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Departments"
+                  label="Department"
                   href="/admin-departments"
                 />
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Programs"
+                  label="Program"
                   href="/admin-programs"
                 />
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Generate Clearance"
-                  href="/admin-generate-clearance"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Generate Report"
-                  href="/admin-reports"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Archived"
-                  href="#"
+                  label="Personnel"
+                  href="/admin-personnel"
                 />
               </Sidebar.Nav.Section>
             </NavItem>
-            <NavItem icon={<Calendar />} label="Academic Year" as="button">
+            <NavItem icon={<Settings2 />} label="Assign" as="button">
+              <Sidebar.Nav.Section className="bg-inherit" isChild>
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Staff/Signatory"
+                  href="/admin-officers"
+                />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Department programs"
+                  href="/admin-departments"
+                />
+
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Dean"
+                  href="/admin-dean"
+                />
+              </Sidebar.Nav.Section>
+            </NavItem>
+            <NavItem icon={<NotebookPen />} label="Clearance" as="button">
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
                   label="Register Semester"
                   href="/admin-schoolyear"
                 />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Generate"
+                  href="/admin-generate-clearance"
+                />
               </Sidebar.Nav.Section>
             </NavItem>
-            <NavItem icon={<UserRoundPlus />} label="User" as="button">
+            <NavItem icon={<UserRoundCog />} label="Student" as="button">
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Personnel"
-                  href="/admin-personnel"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Student"
+                  label="Sync"
                   href="/admin-students"
                 />
+              </Sidebar.Nav.Section>
+            </NavItem>
+            <NavItem
+              icon={<MessageCircleWarning />}
+              label="Generate Report"
+              as="button"
+            >
+              <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Archived"
-                  href="#"
+                  label="Clearance"
+                  href="/admin-reports"
                 />
               </Sidebar.Nav.Section>
             </NavItem>

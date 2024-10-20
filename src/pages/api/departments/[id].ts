@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("Request body:", req.body);
 
   if (req.method === "PUT") {
-    const { name } = req.body;
+    const { name, description, programIds } = req.body;
 
     try {
       const departmentExists = await prisma.department.findUnique({
@@ -30,7 +30,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const department = await prisma.department.update({
         where: { id: departmentId },
-        data: { name },
+        data: {
+          name,
+          description,
+          programs: {
+            set: programIds.map((id) => ({ id })),
+          },
+        },
       });
       res.status(200).json(department);
     } catch (error) {

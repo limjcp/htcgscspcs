@@ -38,7 +38,7 @@ const OfficesDepartmentsPage = () => {
     departments: Department[];
   } | null>(null);
   const [selection, setSelection] = useState<"offices" | "departments" | "">(
-    ""
+    "offices"
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOfficeOrDepartmentId, setSelectedOfficeOrDepartmentId] =
@@ -110,7 +110,7 @@ const OfficesDepartmentsPage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Offices and Departments</h1>
 
-      <div className="mb-6">
+      <div className="mb-6 hidden">
         <label className="mr-4">Select:</label>
         <select
           value={selection}
@@ -118,8 +118,8 @@ const OfficesDepartmentsPage = () => {
             setSelection(e.target.value as "offices" | "departments" | "")
           }
           className="border border-gray-300 p-2 rounded"
+          disabled
         >
-          <option value="">Please select</option>
           <option value="offices">Offices</option>
           <option value="departments">Departments</option>
         </select>

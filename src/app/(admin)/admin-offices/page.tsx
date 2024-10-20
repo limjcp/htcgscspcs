@@ -3,20 +3,41 @@
 import React, { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
 
+interface Department {
+  id: string;
+  name: string;
+}
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface Office {
+  id: string;
+  name: string;
+  departments: Department[];
+  staff: { user: User }[];
+  signatory: { user: User }[];
+}
+
 export default function Office() {
-  const [offices, setOffices] = useState([]);
-  const [departments, setdepartments] = useState([]);
+  const [offices, setOffices] = useState<Office[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [personnel, setPersonnel] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentOffice, setCurrentOffice] = useState(null);
+  const [currentOffice, setCurrentOffice] = useState<Office | null>(null);
   const [name, setName] = useState("");
-  const [selecteddepartments, setSelecteddepartments] = useState([]);
-  const [currentStaff, setCurrentStaff] = useState(null);
-  const [currentSignatory, setCurrentSignatory] = useState(null);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+  const [currentStaff, setCurrentStaff] = useState<string | null>(null);
+  const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOffices();
-    fetchdepartments();
+    fetchDepartments();
+    fetchPersonnel();
   }, []);
 
   const fetchOffices = async () => {
@@ -33,14 +54,25 @@ export default function Office() {
     }
   };
 
-  const fetchdepartments = async () => {
+  const fetchDepartments = async () => {
     try {
       const response = await fetch("/api/departments");
       const data = await response.json();
-      setdepartments(Array.isArray(data) ? data : []);
+      setDepartments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch departments:", error);
-      setdepartments([]);
+      setDepartments([]);
+    }
+  };
+
+  const fetchPersonnel = async () => {
+    try {
+      const response = await fetch("/api/users?role=personnel");
+      const data = await response.json();
+      setPersonnel(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch personnel:", error);
+      setPersonnel([]);
     }
   };
 
@@ -54,22 +86,23 @@ export default function Office() {
     const response = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, departmentIds: selecteddepartments }),
+      body: JSON.stringify({ name, departmentIds: selectedDepartments }),
     });
 
     if (response.ok) {
       alert(`Office ${currentOffice ? "updated" : "created"} successfully!`);
       setName("");
       setCurrentOffice(null);
-      setSelecteddepartments([]);
+      setSelectedDepartments([]);
       fetchOffices();
       setIsModalOpen(false);
+      await handleAssignPersonnel(); // Call handleAssignPersonnel after office is created/updated
     } else {
       alert(`Failed to ${currentOffice ? "update" : "create"} office.`);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     const response = await fetch(`/api/offices/${id}`, { method: "DELETE" });
     if (response.ok) {
       alert("Office deleted successfully!");
@@ -79,10 +112,10 @@ export default function Office() {
     }
   };
 
-  const handleEdit = (office) => {
+  const handleEdit = (office: Office) => {
     setCurrentOffice(office);
     setName(office.name);
-    setSelecteddepartments(
+    setSelectedDepartments(
       office.departments
         ? office.departments.map((department) => department.id)
         : []
@@ -99,28 +132,88 @@ export default function Office() {
   };
 
   const handleAssignPersonnel = async () => {
-    const response = await fetch(`/api/assign-personnel`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        officeId: currentOffice.id,
-        staffId: currentStaff,
-        signatoryId: currentSignatory,
-      }),
-    });
+    const assignOrUpdate = async (type: string, userId: string) => {
+      const response = await fetch(`/api/${type}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          officeId: currentOffice?.id,
+        }),
+      });
 
-    if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`Failed to assign ${type}`);
+      }
+    };
+
+    try {
+      if (currentStaff) {
+        await assignOrUpdate("staff", currentStaff);
+      }
+      if (currentSignatory) {
+        await assignOrUpdate("signatories", currentSignatory);
+      }
       alert("Personnel assigned successfully!");
       fetchOffices();
-    } else {
-      alert("Failed to assign personnel.");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleResetPersonnel = async () => {
+    const removePersonnel = async (type: string, userId: string) => {
+      const response = await fetch(`/api/remove-personnel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          officeId: currentOffice?.id,
+          type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to remove ${type}`);
+      }
+    };
+
+    try {
+      if (currentStaff) {
+        await removePersonnel("staff", currentStaff);
+        setCurrentStaff(null);
+      }
+      if (currentSignatory) {
+        await removePersonnel("signatory", currentSignatory);
+        setCurrentSignatory(null);
+      }
+
+      // Update the current office state to remove the staff and signatory
+      if (currentOffice) {
+        const updatedOffice = {
+          ...currentOffice,
+          staff: [],
+          signatory: [],
+        };
+        setCurrentOffice(updatedOffice);
+        setOffices((prevOffices) =>
+          prevOffices.map((office) =>
+            office.id === currentOffice.id ? updatedOffice : office
+          )
+        );
+      }
+
+      alert("Personnel roles reset successfully!");
+      fetchOffices();
+    } catch (error) {
+      alert(error.message);
     }
   };
 
   const handleCancel = () => {
     setName("");
     setCurrentOffice(null);
-    setSelecteddepartments([]);
+    setSelectedDepartments([]);
     setCurrentStaff(null);
     setCurrentSignatory(null);
     setIsModalOpen(false);
@@ -202,7 +295,7 @@ export default function Office() {
         onClick={() => {
           setCurrentOffice(null);
           setName("");
-          setSelecteddepartments([]);
+          setSelectedDepartments([]);
           setIsModalOpen(true);
         }}
         className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -245,9 +338,9 @@ export default function Office() {
                       <input
                         type="checkbox"
                         id={`department-${department.id}`}
-                        checked={selecteddepartments.includes(department.id)}
+                        checked={selectedDepartments.includes(department.id)}
                         onChange={(e) => {
-                          setSelecteddepartments((prev) =>
+                          setSelectedDepartments((prev) =>
                             e.target.checked
                               ? [...prev, department.id]
                               : prev.filter((id) => id !== department.id)
@@ -271,14 +364,16 @@ export default function Office() {
                   <select
                     value={currentStaff || ""}
                     onChange={(e) =>
-                      setCurrentStaff(
-                        e.target.value ? parseInt(e.target.value) : null
-                      )
+                      setCurrentStaff(e.target.value ? e.target.value : null)
                     }
                     className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   >
                     <option value="">Select staff</option>
-                    {/* Add options for staff here */}
+                    {personnel.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.firstName} {p.lastName}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="mb-4">
@@ -286,13 +381,17 @@ export default function Office() {
                     value={currentSignatory || ""}
                     onChange={(e) =>
                       setCurrentSignatory(
-                        e.target.value ? parseInt(e.target.value) : null
+                        e.target.value ? e.target.value : null
                       )
                     }
                     className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                   >
                     <option value="">Select signatory</option>
-                    {/* Add options for signatories here */}
+                    {personnel.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.firstName} {p.lastName}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex items-center justify-between px-4 py-3">
@@ -308,6 +407,13 @@ export default function Office() {
                     className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
                     {currentOffice ? "Save Changes" : "Create Office"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetPersonnel}
+                    className="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+                  >
+                    Reset Personnel
                   </button>
                 </div>
               </form>

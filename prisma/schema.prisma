@@ -16,6 +16,7 @@ enum Role {
   staff
   personnel
   admin
+  dean
 }
 
 enum Gender {
@@ -116,29 +117,30 @@ model Student {
 }
 
 model Staff {
-  id           String      @id @default(cuid())
+  id           String  @id @default(cuid())
   firstName    String?
   middleName   String?
   lastName     String?
-  user         User        @relation(fields: [userId], references: [id])
-  userId       String      @unique
-  office       Office?     @relation(fields: [officeId], references: [id]) // Can belong to an office
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String  @unique
+  office       Office? @relation(fields: [officeId], references: [id]) // Can belong to an office
   officeId     String?
-  department   Department? @relation(fields: [departmentId], references: [id]) // Can belong to a department
   departmentId String?
 }
 
 model Signatory {
-  id           String      @id @default(cuid())
-  firstName    String?
-  middleName   String?
-  lastName     String?
-  user         User        @relation(fields: [userId], references: [id])
-  userId       String      @unique
-  office       Office?     @relation(fields: [officeId], references: [id]) // Can belong to an office
-  officeId     String?
-  department   Department? @relation(fields: [departmentId], references: [id]) // Can belong to a department
-  departmentId String?
+  id            String  @id @default(cuid())
+  firstName     String?
+  middleName    String?
+  lastName      String?
+  user          User    @relation(fields: [userId], references: [id])
+  userId        String  @unique
+  office        Office? @relation(fields: [officeId], references: [id]) // Can belong to an office
+  officeId      String?
+  departmentId  String?
+  isProgramHead Boolean @default(false) // Mark as Program Head for a department
+
+  Department Department[] @relation(name: "ProgramHead")
 }
 
 model Program {
@@ -249,17 +251,17 @@ model Report {
 }
 
 model Department {
-  id            String          @id @default(cuid())
-  name          String          @unique
-  description   String          @default("no description")
+  id            String        @id @default(cuid())
+  name          String        @unique
+  description   String        @default("no description")
   programs      Program[] // Relation to the Program model
-  staff         Staff[] // Staff related to the department
-  signatory     Signatory[] // Signatories related to the department
-  requirements  Requirement[] // Requirements related to the department
-  ClearanceStep ClearanceStep[]
+  programHead   Signatory?    @relation(name: "ProgramHead", fields: [programHeadid], references: [id]) // Assign one Program Head per department
+  programHeadid String?
+  requirements  Requirement[]
   students      Student[] // Track students belonging to the department
 
-  Office Office[]
+  Office        Office[]
+  ClearanceStep ClearanceStep[]
 }
 
 model Office {
@@ -270,4 +272,17 @@ model Office {
   signatory      Signatory[]
   requirements   Requirement[]
   clearanceSteps ClearanceStep[]
+
+  // New relation for dependencies
+  dependentOn  OfficeDependency[] @relation("Dependency") // Office dependencies
+  dependencies OfficeDependency[] @relation("Dependent")
+}
+
+model OfficeDependency {
+  id          String @id @default(cuid())
+  dependentId String
+  dependent   Office @relation("Dependency", fields: [dependentId], references: [id])
+
+  requiredId String
+  required   Office @relation("Dependent", fields: [requiredId], references: [id])
 }

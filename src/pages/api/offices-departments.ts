@@ -23,12 +23,7 @@ export default async function handler(
 
     const departments = await prisma.department.findMany({
       include: {
-        staff: {
-          include: {
-            user: true,
-          },
-        },
-        signatory: {
+        programHead: {
           include: {
             user: true,
           },

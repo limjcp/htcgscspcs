@@ -3,13 +3,12 @@ import React, { useState, useEffect } from "react";
 
 const DepartmentPage = () => {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [departments, setDepartments] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [selectedPrograms, setSelectedPrograms] = useState([]);
   const [editingDepartment, setEditingDepartment] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [currentDepartment, setCurrentDepartment] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchDepartments = async () => {
@@ -61,12 +60,14 @@ const DepartmentPage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, description, programIds: selectedPrograms }),
     });
 
     if (response.ok) {
       alert("Department created successfully!");
       setName("");
+      setDescription("");
+      setSelectedPrograms([]);
       fetchDepartments();
       setIsFormModalOpen(false);
     } else {
@@ -77,6 +78,12 @@ const DepartmentPage = () => {
   const handleEdit = (department) => {
     setEditingDepartment(department);
     setName(department.name);
+    setDescription(department.description);
+    setSelectedPrograms(
+      department.programs
+        ? department.programs.map((program) => program.id)
+        : []
+    );
     setIsFormModalOpen(true);
   };
 
@@ -87,12 +94,14 @@ const DepartmentPage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, description, programIds: selectedPrograms }),
     });
 
     if (response.ok) {
       alert("Department updated successfully!");
       setName("");
+      setDescription("");
+      setSelectedPrograms([]);
       setEditingDepartment(null);
       fetchDepartments();
       setIsFormModalOpen(false);
@@ -114,27 +123,6 @@ const DepartmentPage = () => {
     }
   };
 
-  const handleAssignPrograms = async () => {
-    const response = await fetch(`/api/assign-programs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        departmentId: currentDepartment.id,
-        programIds: selectedPrograms,
-      }),
-    });
-
-    if (response.ok) {
-      alert("Programs assigned successfully!");
-      setIsModalOpen(false);
-      fetchDepartments();
-    } else {
-      alert("Failed to assign programs.");
-    }
-  };
-
   const handleProgramChange = (programId) => {
     setSelectedPrograms((prevSelected) =>
       prevSelected.includes(programId)
@@ -143,14 +131,16 @@ const DepartmentPage = () => {
     );
   };
 
-  const openModal = (department) => {
-    setCurrentDepartment(department);
-    setSelectedPrograms(
-      department.programs
-        ? department.programs.map((program) => program.id)
-        : []
+  const getAvailablePrograms = () => {
+    const assignedProgramIds = departments
+      .flatMap((department) => department.programs)
+      .map((program) => program.id);
+
+    return programs.filter(
+      (program) =>
+        !assignedProgramIds.includes(program.id) ||
+        selectedPrograms.includes(program.id)
     );
-    setIsModalOpen(true);
   };
 
   return (
@@ -171,6 +161,7 @@ const DepartmentPage = () => {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b">Department</th>
+              <th className="py-2 px-4 border-b">Description</th>
               <th className="py-2 px-4 border-b">Programs</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
@@ -181,6 +172,9 @@ const DepartmentPage = () => {
                 <tr key={department.id}>
                   <td className="py-2 px-4 border-b text-center">
                     {department.name}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {department.description}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
                     {department.programs
@@ -200,78 +194,18 @@ const DepartmentPage = () => {
                     >
                       Delete
                     </button>
-                    <button
-                      onClick={() => openModal(department)}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Assign Programs
-                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="py-2 px-4 border-b">
+                <td colSpan="4" className="py-2 px-4 border-b">
                   No departments available.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      )}
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-            <h2 className="text-2xl font-bold mb-4">Assign Programs</h2>
-            <div className="mb-4">
-              <label className="inline-flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  checked={selectedPrograms.length === programs.length}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedPrograms(
-                        programs.map((program) => program.id)
-                      );
-                    } else {
-                      setSelectedPrograms([]);
-                    }
-                  }}
-                />
-                <span className="ml-2">Check All</span>
-              </label>
-              <div className="grid grid-cols-4 gap-4">
-                {programs.map((program) => (
-                  <div key={program.id} className="mb-2">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="checkbox"
-                        className="form-checkbox"
-                        checked={selectedPrograms.includes(program.id)}
-                        onChange={() => handleProgramChange(program.id)}
-                      />
-                      <span className="ml-2">{program.name}</span>
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={handleAssignPrograms}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-            >
-              Assign
-            </button>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
       )}
 
       {isFormModalOpen && (
@@ -299,6 +233,45 @@ const DepartmentPage = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
+              </div>
+              <div className="mb-4">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="description"
+                >
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  Assign Programs
+                </h4>
+                <div className="grid grid-cols-4 gap-4">
+                  {getAvailablePrograms().map((program) => (
+                    <div key={program.id} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={`program-${program.id}`}
+                        checked={selectedPrograms.includes(program.id)}
+                        onChange={() => handleProgramChange(program.id)}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor={`program-${program.id}`}
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        {program.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
               <button
                 type="submit"

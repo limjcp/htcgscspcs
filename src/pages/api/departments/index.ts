@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("Request method:", req.method);
   console.log("Request body:", req.body);
@@ -9,21 +10,45 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const departments = await prisma.department.findMany({
         include: {
           programs: true,
+          programHead: {
+            select: {
+              user: {
+                select: {
+                  id: true, // Include the dean's ID
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
         },
       });
-      console.log("Fetched departments:", departments);
-      res.status(200).json(departments);
+
+      const formattedDepartments = departments.map((department) => ({
+        ...department,
+        dean: department.programHead
+          ? `${department.programHead.user.firstName} ${department.programHead.user.lastName}`
+          : null,
+        deanId: department.programHead ? department.programHead.user.id : null, // Set the deanId
+      }));
+
+      console.log("Fetched departments:", formattedDepartments);
+      res.status(200).json(formattedDepartments);
     } catch (error) {
       console.error("Error fetching departments:", error);
       res.status(500).json({ error: "Failed to fetch departments" });
     }
   } else if (req.method === "POST") {
-    const { name } = req.body;
+    const { name, description, programIds } = req.body;
 
     try {
       const department = await prisma.department.create({
         data: {
           name,
+          description,
+          programs: {
+            connect: programIds.map((id) => ({ id })),
+          },
         },
       });
       console.log("Created department:", department);
