@@ -171,6 +171,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   label="Dean"
                   href="/admin-dean"
                 />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Office Dependency"
+                  href="/admin-dependency"
+                />
               </Sidebar.Nav.Section>
             </NavItem>
             <NavItem icon={<NotebookPen />} label="Clearance" as="button">

@@ -8,6 +8,7 @@ export default function Page() {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
+  const [isDeanAssigned, setIsDeanAssigned] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
@@ -34,6 +35,7 @@ export default function Page() {
 
   const showModal = (department) => {
     setSelectedDepartment(department);
+    setIsDeanAssigned(department.deanId ? true : false);
     setIsModalVisible(true);
   };
 
@@ -130,6 +132,7 @@ export default function Page() {
                 <button
                   onClick={() => showModal(department)}
                   className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+                  disabled={department.deanId ? true : false}
                 >
                   Assign Dean
                 </button>

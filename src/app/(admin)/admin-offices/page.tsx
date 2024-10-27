@@ -97,6 +97,7 @@ export default function Office() {
       fetchOffices();
       setIsModalOpen(false);
       await handleAssignPersonnel(); // Call handleAssignPersonnel after office is created/updated
+      await handleSaveOffice(); // Call handleSaveOffice after office is created/updated
     } else {
       alert(`Failed to ${currentOffice ? "update" : "create"} office.`);
     }
@@ -133,12 +134,14 @@ export default function Office() {
 
   const handleAssignPersonnel = async () => {
     const assignOrUpdate = async (type: string, userId: string) => {
-      const response = await fetch(`/api/${type}`, {
+      const response = await fetch(`/api/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          officeId: currentOffice?.id,
+          officeOrDepartmentId: currentOffice?.id,
+          type: "office",
+          role: type,
         }),
       });
 
@@ -152,10 +155,72 @@ export default function Office() {
         await assignOrUpdate("staff", currentStaff);
       }
       if (currentSignatory) {
-        await assignOrUpdate("signatories", currentSignatory);
+        await assignOrUpdate("signatory", currentSignatory);
       }
       alert("Personnel assigned successfully!");
       fetchOffices();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleAssignDepartment = async () => {
+    const assignOrUpdate = async (type: string, userId: string) => {
+      const response = await fetch(`/api/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          officeOrDepartmentId: currentDepartment?.id,
+          type: "department",
+          role: type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to assign ${type}`);
+      }
+    };
+
+    try {
+      if (currentStaff) {
+        await assignOrUpdate("staff", currentStaff);
+      }
+      if (currentSignatory) {
+        await assignOrUpdate("signatory", currentSignatory);
+      }
+      alert("Personnel assigned successfully!");
+      fetchDepartments();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleSaveOffice = async () => {
+    const assignDepartments = async (
+      officeId: string,
+      departmentIds: string[]
+    ) => {
+      const response = await fetch(`/api/assign-departments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          officeId,
+          departmentIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to assign departments");
+      }
+    };
+
+    try {
+      if (currentOffice) {
+        await assignDepartments(currentOffice.id, selectedDepartments);
+        alert("Departments assigned successfully!");
+        fetchOffices();
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -168,8 +233,8 @@ export default function Office() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          officeId: currentOffice?.id,
-          type,
+          officeOrDepartmentId: currentOffice?.id,
+          type: "office",
         }),
       });
 
