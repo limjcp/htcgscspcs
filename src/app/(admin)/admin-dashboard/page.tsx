@@ -1,33 +1,48 @@
 "use client";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-import React, { useState, useEffect } from "react";
-
-const AdminDashboard = () => {
-  const [selectedSemester, setSelectedSemester] = useState("Fall 2023");
+const Page = () => {
+  const [semesters, setSemesters] = useState([]);
+  const [selectedSemester, setSelectedSemester] = useState("");
   const [counts, setCounts] = useState({
     totalStudents: 0,
     clearedStudents: 0,
     notClearedStudents: 0,
-    totalRequirements: 0,
-    completedRequirements: 0,
-    pendingRequirements: 0,
-    totalClearances: 0,
-    approvedClearances: 0,
-    pendingClearances: 0,
-    rejectedClearances: 0,
+    requirements: [],
   });
 
   useEffect(() => {
-    const getCounts = async () => {
-      // In a real application, you would pass the selectedSemester to your API
-      const response = await fetch(
-        `/api/userCounts?semester=${selectedSemester}`
-      );
-      const data = await response.json();
-      setCounts(data);
+    const fetchSemesters = async () => {
+      try {
+        const response = await axios.get("/api/semesters");
+        setSemesters(response.data);
+        if (response.data.length > 0) {
+          setSelectedSemester(response.data[0].id); // Set the first semester as default
+        }
+      } catch (error) {
+        console.error("Failed to fetch semesters", error);
+      }
     };
 
-    getCounts();
+    fetchSemesters();
+  }, []);
+
+  useEffect(() => {
+    const getCounts = async () => {
+      try {
+        const response = await axios.get(
+          `/api/counts?semesterId=${selectedSemester}`
+        );
+        setCounts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch counts", error);
+      }
+    };
+
+    if (selectedSemester) {
+      getCounts();
+    }
   }, [selectedSemester]);
 
   const handleSemesterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,9 +50,9 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-100">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
+    <div className="min-h-screen p-4 md:p-6 bg-gray-100">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">
           Student Clearance System Dashboard
         </h1>
         <div className="flex items-center">
@@ -50,72 +65,22 @@ const AdminDashboard = () => {
             onChange={handleSemesterChange}
             className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="Fall 2023">Fall 2023</option>
-            <option value="Spring 2024">Spring 2024</option>
-            <option value="Fall 2024">Fall 2024</option>
+            {semesters.map((semester) => (
+              <option key={semester.id} value={semester.id}>
+                {semester.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2 text-gray-700">
-            Total Students
-          </h2>
-          <p className="text-3xl font-bold text-blue-600">
-            {counts.totalStudents}
-          </p>
-          <p className="text-sm text-gray-500">Enrolled this semester</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2 text-gray-700">
-            Cleared Students
-          </h2>
-          <p className="text-3xl font-bold text-green-600">
-            {counts.clearedStudents}
-          </p>
-          <p className="text-sm text-gray-500">
-            {counts.totalStudents > 0
-              ? `${(
-                  (counts.clearedStudents / counts.totalStudents) *
-                  100
-                ).toFixed(1)}% of total students`
-              : "No students enrolled"}
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2 text-gray-700">
-            Total Requirements
-          </h2>
-          <p className="text-3xl font-bold text-purple-600">
-            {counts.totalRequirements}
-          </p>
-          <p className="text-sm text-gray-500">Across all departments</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2 text-gray-700">
-            Pending Clearances
-          </h2>
-          <p className="text-3xl font-bold text-yellow-600">
-            {counts.pendingClearances}
-          </p>
-          <p className="text-sm text-gray-500">
-            {counts.totalClearances > 0
-              ? `${(
-                  (counts.pendingClearances / counts.totalClearances) *
-                  100
-                ).toFixed(1)}% of total clearances`
-              : "No clearances initiated"}
-          </p>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+          <h2 className="text-lg md:text-xl font-bold mb-4">
             Clearance Status
           </h2>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between">
             <div>
-              <p className="text-lg font-semibold text-green-600">
+              <p className="text-md md:text-lg font-semibold text-green-600">
                 Cleared: {counts.clearedStudents}
               </p>
               <p className="text-sm text-gray-500">
@@ -128,7 +93,7 @@ const AdminDashboard = () => {
               </p>
             </div>
             <div>
-              <p className="text-lg font-semibold text-red-600">
+              <p className="text-md md:text-lg font-semibold text-red-600">
                 Not Cleared: {counts.notClearedStudents}
               </p>
               <p className="text-sm text-gray-500">
@@ -142,43 +107,40 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            Requirements Status
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
+          <h2 className="text-lg md:text-xl font-bold mb-4">
+            Requirements by Office/Department
           </h2>
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-lg font-semibold text-blue-600">
-                Completed: {counts.completedRequirements}
-              </p>
-              <p className="text-sm text-gray-500">
-                {counts.totalRequirements > 0
-                  ? `${(
-                      (counts.completedRequirements /
-                        counts.totalRequirements) *
-                      100
-                    ).toFixed(1)}%`
-                  : "N/A"}
-              </p>
+          {counts.requirements.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {counts.requirements.map((requirement) => (
+                <div
+                  key={requirement.id}
+                  className="bg-gray-50 p-4 rounded-lg shadow-sm"
+                >
+                  <h3 className="text-md md:text-lg font-semibold text-gray-800">
+                    {requirement.office
+                      ? requirement.office.name
+                      : requirement.department
+                      ? requirement.department.name
+                      : "No Office/Department"}
+                  </h3>
+                  <p className="text-sm text-gray-600">{requirement.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {requirement.description}
+                  </p>
+                </div>
+              ))}
             </div>
-            <div>
-              <p className="text-lg font-semibold text-orange-600">
-                Pending: {counts.pendingRequirements}
-              </p>
-              <p className="text-sm text-gray-500">
-                {counts.totalRequirements > 0
-                  ? `${(
-                      (counts.pendingRequirements / counts.totalRequirements) *
-                      100
-                    ).toFixed(1)}%`
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              No requirements found for the selected semester.
+            </p>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default AdminDashboard;
+export default Page;
