@@ -18,6 +18,16 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  * 
  */
 export type Student = $Result.DefaultSelection<Prisma.$StudentPayload>
+/**
+ * Model SchoolYear
+ * 
+ */
+export type SchoolYear = $Result.DefaultSelection<Prisma.$SchoolYearPayload>
+/**
+ * Model Semester
+ * 
+ */
+export type Semester = $Result.DefaultSelection<Prisma.$SemesterPayload>
 
 /**
  * Enums
@@ -40,16 +50,6 @@ export const StudentStatus: {
 
 export type StudentStatus = (typeof StudentStatus)[keyof typeof StudentStatus]
 
-
-export const yearLevel: {
-  FIRST: 'FIRST',
-  SECOND: 'SECOND',
-  THIRD: 'THIRD',
-  FOURTH: 'FOURTH'
-};
-
-export type yearLevel = (typeof yearLevel)[keyof typeof yearLevel]
-
 }
 
 export type Gender = $Enums.Gender
@@ -59,10 +59,6 @@ export const Gender: typeof $Enums.Gender
 export type StudentStatus = $Enums.StudentStatus
 
 export const StudentStatus: typeof $Enums.StudentStatus
-
-export type yearLevel = $Enums.yearLevel
-
-export const yearLevel: typeof $Enums.yearLevel
 
 /**
  * ##  Prisma Client ʲˢ
@@ -196,6 +192,26 @@ export class PrismaClient<
     * ```
     */
   get student(): Prisma.StudentDelegate<ExtArgs>;
+
+  /**
+   * `prisma.schoolYear`: Exposes CRUD operations for the **SchoolYear** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SchoolYears
+    * const schoolYears = await prisma.schoolYear.findMany()
+    * ```
+    */
+  get schoolYear(): Prisma.SchoolYearDelegate<ExtArgs>;
+
+  /**
+   * `prisma.semester`: Exposes CRUD operations for the **Semester** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Semesters
+    * const semesters = await prisma.semester.findMany()
+    * ```
+    */
+  get semester(): Prisma.SemesterDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -255,8 +271,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 5.20.0
-   * Query Engine version: 06fc58a368dc7be9fbbbe894adf8d445d208c284
+   * Prisma Client JS version: 5.21.1
+   * Query Engine version: bf0e5e8a04cada8225617067eaa03d041e2bba36
    */
   export type PrismaVersion = {
     client: string
@@ -637,7 +653,9 @@ export namespace Prisma {
 
 
   export const ModelName: {
-    Student: 'Student'
+    Student: 'Student',
+    SchoolYear: 'SchoolYear',
+    Semester: 'Semester'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -653,7 +671,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "student"
+      modelProps: "student" | "schoolYear" | "semester"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -720,6 +738,138 @@ export namespace Prisma {
           count: {
             args: Prisma.StudentCountArgs<ExtArgs>
             result: $Utils.Optional<StudentCountAggregateOutputType> | number
+          }
+        }
+      }
+      SchoolYear: {
+        payload: Prisma.$SchoolYearPayload<ExtArgs>
+        fields: Prisma.SchoolYearFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SchoolYearFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SchoolYearFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          findFirst: {
+            args: Prisma.SchoolYearFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SchoolYearFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          findMany: {
+            args: Prisma.SchoolYearFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>[]
+          }
+          create: {
+            args: Prisma.SchoolYearCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          createMany: {
+            args: Prisma.SchoolYearCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.SchoolYearDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          update: {
+            args: Prisma.SchoolYearUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          deleteMany: {
+            args: Prisma.SchoolYearDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SchoolYearUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SchoolYearUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SchoolYearPayload>
+          }
+          aggregate: {
+            args: Prisma.SchoolYearAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSchoolYear>
+          }
+          groupBy: {
+            args: Prisma.SchoolYearGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SchoolYearGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SchoolYearCountArgs<ExtArgs>
+            result: $Utils.Optional<SchoolYearCountAggregateOutputType> | number
+          }
+        }
+      }
+      Semester: {
+        payload: Prisma.$SemesterPayload<ExtArgs>
+        fields: Prisma.SemesterFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SemesterFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SemesterFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          findFirst: {
+            args: Prisma.SemesterFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SemesterFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          findMany: {
+            args: Prisma.SemesterFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>[]
+          }
+          create: {
+            args: Prisma.SemesterCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          createMany: {
+            args: Prisma.SemesterCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.SemesterDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          update: {
+            args: Prisma.SemesterUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          deleteMany: {
+            args: Prisma.SemesterDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SemesterUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.SemesterUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SemesterPayload>
+          }
+          aggregate: {
+            args: Prisma.SemesterAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSemester>
+          }
+          groupBy: {
+            args: Prisma.SemesterGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SemesterGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SemesterCountArgs<ExtArgs>
+            result: $Utils.Optional<SemesterCountAggregateOutputType> | number
           }
         }
       }
@@ -879,6 +1029,45 @@ export namespace Prisma {
    */
 
 
+  /**
+   * Count Type SchoolYearCountOutputType
+   */
+
+  export type SchoolYearCountOutputType = {
+    Semester: number
+    Student: number
+  }
+
+  export type SchoolYearCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Semester?: boolean | SchoolYearCountOutputTypeCountSemesterArgs
+    Student?: boolean | SchoolYearCountOutputTypeCountStudentArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SchoolYearCountOutputType without action
+   */
+  export type SchoolYearCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYearCountOutputType
+     */
+    select?: SchoolYearCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SchoolYearCountOutputType without action
+   */
+  export type SchoolYearCountOutputTypeCountSemesterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SemesterWhereInput
+  }
+
+  /**
+   * SchoolYearCountOutputType without action
+   */
+  export type SchoolYearCountOutputTypeCountStudentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StudentWhereInput
+  }
+
 
   /**
    * Models
@@ -890,18 +1079,8 @@ export namespace Prisma {
 
   export type AggregateStudent = {
     _count: StudentCountAggregateOutputType | null
-    _avg: StudentAvgAggregateOutputType | null
-    _sum: StudentSumAggregateOutputType | null
     _min: StudentMinAggregateOutputType | null
     _max: StudentMaxAggregateOutputType | null
-  }
-
-  export type StudentAvgAggregateOutputType = {
-    enrollmentYear: number | null
-  }
-
-  export type StudentSumAggregateOutputType = {
-    enrollmentYear: number | null
   }
 
   export type StudentMinAggregateOutputType = {
@@ -915,10 +1094,9 @@ export namespace Prisma {
     address: string | null
     dateOfBirth: Date | null
     gender: $Enums.Gender | null
-    enrollmentYear: number | null
+    enrollmentYearId: string | null
     status: $Enums.StudentStatus | null
     program: string | null
-    yearLevel: $Enums.yearLevel | null
   }
 
   export type StudentMaxAggregateOutputType = {
@@ -932,10 +1110,9 @@ export namespace Prisma {
     address: string | null
     dateOfBirth: Date | null
     gender: $Enums.Gender | null
-    enrollmentYear: number | null
+    enrollmentYearId: string | null
     status: $Enums.StudentStatus | null
     program: string | null
-    yearLevel: $Enums.yearLevel | null
   }
 
   export type StudentCountAggregateOutputType = {
@@ -949,21 +1126,12 @@ export namespace Prisma {
     address: number
     dateOfBirth: number
     gender: number
-    enrollmentYear: number
+    enrollmentYearId: number
     status: number
     program: number
-    yearLevel: number
     _all: number
   }
 
-
-  export type StudentAvgAggregateInputType = {
-    enrollmentYear?: true
-  }
-
-  export type StudentSumAggregateInputType = {
-    enrollmentYear?: true
-  }
 
   export type StudentMinAggregateInputType = {
     id?: true
@@ -976,10 +1144,9 @@ export namespace Prisma {
     address?: true
     dateOfBirth?: true
     gender?: true
-    enrollmentYear?: true
+    enrollmentYearId?: true
     status?: true
     program?: true
-    yearLevel?: true
   }
 
   export type StudentMaxAggregateInputType = {
@@ -993,10 +1160,9 @@ export namespace Prisma {
     address?: true
     dateOfBirth?: true
     gender?: true
-    enrollmentYear?: true
+    enrollmentYearId?: true
     status?: true
     program?: true
-    yearLevel?: true
   }
 
   export type StudentCountAggregateInputType = {
@@ -1010,10 +1176,9 @@ export namespace Prisma {
     address?: true
     dateOfBirth?: true
     gender?: true
-    enrollmentYear?: true
+    enrollmentYearId?: true
     status?: true
     program?: true
-    yearLevel?: true
     _all?: true
   }
 
@@ -1055,18 +1220,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: StudentAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: StudentSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: StudentMinAggregateInputType
@@ -1097,8 +1250,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: StudentCountAggregateInputType | true
-    _avg?: StudentAvgAggregateInputType
-    _sum?: StudentSumAggregateInputType
     _min?: StudentMinAggregateInputType
     _max?: StudentMaxAggregateInputType
   }
@@ -1114,13 +1265,10 @@ export namespace Prisma {
     address: string | null
     dateOfBirth: Date | null
     gender: $Enums.Gender
-    enrollmentYear: number
+    enrollmentYearId: string
     status: $Enums.StudentStatus
     program: string
-    yearLevel: $Enums.yearLevel
     _count: StudentCountAggregateOutputType | null
-    _avg: StudentAvgAggregateOutputType | null
-    _sum: StudentSumAggregateOutputType | null
     _min: StudentMinAggregateOutputType | null
     _max: StudentMaxAggregateOutputType | null
   }
@@ -1150,10 +1298,10 @@ export namespace Prisma {
     address?: boolean
     dateOfBirth?: boolean
     gender?: boolean
-    enrollmentYear?: boolean
+    enrollmentYearId?: boolean
     status?: boolean
     program?: boolean
-    yearLevel?: boolean
+    enrollmentYear?: boolean | SchoolYearDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["student"]>
 
 
@@ -1168,16 +1316,20 @@ export namespace Prisma {
     address?: boolean
     dateOfBirth?: boolean
     gender?: boolean
-    enrollmentYear?: boolean
+    enrollmentYearId?: boolean
     status?: boolean
     program?: boolean
-    yearLevel?: boolean
   }
 
+  export type StudentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    enrollmentYear?: boolean | SchoolYearDefaultArgs<ExtArgs>
+  }
 
   export type $StudentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Student"
-    objects: {}
+    objects: {
+      enrollmentYear: Prisma.$SchoolYearPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       studentId: string
@@ -1189,10 +1341,9 @@ export namespace Prisma {
       address: string | null
       dateOfBirth: Date | null
       gender: $Enums.Gender
-      enrollmentYear: number
+      enrollmentYearId: string
       status: $Enums.StudentStatus
       program: string
-      yearLevel: $Enums.yearLevel
     }, ExtArgs["result"]["student"]>
     composites: {}
   }
@@ -1533,6 +1684,7 @@ export namespace Prisma {
    */
   export interface Prisma__StudentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    enrollmentYear<T extends SchoolYearDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SchoolYearDefaultArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1572,10 +1724,9 @@ export namespace Prisma {
     readonly address: FieldRef<"Student", 'String'>
     readonly dateOfBirth: FieldRef<"Student", 'DateTime'>
     readonly gender: FieldRef<"Student", 'Gender'>
-    readonly enrollmentYear: FieldRef<"Student", 'Int'>
+    readonly enrollmentYearId: FieldRef<"Student", 'String'>
     readonly status: FieldRef<"Student", 'StudentStatus'>
     readonly program: FieldRef<"Student", 'String'>
-    readonly yearLevel: FieldRef<"Student", 'yearLevel'>
   }
     
 
@@ -1588,6 +1739,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Student
      */
     select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
     /**
      * Filter, which Student to fetch.
      */
@@ -1603,6 +1758,10 @@ export namespace Prisma {
      */
     select?: StudentSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    /**
      * Filter, which Student to fetch.
      */
     where: StudentWhereUniqueInput
@@ -1616,6 +1775,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Student
      */
     select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
     /**
      * Filter, which Student to fetch.
      */
@@ -1661,6 +1824,10 @@ export namespace Prisma {
      */
     select?: StudentSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    /**
      * Filter, which Student to fetch.
      */
     where?: StudentWhereInput
@@ -1705,6 +1872,10 @@ export namespace Prisma {
      */
     select?: StudentSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    /**
      * Filter, which Students to fetch.
      */
     where?: StudentWhereInput
@@ -1744,6 +1915,10 @@ export namespace Prisma {
      */
     select?: StudentSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    /**
      * The data needed to create a Student.
      */
     data: XOR<StudentCreateInput, StudentUncheckedCreateInput>
@@ -1768,6 +1943,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Student
      */
     select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
     /**
      * The data needed to update a Student.
      */
@@ -1801,6 +1980,10 @@ export namespace Prisma {
      */
     select?: StudentSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    /**
      * The filter to search for the Student to update in case it exists.
      */
     where: StudentWhereUniqueInput
@@ -1822,6 +2005,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Student
      */
     select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
     /**
      * Filter which Student to delete.
      */
@@ -1846,6 +2033,1803 @@ export namespace Prisma {
      * Select specific fields to fetch from the Student
      */
     select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SchoolYear
+   */
+
+  export type AggregateSchoolYear = {
+    _count: SchoolYearCountAggregateOutputType | null
+    _min: SchoolYearMinAggregateOutputType | null
+    _max: SchoolYearMaxAggregateOutputType | null
+  }
+
+  export type SchoolYearMinAggregateOutputType = {
+    id: string | null
+    year: string | null
+    startDate: Date | null
+    endDate: Date | null
+  }
+
+  export type SchoolYearMaxAggregateOutputType = {
+    id: string | null
+    year: string | null
+    startDate: Date | null
+    endDate: Date | null
+  }
+
+  export type SchoolYearCountAggregateOutputType = {
+    id: number
+    year: number
+    startDate: number
+    endDate: number
+    _all: number
+  }
+
+
+  export type SchoolYearMinAggregateInputType = {
+    id?: true
+    year?: true
+    startDate?: true
+    endDate?: true
+  }
+
+  export type SchoolYearMaxAggregateInputType = {
+    id?: true
+    year?: true
+    startDate?: true
+    endDate?: true
+  }
+
+  export type SchoolYearCountAggregateInputType = {
+    id?: true
+    year?: true
+    startDate?: true
+    endDate?: true
+    _all?: true
+  }
+
+  export type SchoolYearAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SchoolYear to aggregate.
+     */
+    where?: SchoolYearWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SchoolYears to fetch.
+     */
+    orderBy?: SchoolYearOrderByWithRelationInput | SchoolYearOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SchoolYearWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SchoolYears from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SchoolYears.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SchoolYears
+    **/
+    _count?: true | SchoolYearCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SchoolYearMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SchoolYearMaxAggregateInputType
+  }
+
+  export type GetSchoolYearAggregateType<T extends SchoolYearAggregateArgs> = {
+        [P in keyof T & keyof AggregateSchoolYear]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSchoolYear[P]>
+      : GetScalarType<T[P], AggregateSchoolYear[P]>
+  }
+
+
+
+
+  export type SchoolYearGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SchoolYearWhereInput
+    orderBy?: SchoolYearOrderByWithAggregationInput | SchoolYearOrderByWithAggregationInput[]
+    by: SchoolYearScalarFieldEnum[] | SchoolYearScalarFieldEnum
+    having?: SchoolYearScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SchoolYearCountAggregateInputType | true
+    _min?: SchoolYearMinAggregateInputType
+    _max?: SchoolYearMaxAggregateInputType
+  }
+
+  export type SchoolYearGroupByOutputType = {
+    id: string
+    year: string
+    startDate: Date | null
+    endDate: Date | null
+    _count: SchoolYearCountAggregateOutputType | null
+    _min: SchoolYearMinAggregateOutputType | null
+    _max: SchoolYearMaxAggregateOutputType | null
+  }
+
+  type GetSchoolYearGroupByPayload<T extends SchoolYearGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SchoolYearGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SchoolYearGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SchoolYearGroupByOutputType[P]>
+            : GetScalarType<T[P], SchoolYearGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SchoolYearSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    year?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    Semester?: boolean | SchoolYear$SemesterArgs<ExtArgs>
+    Student?: boolean | SchoolYear$StudentArgs<ExtArgs>
+    _count?: boolean | SchoolYearCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["schoolYear"]>
+
+
+  export type SchoolYearSelectScalar = {
+    id?: boolean
+    year?: boolean
+    startDate?: boolean
+    endDate?: boolean
+  }
+
+  export type SchoolYearInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Semester?: boolean | SchoolYear$SemesterArgs<ExtArgs>
+    Student?: boolean | SchoolYear$StudentArgs<ExtArgs>
+    _count?: boolean | SchoolYearCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $SchoolYearPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SchoolYear"
+    objects: {
+      Semester: Prisma.$SemesterPayload<ExtArgs>[]
+      Student: Prisma.$StudentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      year: string
+      startDate: Date | null
+      endDate: Date | null
+    }, ExtArgs["result"]["schoolYear"]>
+    composites: {}
+  }
+
+  type SchoolYearGetPayload<S extends boolean | null | undefined | SchoolYearDefaultArgs> = $Result.GetResult<Prisma.$SchoolYearPayload, S>
+
+  type SchoolYearCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<SchoolYearFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: SchoolYearCountAggregateInputType | true
+    }
+
+  export interface SchoolYearDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SchoolYear'], meta: { name: 'SchoolYear' } }
+    /**
+     * Find zero or one SchoolYear that matches the filter.
+     * @param {SchoolYearFindUniqueArgs} args - Arguments to find a SchoolYear
+     * @example
+     * // Get one SchoolYear
+     * const schoolYear = await prisma.schoolYear.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SchoolYearFindUniqueArgs>(args: SelectSubset<T, SchoolYearFindUniqueArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one SchoolYear that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {SchoolYearFindUniqueOrThrowArgs} args - Arguments to find a SchoolYear
+     * @example
+     * // Get one SchoolYear
+     * const schoolYear = await prisma.schoolYear.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SchoolYearFindUniqueOrThrowArgs>(args: SelectSubset<T, SchoolYearFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first SchoolYear that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearFindFirstArgs} args - Arguments to find a SchoolYear
+     * @example
+     * // Get one SchoolYear
+     * const schoolYear = await prisma.schoolYear.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SchoolYearFindFirstArgs>(args?: SelectSubset<T, SchoolYearFindFirstArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first SchoolYear that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearFindFirstOrThrowArgs} args - Arguments to find a SchoolYear
+     * @example
+     * // Get one SchoolYear
+     * const schoolYear = await prisma.schoolYear.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SchoolYearFindFirstOrThrowArgs>(args?: SelectSubset<T, SchoolYearFindFirstOrThrowArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more SchoolYears that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SchoolYears
+     * const schoolYears = await prisma.schoolYear.findMany()
+     * 
+     * // Get first 10 SchoolYears
+     * const schoolYears = await prisma.schoolYear.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const schoolYearWithIdOnly = await prisma.schoolYear.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SchoolYearFindManyArgs>(args?: SelectSubset<T, SchoolYearFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a SchoolYear.
+     * @param {SchoolYearCreateArgs} args - Arguments to create a SchoolYear.
+     * @example
+     * // Create one SchoolYear
+     * const SchoolYear = await prisma.schoolYear.create({
+     *   data: {
+     *     // ... data to create a SchoolYear
+     *   }
+     * })
+     * 
+     */
+    create<T extends SchoolYearCreateArgs>(args: SelectSubset<T, SchoolYearCreateArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many SchoolYears.
+     * @param {SchoolYearCreateManyArgs} args - Arguments to create many SchoolYears.
+     * @example
+     * // Create many SchoolYears
+     * const schoolYear = await prisma.schoolYear.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SchoolYearCreateManyArgs>(args?: SelectSubset<T, SchoolYearCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a SchoolYear.
+     * @param {SchoolYearDeleteArgs} args - Arguments to delete one SchoolYear.
+     * @example
+     * // Delete one SchoolYear
+     * const SchoolYear = await prisma.schoolYear.delete({
+     *   where: {
+     *     // ... filter to delete one SchoolYear
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SchoolYearDeleteArgs>(args: SelectSubset<T, SchoolYearDeleteArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one SchoolYear.
+     * @param {SchoolYearUpdateArgs} args - Arguments to update one SchoolYear.
+     * @example
+     * // Update one SchoolYear
+     * const schoolYear = await prisma.schoolYear.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SchoolYearUpdateArgs>(args: SelectSubset<T, SchoolYearUpdateArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more SchoolYears.
+     * @param {SchoolYearDeleteManyArgs} args - Arguments to filter SchoolYears to delete.
+     * @example
+     * // Delete a few SchoolYears
+     * const { count } = await prisma.schoolYear.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SchoolYearDeleteManyArgs>(args?: SelectSubset<T, SchoolYearDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SchoolYears.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SchoolYears
+     * const schoolYear = await prisma.schoolYear.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SchoolYearUpdateManyArgs>(args: SelectSubset<T, SchoolYearUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one SchoolYear.
+     * @param {SchoolYearUpsertArgs} args - Arguments to update or create a SchoolYear.
+     * @example
+     * // Update or create a SchoolYear
+     * const schoolYear = await prisma.schoolYear.upsert({
+     *   create: {
+     *     // ... data to create a SchoolYear
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SchoolYear we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SchoolYearUpsertArgs>(args: SelectSubset<T, SchoolYearUpsertArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of SchoolYears.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearCountArgs} args - Arguments to filter SchoolYears to count.
+     * @example
+     * // Count the number of SchoolYears
+     * const count = await prisma.schoolYear.count({
+     *   where: {
+     *     // ... the filter for the SchoolYears we want to count
+     *   }
+     * })
+    **/
+    count<T extends SchoolYearCountArgs>(
+      args?: Subset<T, SchoolYearCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SchoolYearCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SchoolYear.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SchoolYearAggregateArgs>(args: Subset<T, SchoolYearAggregateArgs>): Prisma.PrismaPromise<GetSchoolYearAggregateType<T>>
+
+    /**
+     * Group by SchoolYear.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SchoolYearGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SchoolYearGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SchoolYearGroupByArgs['orderBy'] }
+        : { orderBy?: SchoolYearGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SchoolYearGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSchoolYearGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SchoolYear model
+   */
+  readonly fields: SchoolYearFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SchoolYear.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SchoolYearClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    Semester<T extends SchoolYear$SemesterArgs<ExtArgs> = {}>(args?: Subset<T, SchoolYear$SemesterArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findMany"> | Null>
+    Student<T extends SchoolYear$StudentArgs<ExtArgs> = {}>(args?: Subset<T, SchoolYear$StudentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SchoolYear model
+   */ 
+  interface SchoolYearFieldRefs {
+    readonly id: FieldRef<"SchoolYear", 'String'>
+    readonly year: FieldRef<"SchoolYear", 'String'>
+    readonly startDate: FieldRef<"SchoolYear", 'DateTime'>
+    readonly endDate: FieldRef<"SchoolYear", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SchoolYear findUnique
+   */
+  export type SchoolYearFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter, which SchoolYear to fetch.
+     */
+    where: SchoolYearWhereUniqueInput
+  }
+
+  /**
+   * SchoolYear findUniqueOrThrow
+   */
+  export type SchoolYearFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter, which SchoolYear to fetch.
+     */
+    where: SchoolYearWhereUniqueInput
+  }
+
+  /**
+   * SchoolYear findFirst
+   */
+  export type SchoolYearFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter, which SchoolYear to fetch.
+     */
+    where?: SchoolYearWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SchoolYears to fetch.
+     */
+    orderBy?: SchoolYearOrderByWithRelationInput | SchoolYearOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SchoolYears.
+     */
+    cursor?: SchoolYearWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SchoolYears from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SchoolYears.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SchoolYears.
+     */
+    distinct?: SchoolYearScalarFieldEnum | SchoolYearScalarFieldEnum[]
+  }
+
+  /**
+   * SchoolYear findFirstOrThrow
+   */
+  export type SchoolYearFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter, which SchoolYear to fetch.
+     */
+    where?: SchoolYearWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SchoolYears to fetch.
+     */
+    orderBy?: SchoolYearOrderByWithRelationInput | SchoolYearOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SchoolYears.
+     */
+    cursor?: SchoolYearWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SchoolYears from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SchoolYears.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SchoolYears.
+     */
+    distinct?: SchoolYearScalarFieldEnum | SchoolYearScalarFieldEnum[]
+  }
+
+  /**
+   * SchoolYear findMany
+   */
+  export type SchoolYearFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter, which SchoolYears to fetch.
+     */
+    where?: SchoolYearWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SchoolYears to fetch.
+     */
+    orderBy?: SchoolYearOrderByWithRelationInput | SchoolYearOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SchoolYears.
+     */
+    cursor?: SchoolYearWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SchoolYears from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SchoolYears.
+     */
+    skip?: number
+    distinct?: SchoolYearScalarFieldEnum | SchoolYearScalarFieldEnum[]
+  }
+
+  /**
+   * SchoolYear create
+   */
+  export type SchoolYearCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SchoolYear.
+     */
+    data: XOR<SchoolYearCreateInput, SchoolYearUncheckedCreateInput>
+  }
+
+  /**
+   * SchoolYear createMany
+   */
+  export type SchoolYearCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SchoolYears.
+     */
+    data: SchoolYearCreateManyInput | SchoolYearCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SchoolYear update
+   */
+  export type SchoolYearUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SchoolYear.
+     */
+    data: XOR<SchoolYearUpdateInput, SchoolYearUncheckedUpdateInput>
+    /**
+     * Choose, which SchoolYear to update.
+     */
+    where: SchoolYearWhereUniqueInput
+  }
+
+  /**
+   * SchoolYear updateMany
+   */
+  export type SchoolYearUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SchoolYears.
+     */
+    data: XOR<SchoolYearUpdateManyMutationInput, SchoolYearUncheckedUpdateManyInput>
+    /**
+     * Filter which SchoolYears to update
+     */
+    where?: SchoolYearWhereInput
+  }
+
+  /**
+   * SchoolYear upsert
+   */
+  export type SchoolYearUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SchoolYear to update in case it exists.
+     */
+    where: SchoolYearWhereUniqueInput
+    /**
+     * In case the SchoolYear found by the `where` argument doesn't exist, create a new SchoolYear with this data.
+     */
+    create: XOR<SchoolYearCreateInput, SchoolYearUncheckedCreateInput>
+    /**
+     * In case the SchoolYear was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SchoolYearUpdateInput, SchoolYearUncheckedUpdateInput>
+  }
+
+  /**
+   * SchoolYear delete
+   */
+  export type SchoolYearDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+    /**
+     * Filter which SchoolYear to delete.
+     */
+    where: SchoolYearWhereUniqueInput
+  }
+
+  /**
+   * SchoolYear deleteMany
+   */
+  export type SchoolYearDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SchoolYears to delete
+     */
+    where?: SchoolYearWhereInput
+  }
+
+  /**
+   * SchoolYear.Semester
+   */
+  export type SchoolYear$SemesterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    where?: SemesterWhereInput
+    orderBy?: SemesterOrderByWithRelationInput | SemesterOrderByWithRelationInput[]
+    cursor?: SemesterWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SemesterScalarFieldEnum | SemesterScalarFieldEnum[]
+  }
+
+  /**
+   * SchoolYear.Student
+   */
+  export type SchoolYear$StudentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Student
+     */
+    select?: StudentSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StudentInclude<ExtArgs> | null
+    where?: StudentWhereInput
+    orderBy?: StudentOrderByWithRelationInput | StudentOrderByWithRelationInput[]
+    cursor?: StudentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StudentScalarFieldEnum | StudentScalarFieldEnum[]
+  }
+
+  /**
+   * SchoolYear without action
+   */
+  export type SchoolYearDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SchoolYear
+     */
+    select?: SchoolYearSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SchoolYearInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Semester
+   */
+
+  export type AggregateSemester = {
+    _count: SemesterCountAggregateOutputType | null
+    _min: SemesterMinAggregateOutputType | null
+    _max: SemesterMaxAggregateOutputType | null
+  }
+
+  export type SemesterMinAggregateOutputType = {
+    id: string | null
+    semester: string | null
+    startDate: Date | null
+    endDate: Date | null
+    schoolYearId: string | null
+  }
+
+  export type SemesterMaxAggregateOutputType = {
+    id: string | null
+    semester: string | null
+    startDate: Date | null
+    endDate: Date | null
+    schoolYearId: string | null
+  }
+
+  export type SemesterCountAggregateOutputType = {
+    id: number
+    semester: number
+    startDate: number
+    endDate: number
+    schoolYearId: number
+    _all: number
+  }
+
+
+  export type SemesterMinAggregateInputType = {
+    id?: true
+    semester?: true
+    startDate?: true
+    endDate?: true
+    schoolYearId?: true
+  }
+
+  export type SemesterMaxAggregateInputType = {
+    id?: true
+    semester?: true
+    startDate?: true
+    endDate?: true
+    schoolYearId?: true
+  }
+
+  export type SemesterCountAggregateInputType = {
+    id?: true
+    semester?: true
+    startDate?: true
+    endDate?: true
+    schoolYearId?: true
+    _all?: true
+  }
+
+  export type SemesterAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Semester to aggregate.
+     */
+    where?: SemesterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Semesters to fetch.
+     */
+    orderBy?: SemesterOrderByWithRelationInput | SemesterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SemesterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Semesters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Semesters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Semesters
+    **/
+    _count?: true | SemesterCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SemesterMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SemesterMaxAggregateInputType
+  }
+
+  export type GetSemesterAggregateType<T extends SemesterAggregateArgs> = {
+        [P in keyof T & keyof AggregateSemester]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSemester[P]>
+      : GetScalarType<T[P], AggregateSemester[P]>
+  }
+
+
+
+
+  export type SemesterGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SemesterWhereInput
+    orderBy?: SemesterOrderByWithAggregationInput | SemesterOrderByWithAggregationInput[]
+    by: SemesterScalarFieldEnum[] | SemesterScalarFieldEnum
+    having?: SemesterScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SemesterCountAggregateInputType | true
+    _min?: SemesterMinAggregateInputType
+    _max?: SemesterMaxAggregateInputType
+  }
+
+  export type SemesterGroupByOutputType = {
+    id: string
+    semester: string
+    startDate: Date | null
+    endDate: Date | null
+    schoolYearId: string
+    _count: SemesterCountAggregateOutputType | null
+    _min: SemesterMinAggregateOutputType | null
+    _max: SemesterMaxAggregateOutputType | null
+  }
+
+  type GetSemesterGroupByPayload<T extends SemesterGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SemesterGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SemesterGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SemesterGroupByOutputType[P]>
+            : GetScalarType<T[P], SemesterGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SemesterSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    semester?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    schoolYearId?: boolean
+    schoolYear?: boolean | SchoolYearDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["semester"]>
+
+
+  export type SemesterSelectScalar = {
+    id?: boolean
+    semester?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    schoolYearId?: boolean
+  }
+
+  export type SemesterInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    schoolYear?: boolean | SchoolYearDefaultArgs<ExtArgs>
+  }
+
+  export type $SemesterPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Semester"
+    objects: {
+      schoolYear: Prisma.$SchoolYearPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      semester: string
+      startDate: Date | null
+      endDate: Date | null
+      schoolYearId: string
+    }, ExtArgs["result"]["semester"]>
+    composites: {}
+  }
+
+  type SemesterGetPayload<S extends boolean | null | undefined | SemesterDefaultArgs> = $Result.GetResult<Prisma.$SemesterPayload, S>
+
+  type SemesterCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<SemesterFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: SemesterCountAggregateInputType | true
+    }
+
+  export interface SemesterDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Semester'], meta: { name: 'Semester' } }
+    /**
+     * Find zero or one Semester that matches the filter.
+     * @param {SemesterFindUniqueArgs} args - Arguments to find a Semester
+     * @example
+     * // Get one Semester
+     * const semester = await prisma.semester.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SemesterFindUniqueArgs>(args: SelectSubset<T, SemesterFindUniqueArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Semester that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {SemesterFindUniqueOrThrowArgs} args - Arguments to find a Semester
+     * @example
+     * // Get one Semester
+     * const semester = await prisma.semester.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SemesterFindUniqueOrThrowArgs>(args: SelectSubset<T, SemesterFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Semester that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterFindFirstArgs} args - Arguments to find a Semester
+     * @example
+     * // Get one Semester
+     * const semester = await prisma.semester.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SemesterFindFirstArgs>(args?: SelectSubset<T, SemesterFindFirstArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Semester that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterFindFirstOrThrowArgs} args - Arguments to find a Semester
+     * @example
+     * // Get one Semester
+     * const semester = await prisma.semester.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SemesterFindFirstOrThrowArgs>(args?: SelectSubset<T, SemesterFindFirstOrThrowArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Semesters that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Semesters
+     * const semesters = await prisma.semester.findMany()
+     * 
+     * // Get first 10 Semesters
+     * const semesters = await prisma.semester.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const semesterWithIdOnly = await prisma.semester.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SemesterFindManyArgs>(args?: SelectSubset<T, SemesterFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Semester.
+     * @param {SemesterCreateArgs} args - Arguments to create a Semester.
+     * @example
+     * // Create one Semester
+     * const Semester = await prisma.semester.create({
+     *   data: {
+     *     // ... data to create a Semester
+     *   }
+     * })
+     * 
+     */
+    create<T extends SemesterCreateArgs>(args: SelectSubset<T, SemesterCreateArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Semesters.
+     * @param {SemesterCreateManyArgs} args - Arguments to create many Semesters.
+     * @example
+     * // Create many Semesters
+     * const semester = await prisma.semester.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SemesterCreateManyArgs>(args?: SelectSubset<T, SemesterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a Semester.
+     * @param {SemesterDeleteArgs} args - Arguments to delete one Semester.
+     * @example
+     * // Delete one Semester
+     * const Semester = await prisma.semester.delete({
+     *   where: {
+     *     // ... filter to delete one Semester
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SemesterDeleteArgs>(args: SelectSubset<T, SemesterDeleteArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Semester.
+     * @param {SemesterUpdateArgs} args - Arguments to update one Semester.
+     * @example
+     * // Update one Semester
+     * const semester = await prisma.semester.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SemesterUpdateArgs>(args: SelectSubset<T, SemesterUpdateArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Semesters.
+     * @param {SemesterDeleteManyArgs} args - Arguments to filter Semesters to delete.
+     * @example
+     * // Delete a few Semesters
+     * const { count } = await prisma.semester.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SemesterDeleteManyArgs>(args?: SelectSubset<T, SemesterDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Semesters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Semesters
+     * const semester = await prisma.semester.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SemesterUpdateManyArgs>(args: SelectSubset<T, SemesterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Semester.
+     * @param {SemesterUpsertArgs} args - Arguments to update or create a Semester.
+     * @example
+     * // Update or create a Semester
+     * const semester = await prisma.semester.upsert({
+     *   create: {
+     *     // ... data to create a Semester
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Semester we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SemesterUpsertArgs>(args: SelectSubset<T, SemesterUpsertArgs<ExtArgs>>): Prisma__SemesterClient<$Result.GetResult<Prisma.$SemesterPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Semesters.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterCountArgs} args - Arguments to filter Semesters to count.
+     * @example
+     * // Count the number of Semesters
+     * const count = await prisma.semester.count({
+     *   where: {
+     *     // ... the filter for the Semesters we want to count
+     *   }
+     * })
+    **/
+    count<T extends SemesterCountArgs>(
+      args?: Subset<T, SemesterCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SemesterCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Semester.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SemesterAggregateArgs>(args: Subset<T, SemesterAggregateArgs>): Prisma.PrismaPromise<GetSemesterAggregateType<T>>
+
+    /**
+     * Group by Semester.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SemesterGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SemesterGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SemesterGroupByArgs['orderBy'] }
+        : { orderBy?: SemesterGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SemesterGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSemesterGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Semester model
+   */
+  readonly fields: SemesterFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Semester.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SemesterClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    schoolYear<T extends SchoolYearDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SchoolYearDefaultArgs<ExtArgs>>): Prisma__SchoolYearClient<$Result.GetResult<Prisma.$SchoolYearPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Semester model
+   */ 
+  interface SemesterFieldRefs {
+    readonly id: FieldRef<"Semester", 'String'>
+    readonly semester: FieldRef<"Semester", 'String'>
+    readonly startDate: FieldRef<"Semester", 'DateTime'>
+    readonly endDate: FieldRef<"Semester", 'DateTime'>
+    readonly schoolYearId: FieldRef<"Semester", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Semester findUnique
+   */
+  export type SemesterFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter, which Semester to fetch.
+     */
+    where: SemesterWhereUniqueInput
+  }
+
+  /**
+   * Semester findUniqueOrThrow
+   */
+  export type SemesterFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter, which Semester to fetch.
+     */
+    where: SemesterWhereUniqueInput
+  }
+
+  /**
+   * Semester findFirst
+   */
+  export type SemesterFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter, which Semester to fetch.
+     */
+    where?: SemesterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Semesters to fetch.
+     */
+    orderBy?: SemesterOrderByWithRelationInput | SemesterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Semesters.
+     */
+    cursor?: SemesterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Semesters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Semesters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Semesters.
+     */
+    distinct?: SemesterScalarFieldEnum | SemesterScalarFieldEnum[]
+  }
+
+  /**
+   * Semester findFirstOrThrow
+   */
+  export type SemesterFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter, which Semester to fetch.
+     */
+    where?: SemesterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Semesters to fetch.
+     */
+    orderBy?: SemesterOrderByWithRelationInput | SemesterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Semesters.
+     */
+    cursor?: SemesterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Semesters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Semesters.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Semesters.
+     */
+    distinct?: SemesterScalarFieldEnum | SemesterScalarFieldEnum[]
+  }
+
+  /**
+   * Semester findMany
+   */
+  export type SemesterFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter, which Semesters to fetch.
+     */
+    where?: SemesterWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Semesters to fetch.
+     */
+    orderBy?: SemesterOrderByWithRelationInput | SemesterOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Semesters.
+     */
+    cursor?: SemesterWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Semesters from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Semesters.
+     */
+    skip?: number
+    distinct?: SemesterScalarFieldEnum | SemesterScalarFieldEnum[]
+  }
+
+  /**
+   * Semester create
+   */
+  export type SemesterCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Semester.
+     */
+    data: XOR<SemesterCreateInput, SemesterUncheckedCreateInput>
+  }
+
+  /**
+   * Semester createMany
+   */
+  export type SemesterCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Semesters.
+     */
+    data: SemesterCreateManyInput | SemesterCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Semester update
+   */
+  export type SemesterUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Semester.
+     */
+    data: XOR<SemesterUpdateInput, SemesterUncheckedUpdateInput>
+    /**
+     * Choose, which Semester to update.
+     */
+    where: SemesterWhereUniqueInput
+  }
+
+  /**
+   * Semester updateMany
+   */
+  export type SemesterUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Semesters.
+     */
+    data: XOR<SemesterUpdateManyMutationInput, SemesterUncheckedUpdateManyInput>
+    /**
+     * Filter which Semesters to update
+     */
+    where?: SemesterWhereInput
+  }
+
+  /**
+   * Semester upsert
+   */
+  export type SemesterUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Semester to update in case it exists.
+     */
+    where: SemesterWhereUniqueInput
+    /**
+     * In case the Semester found by the `where` argument doesn't exist, create a new Semester with this data.
+     */
+    create: XOR<SemesterCreateInput, SemesterUncheckedCreateInput>
+    /**
+     * In case the Semester was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SemesterUpdateInput, SemesterUncheckedUpdateInput>
+  }
+
+  /**
+   * Semester delete
+   */
+  export type SemesterDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
+    /**
+     * Filter which Semester to delete.
+     */
+    where: SemesterWhereUniqueInput
+  }
+
+  /**
+   * Semester deleteMany
+   */
+  export type SemesterDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Semesters to delete
+     */
+    where?: SemesterWhereInput
+  }
+
+  /**
+   * Semester without action
+   */
+  export type SemesterDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Semester
+     */
+    select?: SemesterSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SemesterInclude<ExtArgs> | null
   }
 
 
@@ -1874,13 +3858,33 @@ export namespace Prisma {
     address: 'address',
     dateOfBirth: 'dateOfBirth',
     gender: 'gender',
-    enrollmentYear: 'enrollmentYear',
+    enrollmentYearId: 'enrollmentYearId',
     status: 'status',
-    program: 'program',
-    yearLevel: 'yearLevel'
+    program: 'program'
   };
 
   export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeof StudentScalarFieldEnum]
+
+
+  export const SchoolYearScalarFieldEnum: {
+    id: 'id',
+    year: 'year',
+    startDate: 'startDate',
+    endDate: 'endDate'
+  };
+
+  export type SchoolYearScalarFieldEnum = (typeof SchoolYearScalarFieldEnum)[keyof typeof SchoolYearScalarFieldEnum]
+
+
+  export const SemesterScalarFieldEnum: {
+    id: 'id',
+    semester: 'semester',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    schoolYearId: 'schoolYearId'
+  };
+
+  export type SemesterScalarFieldEnum = (typeof SemesterScalarFieldEnum)[keyof typeof SemesterScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -1926,13 +3930,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
    * Reference to a field of type 'StudentStatus'
    */
   export type EnumStudentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StudentStatus'>
@@ -1940,16 +3937,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'yearLevel'
+   * Reference to a field of type 'Int'
    */
-  export type EnumyearLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'yearLevel'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
   /**
    * Deep Input Types
@@ -1970,10 +3960,10 @@ export namespace Prisma {
     address?: StringNullableFilter<"Student"> | string | null
     dateOfBirth?: DateTimeNullableFilter<"Student"> | Date | string | null
     gender?: EnumGenderFilter<"Student"> | $Enums.Gender
-    enrollmentYear?: IntFilter<"Student"> | number
+    enrollmentYearId?: StringFilter<"Student"> | string
     status?: EnumStudentStatusFilter<"Student"> | $Enums.StudentStatus
     program?: StringFilter<"Student"> | string
-    yearLevel?: EnumyearLevelFilter<"Student"> | $Enums.yearLevel
+    enrollmentYear?: XOR<SchoolYearRelationFilter, SchoolYearWhereInput>
   }
 
   export type StudentOrderByWithRelationInput = {
@@ -1987,10 +3977,10 @@ export namespace Prisma {
     address?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
     gender?: SortOrder
-    enrollmentYear?: SortOrder
+    enrollmentYearId?: SortOrder
     status?: SortOrder
     program?: SortOrder
-    yearLevel?: SortOrder
+    enrollmentYear?: SchoolYearOrderByWithRelationInput
   }
 
   export type StudentWhereUniqueInput = Prisma.AtLeast<{
@@ -2007,10 +3997,10 @@ export namespace Prisma {
     address?: StringNullableFilter<"Student"> | string | null
     dateOfBirth?: DateTimeNullableFilter<"Student"> | Date | string | null
     gender?: EnumGenderFilter<"Student"> | $Enums.Gender
-    enrollmentYear?: IntFilter<"Student"> | number
+    enrollmentYearId?: StringFilter<"Student"> | string
     status?: EnumStudentStatusFilter<"Student"> | $Enums.StudentStatus
     program?: StringFilter<"Student"> | string
-    yearLevel?: EnumyearLevelFilter<"Student"> | $Enums.yearLevel
+    enrollmentYear?: XOR<SchoolYearRelationFilter, SchoolYearWhereInput>
   }, "id" | "studentId">
 
   export type StudentOrderByWithAggregationInput = {
@@ -2024,15 +4014,12 @@ export namespace Prisma {
     address?: SortOrderInput | SortOrder
     dateOfBirth?: SortOrderInput | SortOrder
     gender?: SortOrder
-    enrollmentYear?: SortOrder
+    enrollmentYearId?: SortOrder
     status?: SortOrder
     program?: SortOrder
-    yearLevel?: SortOrder
     _count?: StudentCountOrderByAggregateInput
-    _avg?: StudentAvgOrderByAggregateInput
     _max?: StudentMaxOrderByAggregateInput
     _min?: StudentMinOrderByAggregateInput
-    _sum?: StudentSumOrderByAggregateInput
   }
 
   export type StudentScalarWhereWithAggregatesInput = {
@@ -2049,10 +4036,117 @@ export namespace Prisma {
     address?: StringNullableWithAggregatesFilter<"Student"> | string | null
     dateOfBirth?: DateTimeNullableWithAggregatesFilter<"Student"> | Date | string | null
     gender?: EnumGenderWithAggregatesFilter<"Student"> | $Enums.Gender
-    enrollmentYear?: IntWithAggregatesFilter<"Student"> | number
+    enrollmentYearId?: StringWithAggregatesFilter<"Student"> | string
     status?: EnumStudentStatusWithAggregatesFilter<"Student"> | $Enums.StudentStatus
     program?: StringWithAggregatesFilter<"Student"> | string
-    yearLevel?: EnumyearLevelWithAggregatesFilter<"Student"> | $Enums.yearLevel
+  }
+
+  export type SchoolYearWhereInput = {
+    AND?: SchoolYearWhereInput | SchoolYearWhereInput[]
+    OR?: SchoolYearWhereInput[]
+    NOT?: SchoolYearWhereInput | SchoolYearWhereInput[]
+    id?: StringFilter<"SchoolYear"> | string
+    year?: StringFilter<"SchoolYear"> | string
+    startDate?: DateTimeNullableFilter<"SchoolYear"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"SchoolYear"> | Date | string | null
+    Semester?: SemesterListRelationFilter
+    Student?: StudentListRelationFilter
+  }
+
+  export type SchoolYearOrderByWithRelationInput = {
+    id?: SortOrder
+    year?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
+    Semester?: SemesterOrderByRelationAggregateInput
+    Student?: StudentOrderByRelationAggregateInput
+  }
+
+  export type SchoolYearWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SchoolYearWhereInput | SchoolYearWhereInput[]
+    OR?: SchoolYearWhereInput[]
+    NOT?: SchoolYearWhereInput | SchoolYearWhereInput[]
+    year?: StringFilter<"SchoolYear"> | string
+    startDate?: DateTimeNullableFilter<"SchoolYear"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"SchoolYear"> | Date | string | null
+    Semester?: SemesterListRelationFilter
+    Student?: StudentListRelationFilter
+  }, "id">
+
+  export type SchoolYearOrderByWithAggregationInput = {
+    id?: SortOrder
+    year?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
+    _count?: SchoolYearCountOrderByAggregateInput
+    _max?: SchoolYearMaxOrderByAggregateInput
+    _min?: SchoolYearMinOrderByAggregateInput
+  }
+
+  export type SchoolYearScalarWhereWithAggregatesInput = {
+    AND?: SchoolYearScalarWhereWithAggregatesInput | SchoolYearScalarWhereWithAggregatesInput[]
+    OR?: SchoolYearScalarWhereWithAggregatesInput[]
+    NOT?: SchoolYearScalarWhereWithAggregatesInput | SchoolYearScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SchoolYear"> | string
+    year?: StringWithAggregatesFilter<"SchoolYear"> | string
+    startDate?: DateTimeNullableWithAggregatesFilter<"SchoolYear"> | Date | string | null
+    endDate?: DateTimeNullableWithAggregatesFilter<"SchoolYear"> | Date | string | null
+  }
+
+  export type SemesterWhereInput = {
+    AND?: SemesterWhereInput | SemesterWhereInput[]
+    OR?: SemesterWhereInput[]
+    NOT?: SemesterWhereInput | SemesterWhereInput[]
+    id?: StringFilter<"Semester"> | string
+    semester?: StringFilter<"Semester"> | string
+    startDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    schoolYearId?: StringFilter<"Semester"> | string
+    schoolYear?: XOR<SchoolYearRelationFilter, SchoolYearWhereInput>
+  }
+
+  export type SemesterOrderByWithRelationInput = {
+    id?: SortOrder
+    semester?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
+    schoolYearId?: SortOrder
+    schoolYear?: SchoolYearOrderByWithRelationInput
+  }
+
+  export type SemesterWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SemesterWhereInput | SemesterWhereInput[]
+    OR?: SemesterWhereInput[]
+    NOT?: SemesterWhereInput | SemesterWhereInput[]
+    semester?: StringFilter<"Semester"> | string
+    startDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    schoolYearId?: StringFilter<"Semester"> | string
+    schoolYear?: XOR<SchoolYearRelationFilter, SchoolYearWhereInput>
+  }, "id">
+
+  export type SemesterOrderByWithAggregationInput = {
+    id?: SortOrder
+    semester?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    endDate?: SortOrderInput | SortOrder
+    schoolYearId?: SortOrder
+    _count?: SemesterCountOrderByAggregateInput
+    _max?: SemesterMaxOrderByAggregateInput
+    _min?: SemesterMinOrderByAggregateInput
+  }
+
+  export type SemesterScalarWhereWithAggregatesInput = {
+    AND?: SemesterScalarWhereWithAggregatesInput | SemesterScalarWhereWithAggregatesInput[]
+    OR?: SemesterScalarWhereWithAggregatesInput[]
+    NOT?: SemesterScalarWhereWithAggregatesInput | SemesterScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Semester"> | string
+    semester?: StringWithAggregatesFilter<"Semester"> | string
+    startDate?: DateTimeNullableWithAggregatesFilter<"Semester"> | Date | string | null
+    endDate?: DateTimeNullableWithAggregatesFilter<"Semester"> | Date | string | null
+    schoolYearId?: StringWithAggregatesFilter<"Semester"> | string
   }
 
   export type StudentCreateInput = {
@@ -2066,10 +4160,9 @@ export namespace Prisma {
     address?: string | null
     dateOfBirth?: Date | string | null
     gender: $Enums.Gender
-    enrollmentYear: number
     status: $Enums.StudentStatus
     program: string
-    yearLevel: $Enums.yearLevel
+    enrollmentYear: SchoolYearCreateNestedOneWithoutStudentInput
   }
 
   export type StudentUncheckedCreateInput = {
@@ -2083,10 +4176,9 @@ export namespace Prisma {
     address?: string | null
     dateOfBirth?: Date | string | null
     gender: $Enums.Gender
-    enrollmentYear: number
+    enrollmentYearId: string
     status: $Enums.StudentStatus
     program: string
-    yearLevel: $Enums.yearLevel
   }
 
   export type StudentUpdateInput = {
@@ -2100,10 +4192,9 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    enrollmentYear?: IntFieldUpdateOperationsInput | number
     status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
     program?: StringFieldUpdateOperationsInput | string
-    yearLevel?: EnumyearLevelFieldUpdateOperationsInput | $Enums.yearLevel
+    enrollmentYear?: SchoolYearUpdateOneRequiredWithoutStudentNestedInput
   }
 
   export type StudentUncheckedUpdateInput = {
@@ -2117,10 +4208,9 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    enrollmentYear?: IntFieldUpdateOperationsInput | number
+    enrollmentYearId?: StringFieldUpdateOperationsInput | string
     status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
     program?: StringFieldUpdateOperationsInput | string
-    yearLevel?: EnumyearLevelFieldUpdateOperationsInput | $Enums.yearLevel
   }
 
   export type StudentCreateManyInput = {
@@ -2134,10 +4224,9 @@ export namespace Prisma {
     address?: string | null
     dateOfBirth?: Date | string | null
     gender: $Enums.Gender
-    enrollmentYear: number
+    enrollmentYearId: string
     status: $Enums.StudentStatus
     program: string
-    yearLevel: $Enums.yearLevel
   }
 
   export type StudentUpdateManyMutationInput = {
@@ -2151,10 +4240,8 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    enrollmentYear?: IntFieldUpdateOperationsInput | number
     status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
     program?: StringFieldUpdateOperationsInput | string
-    yearLevel?: EnumyearLevelFieldUpdateOperationsInput | $Enums.yearLevel
   }
 
   export type StudentUncheckedUpdateManyInput = {
@@ -2168,10 +4255,121 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    enrollmentYear?: IntFieldUpdateOperationsInput | number
+    enrollmentYearId?: StringFieldUpdateOperationsInput | string
     status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
     program?: StringFieldUpdateOperationsInput | string
-    yearLevel?: EnumyearLevelFieldUpdateOperationsInput | $Enums.yearLevel
+  }
+
+  export type SchoolYearCreateInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Semester?: SemesterCreateNestedManyWithoutSchoolYearInput
+    Student?: StudentCreateNestedManyWithoutEnrollmentYearInput
+  }
+
+  export type SchoolYearUncheckedCreateInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Semester?: SemesterUncheckedCreateNestedManyWithoutSchoolYearInput
+    Student?: StudentUncheckedCreateNestedManyWithoutEnrollmentYearInput
+  }
+
+  export type SchoolYearUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Semester?: SemesterUpdateManyWithoutSchoolYearNestedInput
+    Student?: StudentUpdateManyWithoutEnrollmentYearNestedInput
+  }
+
+  export type SchoolYearUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Semester?: SemesterUncheckedUpdateManyWithoutSchoolYearNestedInput
+    Student?: StudentUncheckedUpdateManyWithoutEnrollmentYearNestedInput
+  }
+
+  export type SchoolYearCreateManyInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+  }
+
+  export type SchoolYearUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SchoolYearUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SemesterCreateInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    schoolYear: SchoolYearCreateNestedOneWithoutSemesterInput
+  }
+
+  export type SemesterUncheckedCreateInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    schoolYearId: string
+  }
+
+  export type SemesterUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schoolYear?: SchoolYearUpdateOneRequiredWithoutSemesterNestedInput
+  }
+
+  export type SemesterUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schoolYearId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SemesterCreateManyInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    schoolYearId: string
+  }
+
+  export type SemesterUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SemesterUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schoolYearId?: StringFieldUpdateOperationsInput | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -2220,17 +4418,6 @@ export namespace Prisma {
     not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
   }
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type EnumStudentStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.StudentStatus | EnumStudentStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StudentStatus[]
@@ -2238,11 +4425,9 @@ export namespace Prisma {
     not?: NestedEnumStudentStatusFilter<$PrismaModel> | $Enums.StudentStatus
   }
 
-  export type EnumyearLevelFilter<$PrismaModel = never> = {
-    equals?: $Enums.yearLevel | EnumyearLevelFieldRefInput<$PrismaModel>
-    in?: $Enums.yearLevel[]
-    notIn?: $Enums.yearLevel[]
-    not?: NestedEnumyearLevelFilter<$PrismaModel> | $Enums.yearLevel
+  export type SchoolYearRelationFilter = {
+    is?: SchoolYearWhereInput
+    isNot?: SchoolYearWhereInput
   }
 
   export type SortOrderInput = {
@@ -2261,14 +4446,9 @@ export namespace Prisma {
     address?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
-    enrollmentYear?: SortOrder
+    enrollmentYearId?: SortOrder
     status?: SortOrder
     program?: SortOrder
-    yearLevel?: SortOrder
-  }
-
-  export type StudentAvgOrderByAggregateInput = {
-    enrollmentYear?: SortOrder
   }
 
   export type StudentMaxOrderByAggregateInput = {
@@ -2282,10 +4462,9 @@ export namespace Prisma {
     address?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
-    enrollmentYear?: SortOrder
+    enrollmentYearId?: SortOrder
     status?: SortOrder
     program?: SortOrder
-    yearLevel?: SortOrder
   }
 
   export type StudentMinOrderByAggregateInput = {
@@ -2299,14 +4478,9 @@ export namespace Prisma {
     address?: SortOrder
     dateOfBirth?: SortOrder
     gender?: SortOrder
-    enrollmentYear?: SortOrder
+    enrollmentYearId?: SortOrder
     status?: SortOrder
     program?: SortOrder
-    yearLevel?: SortOrder
-  }
-
-  export type StudentSumOrderByAggregateInput = {
-    enrollmentYear?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -2367,22 +4541,6 @@ export namespace Prisma {
     _max?: NestedEnumGenderFilter<$PrismaModel>
   }
 
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
   export type EnumStudentStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.StudentStatus | EnumStudentStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StudentStatus[]
@@ -2393,14 +4551,75 @@ export namespace Prisma {
     _max?: NestedEnumStudentStatusFilter<$PrismaModel>
   }
 
-  export type EnumyearLevelWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.yearLevel | EnumyearLevelFieldRefInput<$PrismaModel>
-    in?: $Enums.yearLevel[]
-    notIn?: $Enums.yearLevel[]
-    not?: NestedEnumyearLevelWithAggregatesFilter<$PrismaModel> | $Enums.yearLevel
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumyearLevelFilter<$PrismaModel>
-    _max?: NestedEnumyearLevelFilter<$PrismaModel>
+  export type SemesterListRelationFilter = {
+    every?: SemesterWhereInput
+    some?: SemesterWhereInput
+    none?: SemesterWhereInput
+  }
+
+  export type StudentListRelationFilter = {
+    every?: StudentWhereInput
+    some?: StudentWhereInput
+    none?: StudentWhereInput
+  }
+
+  export type SemesterOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type StudentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SchoolYearCountOrderByAggregateInput = {
+    id?: SortOrder
+    year?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+  }
+
+  export type SchoolYearMaxOrderByAggregateInput = {
+    id?: SortOrder
+    year?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+  }
+
+  export type SchoolYearMinOrderByAggregateInput = {
+    id?: SortOrder
+    year?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+  }
+
+  export type SemesterCountOrderByAggregateInput = {
+    id?: SortOrder
+    semester?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    schoolYearId?: SortOrder
+  }
+
+  export type SemesterMaxOrderByAggregateInput = {
+    id?: SortOrder
+    semester?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    schoolYearId?: SortOrder
+  }
+
+  export type SemesterMinOrderByAggregateInput = {
+    id?: SortOrder
+    semester?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    schoolYearId?: SortOrder
+  }
+
+  export type SchoolYearCreateNestedOneWithoutStudentInput = {
+    create?: XOR<SchoolYearCreateWithoutStudentInput, SchoolYearUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: SchoolYearCreateOrConnectWithoutStudentInput
+    connect?: SchoolYearWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -2419,20 +4638,114 @@ export namespace Prisma {
     set?: $Enums.Gender
   }
 
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type EnumStudentStatusFieldUpdateOperationsInput = {
     set?: $Enums.StudentStatus
   }
 
-  export type EnumyearLevelFieldUpdateOperationsInput = {
-    set?: $Enums.yearLevel
+  export type SchoolYearUpdateOneRequiredWithoutStudentNestedInput = {
+    create?: XOR<SchoolYearCreateWithoutStudentInput, SchoolYearUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: SchoolYearCreateOrConnectWithoutStudentInput
+    upsert?: SchoolYearUpsertWithoutStudentInput
+    connect?: SchoolYearWhereUniqueInput
+    update?: XOR<XOR<SchoolYearUpdateToOneWithWhereWithoutStudentInput, SchoolYearUpdateWithoutStudentInput>, SchoolYearUncheckedUpdateWithoutStudentInput>
+  }
+
+  export type SemesterCreateNestedManyWithoutSchoolYearInput = {
+    create?: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput> | SemesterCreateWithoutSchoolYearInput[] | SemesterUncheckedCreateWithoutSchoolYearInput[]
+    connectOrCreate?: SemesterCreateOrConnectWithoutSchoolYearInput | SemesterCreateOrConnectWithoutSchoolYearInput[]
+    createMany?: SemesterCreateManySchoolYearInputEnvelope
+    connect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+  }
+
+  export type StudentCreateNestedManyWithoutEnrollmentYearInput = {
+    create?: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput> | StudentCreateWithoutEnrollmentYearInput[] | StudentUncheckedCreateWithoutEnrollmentYearInput[]
+    connectOrCreate?: StudentCreateOrConnectWithoutEnrollmentYearInput | StudentCreateOrConnectWithoutEnrollmentYearInput[]
+    createMany?: StudentCreateManyEnrollmentYearInputEnvelope
+    connect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+  }
+
+  export type SemesterUncheckedCreateNestedManyWithoutSchoolYearInput = {
+    create?: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput> | SemesterCreateWithoutSchoolYearInput[] | SemesterUncheckedCreateWithoutSchoolYearInput[]
+    connectOrCreate?: SemesterCreateOrConnectWithoutSchoolYearInput | SemesterCreateOrConnectWithoutSchoolYearInput[]
+    createMany?: SemesterCreateManySchoolYearInputEnvelope
+    connect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+  }
+
+  export type StudentUncheckedCreateNestedManyWithoutEnrollmentYearInput = {
+    create?: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput> | StudentCreateWithoutEnrollmentYearInput[] | StudentUncheckedCreateWithoutEnrollmentYearInput[]
+    connectOrCreate?: StudentCreateOrConnectWithoutEnrollmentYearInput | StudentCreateOrConnectWithoutEnrollmentYearInput[]
+    createMany?: StudentCreateManyEnrollmentYearInputEnvelope
+    connect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+  }
+
+  export type SemesterUpdateManyWithoutSchoolYearNestedInput = {
+    create?: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput> | SemesterCreateWithoutSchoolYearInput[] | SemesterUncheckedCreateWithoutSchoolYearInput[]
+    connectOrCreate?: SemesterCreateOrConnectWithoutSchoolYearInput | SemesterCreateOrConnectWithoutSchoolYearInput[]
+    upsert?: SemesterUpsertWithWhereUniqueWithoutSchoolYearInput | SemesterUpsertWithWhereUniqueWithoutSchoolYearInput[]
+    createMany?: SemesterCreateManySchoolYearInputEnvelope
+    set?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    disconnect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    delete?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    connect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    update?: SemesterUpdateWithWhereUniqueWithoutSchoolYearInput | SemesterUpdateWithWhereUniqueWithoutSchoolYearInput[]
+    updateMany?: SemesterUpdateManyWithWhereWithoutSchoolYearInput | SemesterUpdateManyWithWhereWithoutSchoolYearInput[]
+    deleteMany?: SemesterScalarWhereInput | SemesterScalarWhereInput[]
+  }
+
+  export type StudentUpdateManyWithoutEnrollmentYearNestedInput = {
+    create?: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput> | StudentCreateWithoutEnrollmentYearInput[] | StudentUncheckedCreateWithoutEnrollmentYearInput[]
+    connectOrCreate?: StudentCreateOrConnectWithoutEnrollmentYearInput | StudentCreateOrConnectWithoutEnrollmentYearInput[]
+    upsert?: StudentUpsertWithWhereUniqueWithoutEnrollmentYearInput | StudentUpsertWithWhereUniqueWithoutEnrollmentYearInput[]
+    createMany?: StudentCreateManyEnrollmentYearInputEnvelope
+    set?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    disconnect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    delete?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    connect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    update?: StudentUpdateWithWhereUniqueWithoutEnrollmentYearInput | StudentUpdateWithWhereUniqueWithoutEnrollmentYearInput[]
+    updateMany?: StudentUpdateManyWithWhereWithoutEnrollmentYearInput | StudentUpdateManyWithWhereWithoutEnrollmentYearInput[]
+    deleteMany?: StudentScalarWhereInput | StudentScalarWhereInput[]
+  }
+
+  export type SemesterUncheckedUpdateManyWithoutSchoolYearNestedInput = {
+    create?: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput> | SemesterCreateWithoutSchoolYearInput[] | SemesterUncheckedCreateWithoutSchoolYearInput[]
+    connectOrCreate?: SemesterCreateOrConnectWithoutSchoolYearInput | SemesterCreateOrConnectWithoutSchoolYearInput[]
+    upsert?: SemesterUpsertWithWhereUniqueWithoutSchoolYearInput | SemesterUpsertWithWhereUniqueWithoutSchoolYearInput[]
+    createMany?: SemesterCreateManySchoolYearInputEnvelope
+    set?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    disconnect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    delete?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    connect?: SemesterWhereUniqueInput | SemesterWhereUniqueInput[]
+    update?: SemesterUpdateWithWhereUniqueWithoutSchoolYearInput | SemesterUpdateWithWhereUniqueWithoutSchoolYearInput[]
+    updateMany?: SemesterUpdateManyWithWhereWithoutSchoolYearInput | SemesterUpdateManyWithWhereWithoutSchoolYearInput[]
+    deleteMany?: SemesterScalarWhereInput | SemesterScalarWhereInput[]
+  }
+
+  export type StudentUncheckedUpdateManyWithoutEnrollmentYearNestedInput = {
+    create?: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput> | StudentCreateWithoutEnrollmentYearInput[] | StudentUncheckedCreateWithoutEnrollmentYearInput[]
+    connectOrCreate?: StudentCreateOrConnectWithoutEnrollmentYearInput | StudentCreateOrConnectWithoutEnrollmentYearInput[]
+    upsert?: StudentUpsertWithWhereUniqueWithoutEnrollmentYearInput | StudentUpsertWithWhereUniqueWithoutEnrollmentYearInput[]
+    createMany?: StudentCreateManyEnrollmentYearInputEnvelope
+    set?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    disconnect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    delete?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    connect?: StudentWhereUniqueInput | StudentWhereUniqueInput[]
+    update?: StudentUpdateWithWhereUniqueWithoutEnrollmentYearInput | StudentUpdateWithWhereUniqueWithoutEnrollmentYearInput[]
+    updateMany?: StudentUpdateManyWithWhereWithoutEnrollmentYearInput | StudentUpdateManyWithWhereWithoutEnrollmentYearInput[]
+    deleteMany?: StudentScalarWhereInput | StudentScalarWhereInput[]
+  }
+
+  export type SchoolYearCreateNestedOneWithoutSemesterInput = {
+    create?: XOR<SchoolYearCreateWithoutSemesterInput, SchoolYearUncheckedCreateWithoutSemesterInput>
+    connectOrCreate?: SchoolYearCreateOrConnectWithoutSemesterInput
+    connect?: SchoolYearWhereUniqueInput
+  }
+
+  export type SchoolYearUpdateOneRequiredWithoutSemesterNestedInput = {
+    create?: XOR<SchoolYearCreateWithoutSemesterInput, SchoolYearUncheckedCreateWithoutSemesterInput>
+    connectOrCreate?: SchoolYearCreateOrConnectWithoutSemesterInput
+    upsert?: SchoolYearUpsertWithoutSemesterInput
+    connect?: SchoolYearWhereUniqueInput
+    update?: XOR<XOR<SchoolYearUpdateToOneWithWhereWithoutSemesterInput, SchoolYearUpdateWithoutSemesterInput>, SchoolYearUncheckedUpdateWithoutSemesterInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -2481,29 +4794,11 @@ export namespace Prisma {
     not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
   }
 
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type NestedEnumStudentStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.StudentStatus | EnumStudentStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StudentStatus[]
     notIn?: $Enums.StudentStatus[]
     not?: NestedEnumStudentStatusFilter<$PrismaModel> | $Enums.StudentStatus
-  }
-
-  export type NestedEnumyearLevelFilter<$PrismaModel = never> = {
-    equals?: $Enums.yearLevel | EnumyearLevelFieldRefInput<$PrismaModel>
-    in?: $Enums.yearLevel[]
-    notIn?: $Enums.yearLevel[]
-    not?: NestedEnumyearLevelFilter<$PrismaModel> | $Enums.yearLevel
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -2521,6 +4816,17 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -2575,33 +4881,6 @@ export namespace Prisma {
     _max?: NestedEnumGenderFilter<$PrismaModel>
   }
 
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type NestedEnumStudentStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.StudentStatus | EnumStudentStatusFieldRefInput<$PrismaModel>
     in?: $Enums.StudentStatus[]
@@ -2612,14 +4891,314 @@ export namespace Prisma {
     _max?: NestedEnumStudentStatusFilter<$PrismaModel>
   }
 
-  export type NestedEnumyearLevelWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.yearLevel | EnumyearLevelFieldRefInput<$PrismaModel>
-    in?: $Enums.yearLevel[]
-    notIn?: $Enums.yearLevel[]
-    not?: NestedEnumyearLevelWithAggregatesFilter<$PrismaModel> | $Enums.yearLevel
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumyearLevelFilter<$PrismaModel>
-    _max?: NestedEnumyearLevelFilter<$PrismaModel>
+  export type SchoolYearCreateWithoutStudentInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Semester?: SemesterCreateNestedManyWithoutSchoolYearInput
+  }
+
+  export type SchoolYearUncheckedCreateWithoutStudentInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Semester?: SemesterUncheckedCreateNestedManyWithoutSchoolYearInput
+  }
+
+  export type SchoolYearCreateOrConnectWithoutStudentInput = {
+    where: SchoolYearWhereUniqueInput
+    create: XOR<SchoolYearCreateWithoutStudentInput, SchoolYearUncheckedCreateWithoutStudentInput>
+  }
+
+  export type SchoolYearUpsertWithoutStudentInput = {
+    update: XOR<SchoolYearUpdateWithoutStudentInput, SchoolYearUncheckedUpdateWithoutStudentInput>
+    create: XOR<SchoolYearCreateWithoutStudentInput, SchoolYearUncheckedCreateWithoutStudentInput>
+    where?: SchoolYearWhereInput
+  }
+
+  export type SchoolYearUpdateToOneWithWhereWithoutStudentInput = {
+    where?: SchoolYearWhereInput
+    data: XOR<SchoolYearUpdateWithoutStudentInput, SchoolYearUncheckedUpdateWithoutStudentInput>
+  }
+
+  export type SchoolYearUpdateWithoutStudentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Semester?: SemesterUpdateManyWithoutSchoolYearNestedInput
+  }
+
+  export type SchoolYearUncheckedUpdateWithoutStudentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Semester?: SemesterUncheckedUpdateManyWithoutSchoolYearNestedInput
+  }
+
+  export type SemesterCreateWithoutSchoolYearInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+  }
+
+  export type SemesterUncheckedCreateWithoutSchoolYearInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+  }
+
+  export type SemesterCreateOrConnectWithoutSchoolYearInput = {
+    where: SemesterWhereUniqueInput
+    create: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput>
+  }
+
+  export type SemesterCreateManySchoolYearInputEnvelope = {
+    data: SemesterCreateManySchoolYearInput | SemesterCreateManySchoolYearInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StudentCreateWithoutEnrollmentYearInput = {
+    id?: string
+    studentId: string
+    firstName: string
+    middleName?: string | null
+    lastName: string
+    email: string
+    phone: string
+    address?: string | null
+    dateOfBirth?: Date | string | null
+    gender: $Enums.Gender
+    status: $Enums.StudentStatus
+    program: string
+  }
+
+  export type StudentUncheckedCreateWithoutEnrollmentYearInput = {
+    id?: string
+    studentId: string
+    firstName: string
+    middleName?: string | null
+    lastName: string
+    email: string
+    phone: string
+    address?: string | null
+    dateOfBirth?: Date | string | null
+    gender: $Enums.Gender
+    status: $Enums.StudentStatus
+    program: string
+  }
+
+  export type StudentCreateOrConnectWithoutEnrollmentYearInput = {
+    where: StudentWhereUniqueInput
+    create: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput>
+  }
+
+  export type StudentCreateManyEnrollmentYearInputEnvelope = {
+    data: StudentCreateManyEnrollmentYearInput | StudentCreateManyEnrollmentYearInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SemesterUpsertWithWhereUniqueWithoutSchoolYearInput = {
+    where: SemesterWhereUniqueInput
+    update: XOR<SemesterUpdateWithoutSchoolYearInput, SemesterUncheckedUpdateWithoutSchoolYearInput>
+    create: XOR<SemesterCreateWithoutSchoolYearInput, SemesterUncheckedCreateWithoutSchoolYearInput>
+  }
+
+  export type SemesterUpdateWithWhereUniqueWithoutSchoolYearInput = {
+    where: SemesterWhereUniqueInput
+    data: XOR<SemesterUpdateWithoutSchoolYearInput, SemesterUncheckedUpdateWithoutSchoolYearInput>
+  }
+
+  export type SemesterUpdateManyWithWhereWithoutSchoolYearInput = {
+    where: SemesterScalarWhereInput
+    data: XOR<SemesterUpdateManyMutationInput, SemesterUncheckedUpdateManyWithoutSchoolYearInput>
+  }
+
+  export type SemesterScalarWhereInput = {
+    AND?: SemesterScalarWhereInput | SemesterScalarWhereInput[]
+    OR?: SemesterScalarWhereInput[]
+    NOT?: SemesterScalarWhereInput | SemesterScalarWhereInput[]
+    id?: StringFilter<"Semester"> | string
+    semester?: StringFilter<"Semester"> | string
+    startDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Semester"> | Date | string | null
+    schoolYearId?: StringFilter<"Semester"> | string
+  }
+
+  export type StudentUpsertWithWhereUniqueWithoutEnrollmentYearInput = {
+    where: StudentWhereUniqueInput
+    update: XOR<StudentUpdateWithoutEnrollmentYearInput, StudentUncheckedUpdateWithoutEnrollmentYearInput>
+    create: XOR<StudentCreateWithoutEnrollmentYearInput, StudentUncheckedCreateWithoutEnrollmentYearInput>
+  }
+
+  export type StudentUpdateWithWhereUniqueWithoutEnrollmentYearInput = {
+    where: StudentWhereUniqueInput
+    data: XOR<StudentUpdateWithoutEnrollmentYearInput, StudentUncheckedUpdateWithoutEnrollmentYearInput>
+  }
+
+  export type StudentUpdateManyWithWhereWithoutEnrollmentYearInput = {
+    where: StudentScalarWhereInput
+    data: XOR<StudentUpdateManyMutationInput, StudentUncheckedUpdateManyWithoutEnrollmentYearInput>
+  }
+
+  export type StudentScalarWhereInput = {
+    AND?: StudentScalarWhereInput | StudentScalarWhereInput[]
+    OR?: StudentScalarWhereInput[]
+    NOT?: StudentScalarWhereInput | StudentScalarWhereInput[]
+    id?: StringFilter<"Student"> | string
+    studentId?: StringFilter<"Student"> | string
+    firstName?: StringFilter<"Student"> | string
+    middleName?: StringNullableFilter<"Student"> | string | null
+    lastName?: StringFilter<"Student"> | string
+    email?: StringFilter<"Student"> | string
+    phone?: StringFilter<"Student"> | string
+    address?: StringNullableFilter<"Student"> | string | null
+    dateOfBirth?: DateTimeNullableFilter<"Student"> | Date | string | null
+    gender?: EnumGenderFilter<"Student"> | $Enums.Gender
+    enrollmentYearId?: StringFilter<"Student"> | string
+    status?: EnumStudentStatusFilter<"Student"> | $Enums.StudentStatus
+    program?: StringFilter<"Student"> | string
+  }
+
+  export type SchoolYearCreateWithoutSemesterInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Student?: StudentCreateNestedManyWithoutEnrollmentYearInput
+  }
+
+  export type SchoolYearUncheckedCreateWithoutSemesterInput = {
+    id?: string
+    year: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    Student?: StudentUncheckedCreateNestedManyWithoutEnrollmentYearInput
+  }
+
+  export type SchoolYearCreateOrConnectWithoutSemesterInput = {
+    where: SchoolYearWhereUniqueInput
+    create: XOR<SchoolYearCreateWithoutSemesterInput, SchoolYearUncheckedCreateWithoutSemesterInput>
+  }
+
+  export type SchoolYearUpsertWithoutSemesterInput = {
+    update: XOR<SchoolYearUpdateWithoutSemesterInput, SchoolYearUncheckedUpdateWithoutSemesterInput>
+    create: XOR<SchoolYearCreateWithoutSemesterInput, SchoolYearUncheckedCreateWithoutSemesterInput>
+    where?: SchoolYearWhereInput
+  }
+
+  export type SchoolYearUpdateToOneWithWhereWithoutSemesterInput = {
+    where?: SchoolYearWhereInput
+    data: XOR<SchoolYearUpdateWithoutSemesterInput, SchoolYearUncheckedUpdateWithoutSemesterInput>
+  }
+
+  export type SchoolYearUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Student?: StudentUpdateManyWithoutEnrollmentYearNestedInput
+  }
+
+  export type SchoolYearUncheckedUpdateWithoutSemesterInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    year?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    Student?: StudentUncheckedUpdateManyWithoutEnrollmentYearNestedInput
+  }
+
+  export type SemesterCreateManySchoolYearInput = {
+    id?: string
+    semester: string
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+  }
+
+  export type StudentCreateManyEnrollmentYearInput = {
+    id?: string
+    studentId: string
+    firstName: string
+    middleName?: string | null
+    lastName: string
+    email: string
+    phone: string
+    address?: string | null
+    dateOfBirth?: Date | string | null
+    gender: $Enums.Gender
+    status: $Enums.StudentStatus
+    program: string
+  }
+
+  export type SemesterUpdateWithoutSchoolYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SemesterUncheckedUpdateWithoutSchoolYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SemesterUncheckedUpdateManyWithoutSchoolYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    semester?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type StudentUpdateWithoutEnrollmentYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
+    program?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type StudentUncheckedUpdateWithoutEnrollmentYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
+    program?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type StudentUncheckedUpdateManyWithoutEnrollmentYearInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    studentId?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    middleName?: NullableStringFieldUpdateOperationsInput | string | null
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    dateOfBirth?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    status?: EnumStudentStatusFieldUpdateOperationsInput | $Enums.StudentStatus
+    program?: StringFieldUpdateOperationsInput | string
   }
 
 
@@ -2628,9 +5207,21 @@ export namespace Prisma {
    * Aliases for legacy arg types
    */
     /**
+     * @deprecated Use SchoolYearCountOutputTypeDefaultArgs instead
+     */
+    export type SchoolYearCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SchoolYearCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use StudentDefaultArgs instead
      */
     export type StudentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StudentDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use SchoolYearDefaultArgs instead
+     */
+    export type SchoolYearArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SchoolYearDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use SemesterDefaultArgs instead
+     */
+    export type SemesterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SemesterDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

@@ -10,20 +10,40 @@ generator client {
 }
 
 model Student {
-  id             String        @id @default(cuid())
-  studentId      String        @unique
-  firstName      String
-  middleName     String?
-  lastName       String
-  email          String
-  phone          String
-  address        String?
-  dateOfBirth    DateTime?
-  gender         Gender
-  enrollmentYear Int
-  status         StudentStatus
-  program        String
-  yearLevel      yearLevel
+  id               String        @id @default(cuid())
+  studentId        String        @unique
+  firstName        String
+  middleName       String?
+  lastName         String
+  email            String
+  phone            String
+  address          String?
+  dateOfBirth      DateTime?
+  gender           Gender
+  enrollmentYear   SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
+  enrollmentYearId String
+  status           StudentStatus
+  program          String
+}
+
+model SchoolYear {
+  id        String    @id @default(cuid())
+  year      String
+  startDate DateTime?
+  endDate   DateTime?
+
+  Semester Semester[]
+
+  Student Student[]
+}
+
+model Semester {
+  id           String     @id @default(cuid())
+  semester     String
+  startDate    DateTime?
+  endDate      DateTime?
+  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])
+  schoolYearId String
 }
 
 enum Gender {
@@ -36,11 +56,4 @@ enum StudentStatus {
   GRADUATED
   DROPPED
   SUSPENDED
-}
-
-enum yearLevel {
-  FIRST
-  SECOND
-  THIRD
-  FOURTH
 }

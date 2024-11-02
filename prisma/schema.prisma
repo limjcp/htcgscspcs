@@ -79,12 +79,15 @@ model User {
 
   role Role[] @default([unverified])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
 
   student   Student?
   staff     Staff?
   signatory Signatory?
+
+  Appointment Appointment[]
 }
 
 model Student {
@@ -262,6 +265,8 @@ model Department {
 
   Office        Office[]
   ClearanceStep ClearanceStep[]
+
+  Appointment Appointment[]
 }
 
 model Office {
@@ -276,6 +281,8 @@ model Office {
   // New relation for dependencies
   dependentOn  OfficeDependency[] @relation("Dependency") // Office dependencies
   dependencies OfficeDependency[] @relation("Dependent")
+
+  Appointment Appointment[]
 }
 
 model OfficeDependency {
@@ -285,4 +292,18 @@ model OfficeDependency {
 
   requiredId String
   required   Office @relation("Dependent", fields: [requiredId], references: [id])
+}
+
+model Appointment {
+  id              Int      @id @default(autoincrement())
+  userId          String // References the personnel user (staff or signatory)
+  officeId        String? // References the assigned office
+  departmentId    String? // References the assigned department
+  appointmentDate DateTime // Date the personnel was assigned
+
+  user       User        @relation(fields: [userId], references: [id])
+  office     Office?     @relation(fields: [officeId], references: [id])
+  department Department? @relation(fields: [departmentId], references: [id])
+
+  @@unique([userId, officeId, departmentId]) // Ensures unique appointment per office/department
 }
