@@ -72,6 +72,12 @@ const authOptions: NextAuthConfig = {
           officeId = user.signatory.officeId;
         }
 
+        // Update lastLogin
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLogin: new Date() },
+        });
+
         return { ...user, officeId, departmentId };
       },
     }),
@@ -93,6 +99,7 @@ const authOptions: NextAuthConfig = {
       session.user.firstName = token.firstName || null;
       session.user.middleName = token.middleName || null;
       session.user.lastName = token.lastName || null;
+      session.user.lastLogin = token.lastLogin || null;
 
       return session;
     },
@@ -108,6 +115,7 @@ const authOptions: NextAuthConfig = {
         token.firstName = user.firstName;
         token.middleName = user.middleName;
         token.lastName = user.lastName;
+        token.lastLogin = user.lastLogin;
       }
       return token;
     },

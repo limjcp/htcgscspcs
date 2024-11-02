@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
+import { useRouter } from "next/navigation";
 
 export default function RegisterProgram() {
   const [name, setName] = useState("");
@@ -11,6 +12,8 @@ export default function RegisterProgram() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState(""); // Add state for message
   const [loading, setLoading] = useState(false); // Add state for loading
+
+  const router = useRouter();
 
   const fetchPrograms = async () => {
     setLoading(true); // Set loading to true when fetching starts
@@ -80,16 +83,28 @@ export default function RegisterProgram() {
     }
   };
 
+  const handleRegisterDepartment = () => {
+    router.push("/admin-departments");
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Programs</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          + Add Program
-        </button>
+        <div className="space-x-4">
+          <button
+            onClick={handleRegisterDepartment}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Register Department
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            + Add Program
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         {loading ? (
@@ -139,14 +154,14 @@ export default function RegisterProgram() {
         )}
       </div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
+        <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
           <h2 className="text-xl font-bold mb-4">
             {editMode ? "Edit Program" : "Register Program"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
+                className="block text-gray-700 text-sm font-bold mb-2 uppercase"
                 htmlFor="name"
               >
                 Program Name
@@ -163,7 +178,7 @@ export default function RegisterProgram() {
             </div>
             <div>
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
+                className="block text-gray-700 text-sm font-bold mb-2 uppercase"
                 htmlFor="description"
               >
                 Program Description

@@ -12,6 +12,7 @@ import {
   UserRoundCog,
   NotebookPen,
   Settings2,
+  Construction,
 } from "lucide-react";
 
 import { useSession } from "next-auth/react";
@@ -87,60 +88,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               label="Home"
               href="/admin-dashboard"
             />
-            {/* <NavItem icon={<LampDesk />} label="Office" as="button">
-              <Sidebar.Nav.Section className="bg-inherit" isChild>
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Register Office"
-                  href="/admin-offices"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Assign Officer"
-                  href="/admin-officers"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Assign Office Rules"
-                  href="/admin-office-rules"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Assign Department"
-                  href="/admin-offices"
-                />
-              </Sidebar.Nav.Section>
-            </NavItem>
-            <NavItem icon={<LampDesk />} label="Department" as="button">
-              <Sidebar.Nav.Section className="bg-inherit" isChild>
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Register Department"
-                  href="/admin-departments"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Assign Dean"
-                  href="#"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Assign Programs"
-                  href="#"
-                />
-              </Sidebar.Nav.Section>
-            </NavItem> */}
             <NavItem icon={<Plus />} label="Register" as="button">
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Office"
-                  href="/admin-offices"
-                />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Department"
-                  href="/admin-departments"
+                  label="Personnel"
+                  href="/admin-personnel"
                 />
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
@@ -149,8 +102,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 />
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="Personnel"
-                  href="/admin-personnel"
+                  label="Department"
+                  href="/admin-departments"
+                />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Office"
+                  href="/admin-offices"
                 />
               </Sidebar.Nav.Section>
             </NavItem>
@@ -200,6 +158,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   label="Sync"
                   href="/admin-students"
                 />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="List"
+                  href="/admin-student-list"
+                />
               </Sidebar.Nav.Section>
             </NavItem>
             <NavItem
@@ -212,6 +175,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
                   label="Clearance"
                   href="/admin-reports"
+                />
+              </Sidebar.Nav.Section>
+            </NavItem>
+            <NavItem icon={<Construction />} label="Maintenance" as="button">
+              <Sidebar.Nav.Section className="bg-inherit" isChild>
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Appointments"
+                  href="/admin-appointments"
                 />
               </Sidebar.Nav.Section>
             </NavItem>

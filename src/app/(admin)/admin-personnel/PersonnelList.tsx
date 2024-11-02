@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import RegisterStaffSignatory from "./RegisterStaffSignatory";
-import Modal from "./Modal"; // Import the Modal component
+import Modal from "./Modal";
+import { useRouter } from "next/navigation";
 
 const PersonnelList = () => {
   const [personnel, setPersonnel] = useState([]);
@@ -28,61 +29,92 @@ const PersonnelList = () => {
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`/api/personnel/${id}`);
-      fetchPersonnel(); // Refresh the data after deletion
+      fetchPersonnel();
     } catch (error) {
       setMessage("Error deleting personnel.");
     }
   };
 
   const handleRegisterSuccess = () => {
-    fetchPersonnel(); // Refresh the data after successful registration
+    fetchPersonnel();
+  };
+
+  const router = useRouter();
+  const program = () => {
+    router.push("/admin-programs");
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Personnel List</h1>
-      <div className="flex justify-end mb-4">
+    <div className="container mx-auto p-4 sm:p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center text-gray-800">
+        Personnel List
+      </h1>
+
+      <div className="flex flex-col sm:flex-row justify-end mb-4 sm:mb-6 space-y-2 sm:space-y-0 sm:space-x-4">
+        <button
+          onClick={program}
+          className="bg-blue-600 hover:bg-blue-800 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg shadow-md transition duration-300"
+        >
+          Register Program
+        </button>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-green-600 hover:bg-green-800 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg shadow-md transition duration-300"
         >
           Register Personnel
         </button>
       </div>
-      {message && <p className="text-center text-red-500 mb-4">{message}</p>}
+
+      {message && (
+        <p className="text-center text-red-600 mb-4 sm:mb-6">{message}</p>
+      )}
+
       {loading ? (
-        <p className="text-center">Loading...</p>
+        <p className="text-center text-gray-600">Loading...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200">
+        <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
+          <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr>
-                <th className="py-2 px-4 border-b text-center">Name</th>
-                <th className="py-2 px-4 border-b text-center">Email</th>
-                <th className="py-2 px-4 border-b text-center">Username</th>
-                <th className="py-2 px-4 border-b text-center">Role</th>
-                <th className="py-2 px-4 border-b text-center">Actions</th>
+                <th className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-700">
+                  Name
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-700">
+                  Email
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-700">
+                  Username
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-700">
+                  Role
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-700">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {personnel.map((person) => (
-                <tr key={person.id}>
-                  <td className="py-2 px-4 border-b text-center">
+                <tr
+                  key={person.id}
+                  className="hover:bg-gray-100 transition duration-200"
+                >
+                  <td className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-800">
                     {person.firstName} {person.lastName}
                   </td>
-                  <td className="py-2 px-4 border-b text-center">
+                  <td className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-800">
                     {person.email}
                   </td>
-                  <td className="py-2 px-4 border-b text-center">
+                  <td className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-800">
                     {person.username}
                   </td>
-                  <td className="py-2 px-4 border-b text-center">
+                  <td className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center text-gray-800">
                     {person.role}
                   </td>
-                  <td className="py-2 px-4 border-b text-center">
+                  <td className="py-2 sm:py-3 px-2 sm:px-6 border-b text-center">
                     <button
                       onClick={() => handleDelete(person.id)}
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                      className="bg-red-600 hover:bg-red-800 text-white font-semibold py-1 px-2 sm:px-3 rounded-lg shadow-md transition duration-300"
                     >
                       Delete
                     </button>
@@ -93,10 +125,11 @@ const PersonnelList = () => {
           </table>
         </div>
       )}
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <RegisterStaffSignatory
           onClose={() => setIsModalOpen(false)}
-          onSuccess={handleRegisterSuccess} // Pass the success callback
+          onSuccess={handleRegisterSuccess}
         />
       </Modal>
     </div>
