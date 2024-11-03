@@ -4,7 +4,7 @@ import PersonnelList from "./PersonnelList"; // Import the new component
 
 const RegisterStaffSignatory: React.FC = () => {
   return (
-    <div className="container mx-auto p-4">
+    <div className="min-h-screen mx-auto p-4">
       <PersonnelList />
     </div>
   );

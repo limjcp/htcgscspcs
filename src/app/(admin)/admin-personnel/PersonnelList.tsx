@@ -45,7 +45,7 @@ const PersonnelList = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 bg-gray-100 min-h-screen">
+    <div className=" mx-auto p-4 sm:p-6 min-h-screen">
       <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-8 text-center text-gray-800">
         Personnel List
       </h1>
@@ -61,7 +61,7 @@ const PersonnelList = () => {
           onClick={() => setIsModalOpen(true)}
           className="bg-green-600 hover:bg-green-800 text-white font-semibold py-2 px-4 sm:px-6 rounded-lg shadow-md transition duration-300"
         >
-          Register Personnel
+          + Add Personnel
         </button>
       </div>
 

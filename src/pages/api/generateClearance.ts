@@ -22,8 +22,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const schoolYearId = semester.schoolYear.id;
 
-    // Fetch all students
+    // Fetch all students who are not archived
     const students = await prisma.student.findMany({
+      where: { archived: false },
       include: {
         program: {
           include: {
@@ -49,28 +50,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
-        // Create office steps
-        const officeSteps = offices.map((office) => ({
-          clearanceId: clearance.id,
-          officeId: office.id,
-          status: "PENDING",
-        }));
+        // Create office steps with department-specific signatories if applicable
+        for (const office of offices) {
+          if (office.departmentId) {
+            const departmentStep = {
+              clearanceId: clearance.id,
+              officeId: office.id,
+              departmentId: student.program.department.id,
+              status: "PENDING",
+            };
 
-        await prisma.clearanceStep.createMany({
-          data: officeSteps,
-        });
+            await prisma.clearanceStep.create({
+              data: departmentStep,
+            });
+          } else {
+            const officeStep = {
+              clearanceId: clearance.id,
+              officeId: office.id,
+              status: "PENDING",
+            };
 
-        // Create department step if department exists
-        if (student.program.department?.id) {
-          const departmentStep = {
-            clearanceId: clearance.id,
-            departmentId: student.program.department.id,
-            status: "PENDING",
-          };
-
-          await prisma.clearanceStep.create({
-            data: departmentStep,
-          });
+            await prisma.clearanceStep.create({
+              data: officeStep,
+            });
+          }
         }
 
         // Send email to the student about clearance availability
@@ -93,9 +96,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("Created Clearances:", clearances);
 
-    res
-      .status(200)
-      .json({ message: "Clearance generated successfully for all students!" });
+    // Log the clearance generation
+    const logEntry = await prisma.clearanceLog.create({
+      data: {
+        schoolYear: `${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,
+        semester: semester.name,
+      },
+    });
+
+    res.status(200).json({
+      message: "Clearance generated successfully for all students!",
+      logEntry,
+    });
   } catch (error) {
     console.error("Error generating clearance:", error);
     res.status(500).json({ error: "Internal server error" });

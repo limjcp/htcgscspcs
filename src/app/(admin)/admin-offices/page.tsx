@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Department {
   id: string;
@@ -23,6 +24,7 @@ interface Office {
 }
 
 export default function Office() {
+  const router = useRouter();
   const [offices, setOffices] = useState<Office[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [personnel, setPersonnel] = useState<User[]>([]);
@@ -33,6 +35,7 @@ export default function Office() {
   const [currentStaff, setCurrentStaff] = useState<string | null>(null);
   const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDepartmentBased, setIsDepartmentBased] = useState(false);
 
   useEffect(() => {
     fetchOffices();
@@ -45,7 +48,13 @@ export default function Office() {
     try {
       const response = await fetch("/api/offices");
       const data = await response.json();
-      setOffices(Array.isArray(data) ? data : []);
+      console.log("Fetched offices data:", data); // Debugging statement
+      // Map the data to use 'departments' instead of 'Department'
+      const mappedData = data.map((office: any) => ({
+        ...office,
+        departments: office.Department,
+      }));
+      setOffices(Array.isArray(mappedData) ? mappedData : []);
     } catch (error) {
       console.error("Failed to fetch offices:", error);
       setOffices([]);
@@ -86,7 +95,11 @@ export default function Office() {
     const response = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, departmentIds: selectedDepartments }),
+      body: JSON.stringify({
+        name,
+        departmentIds: isDepartmentBased ? selectedDepartments : [],
+        isDepartmentBased,
+      }),
     });
 
     if (response.ok) {
@@ -94,9 +107,12 @@ export default function Office() {
       setName("");
       setCurrentOffice(null);
       setSelectedDepartments([]);
+      setIsDepartmentBased(false);
       fetchOffices();
       setIsModalOpen(false);
-      await handleAssignPersonnel(); // Call handleAssignPersonnel after office is created/updated
+      if (!isDepartmentBased) {
+        await handleAssignPersonnel(); // Call handleAssignPersonnel after office is created/updated
+      }
       await handleSaveOffice(); // Call handleSaveOffice after office is created/updated
     } else {
       alert(`Failed to ${currentOffice ? "update" : "create"} office.`);
@@ -116,6 +132,7 @@ export default function Office() {
   const handleEdit = (office: Office) => {
     setCurrentOffice(office);
     setName(office.name);
+    setIsDepartmentBased(office.isDepartmentBased || false);
     setSelectedDepartments(
       office.departments
         ? office.departments.map((department) => department.id)
@@ -285,8 +302,29 @@ export default function Office() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">Offices</h2>
+    <div className="min-h-screen  mx-auto p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Offices</h2>
+        <div>
+          <button
+            onClick={() => router.push("/admin-personnel")}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+          >
+            Register Personnel
+          </button>
+          <button
+            onClick={() => {
+              setCurrentOffice(null);
+              setName("");
+              setSelectedDepartments([]);
+              setIsModalOpen(true);
+            }}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            + Add Office
+          </button>
+        </div>
+      </div>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -319,7 +357,7 @@ export default function Office() {
                 <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
                   {office.departments
                     ?.map((department) => department.name)
-                    .join(", ")}
+                    .join(", ") || "No departments assigned"}
                 </td>
                 <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
                   {office.staff
@@ -356,17 +394,6 @@ export default function Office() {
           </tbody>
         </table>
       )}
-      <button
-        onClick={() => {
-          setCurrentOffice(null);
-          setName("");
-          setSelectedDepartments([]);
-          setIsModalOpen(true);
-        }}
-        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        + Add Office
-      </button>
       {isModalOpen && (
         <div
           className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
@@ -395,70 +422,95 @@ export default function Office() {
                   />
                 </div>
                 <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    Assign Departments
-                  </h4>
-                  {departments.map((department) => (
-                    <div key={department.id} className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        id={`department-${department.id}`}
-                        checked={selectedDepartments.includes(department.id)}
-                        onChange={(e) => {
-                          setSelectedDepartments((prev) =>
-                            e.target.checked
-                              ? [...prev, department.id]
-                              : prev.filter((id) => id !== department.id)
-                          );
-                        }}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor={`department-${department.id}`}
-                        className="ml-2 block text-sm text-gray-900"
+                  <label
+                    htmlFor="isDepartmentBased"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Is Department Based
+                  </label>
+                  <input
+                    type="checkbox"
+                    id="isDepartmentBased"
+                    checked={isDepartmentBased}
+                    onChange={(e) => setIsDepartmentBased(e.target.checked)}
+                    className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                </div>
+                {isDepartmentBased ? (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Assign Departments
+                    </h4>
+                    {departments.map((department) => (
+                      <div
+                        key={department.id}
+                        className="flex items-center mb-2"
                       >
-                        {department.name}
-                      </label>
+                        <input
+                          type="checkbox"
+                          id={`department-${department.id}`}
+                          checked={selectedDepartments.includes(department.id)}
+                          onChange={(e) => {
+                            setSelectedDepartments((prev) =>
+                              e.target.checked
+                                ? [...prev, department.id]
+                                : prev.filter((id) => id !== department.id)
+                            );
+                          }}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor={`department-${department.id}`}
+                          className="ml-2 block text-sm text-gray-900"
+                        >
+                          {department.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Assign Personnel
+                      </h4>
+                      <select
+                        value={currentStaff || ""}
+                        onChange={(e) =>
+                          setCurrentStaff(
+                            e.target.value ? e.target.value : null
+                          )
+                        }
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      >
+                        <option value="">Select staff</option>
+                        {personnel.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.firstName} {p.lastName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  ))}
-                </div>
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    Assign Personnel
-                  </h4>
-                  <select
-                    value={currentStaff || ""}
-                    onChange={(e) =>
-                      setCurrentStaff(e.target.value ? e.target.value : null)
-                    }
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                  >
-                    <option value="">Select staff</option>
-                    {personnel.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.firstName} {p.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <select
-                    value={currentSignatory || ""}
-                    onChange={(e) =>
-                      setCurrentSignatory(
-                        e.target.value ? e.target.value : null
-                      )
-                    }
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                  >
-                    <option value="">Select signatory</option>
-                    {personnel.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.firstName} {p.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    <div className="mb-4">
+                      <select
+                        value={currentSignatory || ""}
+                        onChange={(e) =>
+                          setCurrentSignatory(
+                            e.target.value ? e.target.value : null
+                          )
+                        }
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      >
+                        <option value="">Select signatory</option>
+                        {personnel.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.firstName} {p.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
                 <div className="flex items-center justify-between px-4 py-3">
                   <button
                     type="button"

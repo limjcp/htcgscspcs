@@ -182,6 +182,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem
                   icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Reset Password"
+                  href="/admin-reset-password"
+                />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
                   label="Appointments"
                   href="/admin-appointments"
                 />

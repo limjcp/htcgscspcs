@@ -88,7 +88,7 @@ export default function RegisterProgram() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Programs</h2>
         <div className="space-x-4">

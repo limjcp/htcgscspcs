@@ -8,20 +8,58 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { year } = req.query;
+
+  if (!year) {
+    return res.status(400).json({ error: "Year parameter is required" });
+  }
+
   try {
+    // Fetch or create the school year in PostgreSQL
+    let schoolYear = await prisma.schoolYear.findFirst({
+      where: { year: year as string },
+    });
+
+    if (!schoolYear) {
+      schoolYear = await prisma.schoolYear.create({
+        data: {
+          year: year as string,
+          startYear: parseInt((year as string).split("-")[0]),
+          endYear: parseInt((year as string).split("-")[1]),
+        },
+      });
+      console.log("Created new school year in PostgreSQL:", schoolYear);
+    }
+
     // Fetch students from MySQL using Prisma
-    const mysqlStudents = await mysqlPrisma.student.findMany();
+    const mysqlStudents = await mysqlPrisma.student.findMany({
+      where: {
+        enrollmentYear: {
+          year: year as string,
+        },
+      },
+    });
 
     console.log("Fetched students from MySQL:", mysqlStudents);
 
     const postgresStudents = await prisma.student.findMany();
-    const postgresStudentEmails = postgresStudents.map(
-      (student) => student.email
-    );
 
     for (const mysqlStudent of mysqlStudents) {
       // Check if the student exists in PostgreSQL
-      if (!postgresStudentEmails.includes(mysqlStudent.email)) {
+      const existingStudent = postgresStudents.find(
+        (student) => student.email === mysqlStudent.email
+      );
+
+      if (existingStudent) {
+        // Unarchive the student if they are archived
+        if (existingStudent.archived) {
+          await prisma.student.update({
+            where: { id: existingStudent.id },
+            data: { archived: false },
+          });
+          console.log("Student unarchived in PostgreSQL:", mysqlStudent.email);
+        }
+      } else {
         const closestProgram = await prisma.program.findFirst({
           where: {
             name: {
@@ -42,8 +80,7 @@ export default async function handler(
               studentId: mysqlStudent.studentId || "", // Provide a default value
               phone: mysqlStudent.phone || "", // Provide a default value
               gender: mysqlStudent.gender || "OTHER", // Provide a default value
-              enrollmentYear: mysqlStudent.enrollmentYear || 0, // Provide a default value
-              yearLevel: mysqlStudent.yearLevel || "FIRST", // Provide a default value
+              enrollmentYearId: schoolYear.id, // Link to the school year
             },
           });
           console.log("Student created in PostgreSQL:", mysqlStudent.email);
@@ -51,12 +88,15 @@ export default async function handler(
       }
     }
 
-    // Archive students that no longer exist in MySQL
+    // Archive students that are not included in the MySQL students for the given year
     const mysqlStudentEmails = mysqlStudents.map((student) => student.email);
     for (const student of postgresStudents) {
-      if (!mysqlStudentEmails.includes(student.email)) {
+      if (
+        !mysqlStudentEmails.includes(student.email) &&
+        student.enrollmentYearId !== schoolYear.id
+      ) {
         await prisma.student.update({
-          where: { studentId: student.studentId },
+          where: { id: student.id },
           data: { archived: true },
         });
         console.log("Student archived in PostgreSQL:", student.email);

@@ -1,189 +1,146 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
+import AssignProgramRolesModal from "./AssignProgramRolesModal"; // Adjust the import path as needed
 
-export default function Page() {
-  const [departments, setDepartments] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState("");
-  const [isDeanAssigned, setIsDeanAssigned] = useState(false);
+interface Staff {
+  id: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}
+
+interface Signatory {
+  id: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  programHead?: Signatory;
+  programPresident?: Staff;
+}
+
+const AssignProgramRolesPage = () => {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
+  const [currentProgramHead, setCurrentProgramHead] = useState<string | null>(
+    null
+  );
+  const [currentProgramPresident, setCurrentProgramPresident] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     fetchDepartments();
-    fetchUsers();
   }, []);
 
-  const fetchDepartments = async () => {
-    const res = await axios.get("/api/departments");
-    const departmentsWithDeanId = res.data.map((department) => {
-      console.log("Department data:", department); // Add logging to inspect the department data
-      return {
-        ...department,
-        deanId: department.deanId, // Ensure deanId is set
-      };
-    });
-    console.log("Fetched departments with deanId:", departmentsWithDeanId); // Add logging
-    setDepartments(departmentsWithDeanId);
+  const fetchDepartments = () => {
+    fetch("/api/departments")
+      .then((response) => response.json())
+      .then((data) => setDepartments(data))
+      .catch((error) => console.error("Error fetching departments:", error));
   };
 
-  const fetchUsers = async () => {
-    const res = await axios.get("/api/users-dean");
-    setUsers(res.data);
-  };
+  const handleAssignClick = (id: string) => {
+    setSelectedDepartmentId(id);
 
-  const showModal = (department) => {
-    setSelectedDepartment(department);
-    setIsDeanAssigned(department.deanId ? true : false);
-    setIsModalVisible(true);
-  };
+    const department = departments.find((dept) => dept.id === id);
 
-  const handleOk = async () => {
-    try {
-      console.log("Assigning dean with parameters:", {
-        departmentId: selectedDepartment.id,
-        userId: selectedUser,
-      });
-
-      await axios.post("/api/assign-dean", {
-        departmentId: selectedDepartment.id,
-        userId: selectedUser,
-      });
-
-      console.log("Updating roles with parameters:", {
-        userId: selectedUser,
-        newRoles: ["dean", "signatory"],
-      });
-
-      await axios.post("/api/update-role", {
-        userId: selectedUser,
-        newRoles: ["dean", "signatory"], // Ensure the parameter name matches the backend
-      });
-
-      setIsModalVisible(false);
-      fetchDepartments(); // Refresh the departments list
-    } catch (error) {
-      console.error("Error assigning dean or updating roles:", error);
-      // Optionally, display an error message to the user
+    if (department) {
+      setCurrentProgramHead(department.programHead?.id || null);
+      setCurrentProgramPresident(department.programPresident?.id || null);
     }
+
+    setIsModalOpen(true);
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleReset = async (departmentId) => {
-    try {
-      const department = departments.find((dept) => dept.id === departmentId);
-      console.log("Department found for reset:", department); // Add logging
-
-      if (department && department.deanId) {
-        console.log("Removing dean with parameters:", {
-          departmentId,
-          deanId: department.deanId,
-        });
-
-        await axios.post("/api/remove-dean", {
-          departmentId,
-        });
-
-        console.log("Reverting roles with parameters:", {
-          userId: department.deanId,
-          newRoles: ["personnel"],
-        });
-
-        await axios.post("/api/update-role", {
-          userId: department.deanId,
-          newRoles: ["personnel"], // Revert the role to only "personnel"
-        });
-
-        fetchDepartments(); // Refresh the departments list
-      } else {
-        console.error("No dean found for department:", departmentId);
-      }
-    } catch (error) {
-      console.error("Error resetting dean:", error);
-      // Optionally, display an error message to the user
-    }
-  };
+  if (!departments.length) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Departments</h1>
-      <table className="min-w-full bg-white border border-gray-200">
-        <thead>
-          <tr>
-            <th className="px-4 py-2 border-b text-left">Department</th>
-            <th className="px-4 py-2 border-b text-left">Dean</th>
-            <th className="px-4 py-2 border-b text-left">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {departments.map((department) => (
-            <tr key={department.id} className="hover:bg-gray-100">
-              <td className="px-4 py-2 border-b text-left">
-                {department.name}
-              </td>
-              <td className="px-4 py-2 border-b text-left">
-                {department.dean ? department.dean : "No Dean Assigned"}
-              </td>
-              <td className="px-4 py-2 border-b text-left">
-                <button
-                  onClick={() => showModal(department)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-                  disabled={department.deanId ? true : false}
-                >
-                  Assign Dean
-                </button>
-                <button
-                  onClick={() => handleReset(department.id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded"
-                >
-                  Reset Dean
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Assign Program Roles</h1>
 
-      {isModalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Select a Dean</h2>
-            <select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="mb-4 p-2 border rounded"
-            >
-              <option value="" disabled>
-                Select a user
-              </option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
+      <div className="min-h-[400px]">
+        <h2 className="text-2xl font-semibold mb-4">Departments</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                  Department Name
+                </th>
+                <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                  Program Head
+                </th>
+                <th className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                  Program President
+                </th>
+                <th className="py-2 px-4 border-b border-gray-300 text-left">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {departments.map((department) => (
+                <tr key={department.id} className="hover:bg-gray-100">
+                  <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                    {department.name}
+                  </td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                    {department.programHead
+                      ? `${department.programHead.firstName} ${
+                          department.programHead.middleName || ""
+                        } ${department.programHead.lastName}`
+                      : "Not Assigned"}
+                  </td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-left border-r">
+                    {department.programPresident
+                      ? `${department.programPresident.firstName} ${
+                          department.programPresident.middleName || ""
+                        } ${department.programPresident.lastName}`
+                      : "Not Assigned"}
+                  </td>
+                  <td className="py-2 px-4 border-b border-gray-300 text-left">
+                    <button
+                      onClick={() => handleAssignClick(department.id)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded"
+                    >
+                      {department.programHead || department.programPresident
+                        ? "Reassign"
+                        : "Assign"}
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </select>
-            <div className="flex justify-end">
-              <button
-                onClick={handleOk}
-                className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-                disabled={!selectedUser}
-              >
-                Assign
-              </button>
-              <button
-                onClick={handleCancel}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
+
+      <AssignProgramRolesModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          fetchDepartments(); // Refresh the data after closing the modal
+        }}
+        departmentId={selectedDepartmentId}
+        currentProgramHead={currentProgramHead}
+        currentProgramPresident={currentProgramPresident}
+      />
     </div>
   );
-}
+};
+
+export default AssignProgramRolesPage;

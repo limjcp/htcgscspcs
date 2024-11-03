@@ -41,13 +41,6 @@ enum ClearanceStatus {
   SIGNED
 }
 
-enum yearLevel {
-  FIRST
-  SECOND
-  THIRD
-  FOURTH
-}
-
 enum SemesterStatus {
   NULL
   ONGOING
@@ -91,24 +84,24 @@ model User {
 }
 
 model Student {
-  id             String        @id @default(cuid())
-  user           User?         @relation(fields: [userId], references: [id])
-  userId         String?       @unique
-  studentId      String        @unique
-  firstName      String
-  middleName     String?
-  lastName       String
-  email          String
-  phone          String
-  address        String?
-  dateOfBirth    DateTime?
-  gender         Gender
-  enrollmentYear Int
-  status         StudentStatus @default(ENROLLED)
-  clearances     Clearance[]
-  program        Program       @relation(fields: [programId], references: [id])
-  programId      String
-  yearLevel      yearLevel
+  id               String        @id @default(cuid())
+  user             User?         @relation(fields: [userId], references: [id])
+  userId           String?       @unique
+  studentId        String        @unique
+  firstName        String
+  middleName       String?
+  lastName         String
+  email            String
+  phone            String
+  address          String?
+  dateOfBirth      DateTime?
+  gender           Gender
+  enrollmentYear   SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
+  enrollmentYearId String
+  status           StudentStatus @default(ENROLLED)
+  clearances       Clearance[]
+  program          Program       @relation(fields: [programId], references: [id])
+  programId        String
 
   // Add the department field derived from the program
   department   Department?          @relation(fields: [departmentId], references: [id])
@@ -129,6 +122,8 @@ model Staff {
   office       Office? @relation(fields: [officeId], references: [id]) // Can belong to an office
   officeId     String?
   departmentId String?
+
+  Department Department[]
 }
 
 model Signatory {
@@ -197,6 +192,8 @@ model SchoolYear {
 
   Requirement Requirement[]
   status      SchoolYearStatus @default(NULL)
+
+  Student Student[]
 }
 
 model Semester {
@@ -254,25 +251,28 @@ model Report {
 }
 
 model Department {
-  id            String        @id @default(cuid())
-  name          String        @unique
-  description   String        @default("no description")
-  programs      Program[] // Relation to the Program model
-  programHead   Signatory?    @relation(name: "ProgramHead", fields: [programHeadid], references: [id]) // Assign one Program Head per department
-  programHeadid String?
-  requirements  Requirement[]
-  students      Student[] // Track students belonging to the department
+  id                 String        @id @default(cuid())
+  name               String        @unique
+  description        String        @default("no description")
+  programs           Program[] // Relation to the Program model
+  programHead        Signatory?    @relation(name: "ProgramHead", fields: [programHeadId], references: [id]) // Assign one Program Head per department
+  programHeadId      String?
+  programPresident   Staff?        @relation(fields: [programPresidentId], references: [id])
+  programPresidentId String?
+  requirements       Requirement[]
+  students           Student[] // Track students belonging to the department
 
-  Office        Office[]
   ClearanceStep ClearanceStep[]
 
   Appointment Appointment[]
+
+  Office Office[] @relation("DepartmentOffices, references: [id]") // Many-to-many relation with Program
 }
 
 model Office {
-  id             String          @id @default(cuid())
-  name           String          @unique
-  departments    Department[] // Many-to-many relation with Program
+  id   String @id @default(cuid())
+  name String @unique
+
   staff          Staff[]
   signatory      Signatory[]
   requirements   Requirement[]
@@ -283,6 +283,8 @@ model Office {
   dependencies OfficeDependency[] @relation("Dependent")
 
   Appointment Appointment[]
+
+  Department Department[] @relation("DepartmentOffices, references: [id]")
 }
 
 model OfficeDependency {
@@ -306,4 +308,11 @@ model Appointment {
   department Department? @relation(fields: [departmentId], references: [id])
 
   @@unique([userId, officeId, departmentId]) // Ensures unique appointment per office/department
+}
+
+model ClearanceLog {
+  id          String   @id @default(cuid())
+  schoolYear  String
+  semester    String
+  generatedAt DateTime @default(now())
 }

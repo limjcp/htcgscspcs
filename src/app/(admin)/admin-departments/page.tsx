@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const DepartmentPage = () => {
   const [name, setName] = useState("");
@@ -10,6 +11,7 @@ const DepartmentPage = () => {
   const [editingDepartment, setEditingDepartment] = useState(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const fetchDepartments = async () => {
     setLoading(true);
@@ -147,12 +149,20 @@ const DepartmentPage = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex justify-between">
         <h2 className="text-2xl font-bold mb-4">Departments</h2>
-        <button
-          onClick={() => setIsFormModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
-        >
-          + Add Department
-        </button>
+        <div>
+          <button
+            onClick={() => router.push("/admin-offices")}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
+          >
+            Register Office
+          </button>
+          <button
+            onClick={() => setIsFormModalOpen(true)}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
+          >
+            + Add Department
+          </button>
+        </div>
       </div>
       {loading ? (
         <p>Loading...</p>

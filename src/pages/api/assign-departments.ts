@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await prisma.office.update({
         where: { id: officeId },
         data: {
-          departments: {
+          Department: {
             set: departmentIds.map((id) => ({ id })),
           },
         },
