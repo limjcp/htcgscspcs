@@ -26,7 +26,6 @@ function ClearanceGenerationPage() {
         console.error("Error fetching school years:", error);
       }
     };
-
     fetchSchoolYears();
   }, []);
 
@@ -49,7 +48,6 @@ function ClearanceGenerationPage() {
           console.error("Error fetching semesters:", error);
         }
       };
-
       fetchSemesters();
     }
   }, [schoolYearId]);
@@ -70,7 +68,6 @@ function ClearanceGenerationPage() {
         console.error("Error fetching activity log:", error);
       }
     };
-
     fetchActivityLog();
   }, []);
 
@@ -86,7 +83,6 @@ function ClearanceGenerationPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-
     try {
       const response = await fetch("/api/generateClearance", {
         method: "POST",
@@ -108,8 +104,9 @@ function ClearanceGenerationPage() {
         setActivityLog((prevLog) => [...prevLog, logMessage]);
         setMessage("Clearance generated successfully!");
       } else {
-        const errorData = await response.json();
-        setMessage(errorData.error || "Failed to generate clearance.");
+        const errorText = await response.text();
+        console.error("Error response text:", errorText);
+        setMessage("Failed to generate clearance.");
       }
     } catch (error) {
       setMessage("Failed to generate clearance.");
@@ -182,7 +179,7 @@ function ClearanceGenerationPage() {
         <ul className="list-disc pl-5">
           {activityLog.map((log, index) => (
             <li key={index} className="text-gray-700">
-              Genarated clreance for Academic Year {log.schoolYear},{" "}
+              Generated clearance for Academic Year {log.schoolYear},{" "}
               {log.semester}, at{" "}
               {new Date(log.generatedAt).toLocaleDateString()}
             </li>

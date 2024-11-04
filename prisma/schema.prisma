@@ -84,24 +84,26 @@ model User {
 }
 
 model Student {
-  id               String        @id @default(cuid())
-  user             User?         @relation(fields: [userId], references: [id])
-  userId           String?       @unique
-  studentId        String        @unique
-  firstName        String
-  middleName       String?
-  lastName         String
-  email            String
-  phone            String
-  address          String?
-  dateOfBirth      DateTime?
-  gender           Gender
-  enrollmentYear   SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
-  enrollmentYearId String
-  status           StudentStatus @default(ENROLLED)
-  clearances       Clearance[]
-  program          Program       @relation(fields: [programId], references: [id])
-  programId        String
+  id                   String        @id @default(cuid())
+  user                 User?         @relation(fields: [userId], references: [id])
+  userId               String?       @unique
+  studentId            String        @unique
+  firstName            String
+  middleName           String?
+  lastName             String
+  email                String
+  phone                String
+  address              String?
+  dateOfBirth          DateTime?
+  gender               Gender
+  enrollmentYear       SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
+  enrollmentYearId     String
+  enrollmentSemester   Semester      @relation(fields: [enrollmentSemesterId], references: [id])
+  enrollmentSemesterId String
+  status               StudentStatus @default(ENROLLED)
+  clearances           Clearance[]
+  program              Program       @relation(fields: [programId], references: [id])
+  programId            String
 
   // Add the department field derived from the program
   department   Department?          @relation(fields: [departmentId], references: [id])
@@ -207,6 +209,8 @@ model Semester {
 
   Requirement Requirement[]
   status      SemesterStatus @default(NULL)
+
+  Student Student[]
 }
 
 model Clearance {
@@ -297,11 +301,12 @@ model OfficeDependency {
 }
 
 model Appointment {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   userId          String // References the personnel user (staff or signatory)
   officeId        String? // References the assigned office
   departmentId    String? // References the assigned department
   appointmentDate DateTime // Date the personnel was assigned
+  resignationDate DateTime? // Date the personnel resigned or was unassigned
 
   user       User        @relation(fields: [userId], references: [id])
   office     Office?     @relation(fields: [officeId], references: [id])

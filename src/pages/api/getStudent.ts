@@ -8,7 +8,11 @@ export default async function handler(
   const students = await prisma.student.findMany({
     where: { archived: false },
     include: {
-      program: true,
+      program: {
+        include: {
+          department: true,
+        },
+      },
     },
   });
 

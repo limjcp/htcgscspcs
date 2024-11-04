@@ -10,20 +10,22 @@ generator client {
 }
 
 model Student {
-  id               String        @id @default(cuid())
-  studentId        String        @unique
-  firstName        String
-  middleName       String?
-  lastName         String
-  email            String
-  phone            String
-  address          String?
-  dateOfBirth      DateTime?
-  gender           Gender
-  enrollmentYear   SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
-  enrollmentYearId String
-  status           StudentStatus
-  program          String
+  id                   String        @id @default(cuid())
+  studentId            String        @unique
+  firstName            String
+  middleName           String?
+  lastName             String
+  email                String
+  phone                String
+  address              String?
+  dateOfBirth          DateTime?
+  gender               Gender
+  enrollmentYear       SchoolYear    @relation(fields: [enrollmentYearId], references: [id])
+  enrollmentYearId     String
+  enrollmentSemester   Semester      @relation(fields: [enrollmentSemesterId], references: [id])
+  enrollmentSemesterId String
+  status               StudentStatus
+  program              String
 }
 
 model SchoolYear {
@@ -44,6 +46,8 @@ model Semester {
   endDate      DateTime?
   schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])
   schoolYearId String
+
+  Student Student[]
 }
 
 enum Gender {

@@ -3,6 +3,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "tailwindcss/tailwind.css";
 
+type Department = {
+  id: number;
+  name: string;
+};
+
 type Student = {
   id: number;
   firstName: string;
@@ -10,7 +15,9 @@ type Student = {
   email: string;
   program: {
     name: string;
+    department?: Department;
   };
+
   studentId: string;
   userCreated: boolean;
   archived: boolean;
@@ -20,11 +27,19 @@ type Year = {
   year: string;
 };
 
+type Semester = {
+  id: string;
+  semester: string;
+  schoolYearId: string;
+};
+
 export default function Students() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [years, setYears] = useState<Year[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -47,16 +62,37 @@ export default function Students() {
     fetchYears();
   }, []);
 
+  useEffect(() => {
+    async function fetchSemesters(year: string) {
+      const res = await axios.get(`/api/getSemestersMysql?year=${year}`);
+      setSemesters(res.data);
+    }
+
+    if (selectedYear) {
+      fetchSemesters(selectedYear);
+    }
+  }, [selectedYear]);
+
   const handleSyncData = async () => {
-    if (!selectedYear) {
-      alert("Please select a year to sync.");
+    if (!selectedYear || !selectedSemester) {
+      alert("Please select both a year and a semester to sync.");
       return;
     }
     setLoading(true);
-    await axios.post(`/api/syncStudents?year=${selectedYear}`);
-    const res = await axios.get("/api/getStudent");
-    setStudents(res.data);
-    setLoading(false);
+    try {
+      await axios.post(
+        `/api/syncStudents?year=${selectedYear}&semester=${selectedSemester}`
+      );
+      const res = await axios.get("/api/getStudent");
+      setStudents(res.data);
+    } catch (error) {
+      console.error("Error syncing students:", error);
+      alert(
+        "Failed to sync students. Please check the console for more details."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateAccounts = async () => {
@@ -74,11 +110,24 @@ export default function Students() {
     );
   };
 
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      const allStudentIds = filteredStudents.map((student) => student.id);
+      setSelectedStudents(allStudentIds);
+    } else {
+      setSelectedStudents([]);
+    }
+  };
+
   const filteredStudents = students.filter(
     (student) =>
       !student.userCreated &&
       (student.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.lastName.toLowerCase().includes(searchQuery.toLowerCase()))
+        student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (student.program.department &&
+          student.program.department.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())))
   );
 
   return (
@@ -94,6 +143,18 @@ export default function Students() {
           {years.map((year) => (
             <option key={year.year} value={year.year}>
               {year.year}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedSemester}
+          onChange={(e) => setSelectedSemester(e.target.value)}
+          className="border border-gray-300 rounded px-4 py-2"
+        >
+          <option value="">Select Semester</option>
+          {semesters.map((semester) => (
+            <option key={semester.id} value={semester.semester}>
+              {semester.semester}
             </option>
           ))}
         </select>
@@ -117,12 +178,11 @@ export default function Students() {
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr>
-              <th className="px-4 py-2 border-b text-left">ID</th>
+              <th className="px-4 py-2 border-b text-left">Student ID</th>
               <th className="px-4 py-2 border-b text-left">Name</th>
               <th className="px-4 py-2 border-b text-left">Email</th>
               <th className="px-4 py-2 border-b text-left">Program</th>
-              <th className="px-4 py-2 border-b text-left">User Created</th>
-              <th className="px-4 py-2 border-b text-left">Archived</th>
+              <th className="px-4 py-2 border-b text-left">Department</th>
             </tr>
           </thead>
           <tbody>
@@ -141,10 +201,9 @@ export default function Students() {
                   {student.program.name}
                 </td>
                 <td className="px-4 py-2 border-b text-left">
-                  {student.userCreated ? "yes" : "no"}
-                </td>
-                <td className="px-4 py-2 border-b text-left">
-                  {student.archived ? "yes" : "no"}
+                  {student.program.department
+                    ? student.program.department.name
+                    : "No department"}
                 </td>
               </tr>
             ))}
@@ -160,7 +219,7 @@ export default function Students() {
             </h2>
             <input
               type="text"
-              placeholder="Search by name"
+              placeholder="Search by name or department"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="border border-gray-300 rounded px-4 py-2 mb-4 w-full"
@@ -169,11 +228,20 @@ export default function Students() {
               <table className="min-w-full bg-white border border-gray-200">
                 <thead>
                   <tr>
-                    <th className="px-4 py-2 border-b text-left">Select</th>
-                    <th className="px-4 py-2 border-b text-left">ID</th>
+                    <th className="px-4 py-2 border-b text-left">
+                      <input
+                        type="checkbox"
+                        onChange={handleSelectAll}
+                        checked={
+                          selectedStudents.length === filteredStudents.length
+                        }
+                      />
+                    </th>
+                    <th className="px-4 py-2 border-b text-left">Student ID</th>
                     <th className="px-4 py-2 border-b text-left">Name</th>
                     <th className="px-4 py-2 border-b text-left">Email</th>
                     <th className="px-4 py-2 border-b text-left">Program</th>
+                    <th className="px-4 py-2 border-b text-left">Department</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -197,6 +265,11 @@ export default function Students() {
                       </td>
                       <td className="px-4 py-2 border-b text-left">
                         {student.program.name}
+                      </td>
+                      <td className="px-4 py-2 border-b text-left">
+                        {student.program.department
+                          ? student.program.department.name
+                          : "No department"}
                       </td>
                     </tr>
                   ))}

@@ -44,7 +44,7 @@ const RegisterSchoolYear: React.FC = () => {
         semesters: [
           {
             ...prev.semesters[0],
-            name: `${semesterType} ${year}`,
+            name: `${semesterType}`,
           },
         ],
       }));

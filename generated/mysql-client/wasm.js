@@ -134,6 +134,7 @@ exports.Prisma.StudentScalarFieldEnum = {
   dateOfBirth: 'dateOfBirth',
   gender: 'gender',
   enrollmentYearId: 'enrollmentYearId',
+  enrollmentSemesterId: 'enrollmentSemesterId',
   status: 'status',
   program: 'program'
 };

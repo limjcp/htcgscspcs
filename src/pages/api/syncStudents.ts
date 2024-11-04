@@ -8,13 +8,47 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { year } = req.query;
+  const { year, semester } = req.query;
 
-  if (!year) {
-    return res.status(400).json({ error: "Year parameter is required" });
+  if (!year || !semester) {
+    return res
+      .status(400)
+      .json({ error: "Year and semester parameters are required" });
   }
 
   try {
+    console.log(
+      "Starting sync process for year:",
+      year,
+      "and semester:",
+      semester
+    );
+
+    // Fetch the school year from MySQL
+    const mysqlSchoolYear = await mysqlPrisma.schoolYear.findFirst({
+      where: { year: year as string },
+    });
+
+    if (!mysqlSchoolYear) {
+      return res.status(404).json({ error: "School year not found in MySQL" });
+    }
+
+    console.log("Found school year in MySQL:", mysqlSchoolYear);
+
+    // Fetch the semester from MySQL
+    const mysqlSemester = await mysqlPrisma.semester.findFirst({
+      where: {
+        semester: semester as string,
+        schoolYearId: mysqlSchoolYear.id,
+      },
+    });
+
+    if (!mysqlSemester) {
+      return res.status(404).json({ error: "Semester not found in MySQL" });
+    }
+
+    console.log("Found semester in MySQL:", mysqlSemester);
+
     // Fetch or create the school year in PostgreSQL
     let schoolYear = await prisma.schoolYear.findFirst({
       where: { year: year as string },
@@ -29,18 +63,48 @@ export default async function handler(
         },
       });
       console.log("Created new school year in PostgreSQL:", schoolYear);
+    } else {
+      console.log("Found existing school year in PostgreSQL:", schoolYear);
     }
+
+    // Fetch or create the semester in PostgreSQL
+    let schoolSemester = await prisma.semester.findFirst({
+      where: {
+        name: semester as string,
+        schoolYearId: schoolYear.id,
+      },
+    });
+
+    if (!schoolSemester) {
+      schoolSemester = await prisma.semester.create({
+        data: {
+          name: semester as string,
+          schoolYearId: schoolYear.id,
+        },
+      });
+      console.log("Created new semester in PostgreSQL:", schoolSemester);
+    } else {
+      console.log("Found existing semester in PostgreSQL:", schoolSemester);
+    }
+
+    console.log("Using schoolYear.id:", schoolYear.id);
+    console.log("Using schoolSemester.id:", schoolSemester.id);
 
     // Fetch students from MySQL using Prisma
     const mysqlStudents = await mysqlPrisma.student.findMany({
       where: {
-        enrollmentYear: {
-          year: year as string,
-        },
+        enrollmentYearId: mysqlSchoolYear.id,
+        enrollmentSemesterId: mysqlSemester.id,
       },
     });
 
     console.log("Fetched students from MySQL:", mysqlStudents);
+
+    if (mysqlStudents.length === 0) {
+      console.log(
+        "No students found in MySQL for the given year and semester."
+      );
+    }
 
     const postgresStudents = await prisma.student.findMany();
 
@@ -51,49 +115,68 @@ export default async function handler(
       );
 
       if (existingStudent) {
-        // Unarchive the student if they are archived
-        if (existingStudent.archived) {
+        // Update the student's year and semester if they are different
+        if (
+          existingStudent.enrollmentYearId !== schoolYear.id ||
+          existingStudent.enrollmentSemesterId !== schoolSemester.id
+        ) {
           await prisma.student.update({
             where: { id: existingStudent.id },
-            data: { archived: false },
+            data: {
+              enrollmentYearId: schoolYear.id,
+              enrollmentSemesterId: schoolSemester.id,
+              archived: false, // Unarchive the student if they are archived
+            },
           });
-          console.log("Student unarchived in PostgreSQL:", mysqlStudent.email);
+          console.log(
+            "Updated student year and semester in PostgreSQL:",
+            mysqlStudent.email
+          );
         }
       } else {
-        const closestProgram = await prisma.program.findFirst({
+        // Check if the program exists in PostgreSQL
+        let program = await prisma.program.findFirst({
           where: {
-            name: {
-              contains: mysqlStudent.program,
-            },
+            name: mysqlStudent.program,
           },
         });
 
-        console.log("Closest program found:", closestProgram);
-
-        if (closestProgram) {
-          await prisma.student.create({
+        // Create the program if it doesn't exist
+        if (!program) {
+          program = await prisma.program.create({
             data: {
-              firstName: mysqlStudent.firstName,
-              lastName: mysqlStudent.lastName,
-              email: mysqlStudent.email,
-              programId: closestProgram.id,
-              studentId: mysqlStudent.studentId || "", // Provide a default value
-              phone: mysqlStudent.phone || "", // Provide a default value
-              gender: mysqlStudent.gender || "OTHER", // Provide a default value
-              enrollmentYearId: schoolYear.id, // Link to the school year
+              name: mysqlStudent.program,
+              description: "Program created during student sync",
             },
           });
-          console.log("Student created in PostgreSQL:", mysqlStudent.email);
+          console.log("Created new program in PostgreSQL:", program);
         }
+
+        // Create the student in PostgreSQL
+        await prisma.student.create({
+          data: {
+            firstName: mysqlStudent.firstName,
+            lastName: mysqlStudent.lastName,
+            email: mysqlStudent.email,
+            programId: program.id,
+            studentId: mysqlStudent.studentId || "", // Provide a default value
+            phone: mysqlStudent.phone || "", // Provide a default value
+            gender: mysqlStudent.gender || "OTHER", // Provide a default value
+            enrollmentYearId: schoolYear.id, // Link to the school year
+            enrollmentSemesterId: schoolSemester.id, // Link to the semester
+          },
+        });
+        console.log("Student created in PostgreSQL:", mysqlStudent.email);
       }
     }
 
-    // Archive students that are not included in the MySQL students for the given year
+    // Archive students that are not included in the MySQL students for the given year and semester
     const mysqlStudentEmails = mysqlStudents.map((student) => student.email);
     for (const student of postgresStudents) {
       if (
         !mysqlStudentEmails.includes(student.email) &&
-        student.enrollmentYearId !== schoolYear.id
+        student.enrollmentYearId === schoolYear.id &&
+        student.enrollmentSemesterId === schoolSemester.id
       ) {
         await prisma.student.update({
           where: { id: student.id },

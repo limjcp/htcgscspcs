@@ -158,11 +158,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   label="Sync"
                   href="/admin-students"
                 />
-                <NavItem
-                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
-                  label="List"
-                  href="/admin-student-list"
-                />
               </Sidebar.Nav.Section>
             </NavItem>
             <NavItem
