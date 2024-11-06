@@ -1,7 +1,5 @@
+import mysqlPrisma from "@/lib/prisma-mysql";
 import { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient as MySQLPrismaClient } from "../../../generated/mysql-client";
-
-const mysqlPrisma = new MySQLPrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
