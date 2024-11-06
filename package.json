@@ -7,10 +7,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma generate --schema=./mysql-schema.prisma",
+    "build": "prisma generate && prisma generate --schema=./mysql-schema.prisma && next build",
+    "vercel-build": "prisma generate && prisma generate --schema=./mysql-schema.prisma && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.2",
