@@ -14,7 +14,7 @@ export default async function UserPage() {
           <pre>{JSON.stringify(session, null, 2)}</pre>
         </>
       ) : (
-        <p>You are not logged in.</p>
+        <p>You are not logged in zzz.</p>
       )}
 
       <AuthButton />
