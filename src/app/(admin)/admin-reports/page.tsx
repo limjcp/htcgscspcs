@@ -24,8 +24,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Reports() {
   const [reports, setReports] = useState([]);
+  const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [students, setStudents] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
 
   const fetchReports = async () => {
@@ -42,9 +44,26 @@ export default function Reports() {
     }
   };
 
-  const fetchSemesters = async () => {
+  const fetchYears = async () => {
     try {
-      const response = await fetch("/api/getSemesters");
+      const response = await fetch("/api/years");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setYears(data);
+      } else {
+        console.error("API response is not an array:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching years:", error);
+    }
+  };
+
+  const fetchSemesters = async (year) => {
+    try {
+      const response = await fetch(`/api/studentsemesters?year=${year}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (Array.isArray(data)) {
         setSemesters(data);
@@ -72,9 +91,15 @@ export default function Reports() {
 
   useEffect(() => {
     fetchReports();
-    fetchSemesters();
+    fetchYears();
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    if (selectedYear) {
+      fetchSemesters(selectedYear);
+    }
+  }, [selectedYear]);
 
   const generateReport = (semesterId) => {
     const semester = semesters.find((s) => s.id === semesterId);
@@ -144,9 +169,22 @@ export default function Reports() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-4">
+            <Select onValueChange={setSelectedYear} value={selectedYear}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year.id} value={year.id}>
+                    {year.year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select
               onValueChange={setSelectedSemester}
               value={selectedSemester}
+              disabled={!selectedYear}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Semester" />
