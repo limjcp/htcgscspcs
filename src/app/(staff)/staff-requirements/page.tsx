@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import React from "react";
+import axios from "axios";
 
 const CreateRequirementPage = () => {
   const { data: session } = useSession();
@@ -9,13 +10,21 @@ const CreateRequirementPage = () => {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [requirements, setRequirements] = useState([]);
+  const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchSemesters();
+    fetchYears();
   }, []);
+
+  useEffect(() => {
+    if (selectedYear) {
+      fetchSemesters(selectedYear);
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
     if (session && session.user && selectedSemester) {
@@ -36,17 +45,22 @@ const CreateRequirementPage = () => {
     }
   }, [session, selectedSemester]);
 
-  const fetchSemesters = async () => {
+  const fetchYears = async () => {
     try {
-      const response = await fetch("/api/getSemesters");
-      if (response.ok) {
-        const data = await response.json();
-        setSemesters(data);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to fetch semesters.");
-        console.error("Error fetching semesters:", errorData);
-      }
+      const response = await axios.get("/api/personnel/years");
+      setYears(response.data);
+    } catch (error) {
+      setError("Failed to fetch years.");
+      console.error("Error fetching years:", error);
+    }
+  };
+
+  const fetchSemesters = async (yearId) => {
+    try {
+      const response = await axios.get(
+        `/api/personnel/semesters?schoolYearId=${yearId}`
+      );
+      setSemesters(response.data);
     } catch (error) {
       setError("Failed to fetch semesters.");
       console.error("Error fetching semesters:", error);
@@ -55,17 +69,10 @@ const CreateRequirementPage = () => {
 
   const fetchRequirements = async (id, type, semesterId) => {
     try {
-      const response = await fetch(
-        `/api/getRequirements?${type}Id=${id}&semesterId=${semesterId}`
+      const response = await axios.get(
+        `/api/personnel/requirements?${type}Id=${id}&semesterId=${semesterId}`
       );
-      if (response.ok) {
-        const data = await response.json();
-        setRequirements(data);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to fetch requirements.");
-        console.error("Error fetching requirements:", errorData);
-      }
+      setRequirements(response.data);
     } catch (error) {
       setError("Failed to fetch requirements.");
       console.error("Error fetching requirements:", error);
@@ -75,13 +82,15 @@ const CreateRequirementPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!session || !session.user || !session.user.staffId) {
-      setError("You must be logged in as staff to create a requirement.");
+    if (!session || !session.user) {
+      setError("You must be logged in to create a requirement.");
       return;
     }
 
-    if (!selectedSemester) {
-      setError("You must select a semester to create a requirement.");
+    if (!selectedYear || !selectedSemester) {
+      setError(
+        "You must select a year and a semester to create a requirement."
+      );
       return;
     }
 
@@ -89,50 +98,43 @@ const CreateRequirementPage = () => {
       (semester) => semester.id === selectedSemester
     );
 
-    const response = await fetch("/api/requirementscreate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const response = await axios.post("/api/personnel/requirements", {
         name,
         description,
-        staffId: session.user.staffId,
         officeId: session.user.officeId,
         departmentId: session.user.departmentId,
         semesterId: selectedSemester,
         schoolYearId: selectedSemesterObj?.schoolYearId,
-      }),
-    });
+      });
 
-    if (response.ok) {
-      alert("Requirement created successfully");
-      const { officeId, departmentId } = session.user;
-      if (officeId) {
-        fetchRequirements(officeId, "office", selectedSemester);
-      } else if (departmentId) {
-        fetchRequirements(departmentId, "department", selectedSemester);
+      if (response.status === 200) {
+        alert("Requirement created successfully");
+        const { officeId, departmentId } = session.user;
+        if (officeId) {
+          fetchRequirements(officeId, "office", selectedSemester);
+        } else if (departmentId) {
+          fetchRequirements(departmentId, "department", selectedSemester);
+        }
+        setIsModalOpen(false);
+        setName("");
+        setDescription("");
+      } else {
+        setError("Failed to create requirement.");
       }
-      setIsModalOpen(false);
-      setName("");
-      setDescription("");
-    } else {
-      const data = await response.json();
-      setError(data.message || "Failed to create requirement.");
+    } catch (error) {
+      setError("Failed to create requirement.");
+      console.error("Error creating requirement:", error);
     }
   };
 
   const handleDelete = async (requirementId) => {
     try {
-      const response = await fetch(`/api/deleteRequirement`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ requirementId }),
-      });
+      const response = await axios.delete(
+        `/api/personnel/requirements?id=${requirementId}`
+      );
 
-      if (response.ok) {
+      if (response.status === 204) {
         alert("Requirement deleted successfully");
         const { officeId, departmentId } = session.user;
         if (officeId) {
@@ -141,9 +143,7 @@ const CreateRequirementPage = () => {
           fetchRequirements(departmentId, "department", selectedSemester);
         }
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to delete requirement.");
-        console.error("Error deleting requirement:", errorData);
+        setError("Failed to delete requirement.");
       }
     } catch (error) {
       setError("Failed to delete requirement.");
@@ -156,12 +156,29 @@ const CreateRequirementPage = () => {
       <h1 className="text-2xl font-bold mb-4">Create Requirement</h1>
       {error && <p className="text-red-500">{error}</p>}
       <div className="mb-4">
+        <label className="block text-gray-700">Year</label>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+          required
+        >
+          <option value="">Select a year</option>
+          {years.map((year) => (
+            <option key={year.id} value={year.id}>
+              {year.year}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-4">
         <label className="block text-gray-700">Semester</label>
         <select
           value={selectedSemester}
           onChange={(e) => setSelectedSemester(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded"
           required
+          disabled={!selectedYear}
         >
           <option value="">Select a semester</option>
           {semesters.map((semester) => (

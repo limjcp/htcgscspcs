@@ -9,40 +9,64 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { officeId, departmentId } = req.query;
+  const { officeId, departmentId, schoolYearId, semesterId } = req.query;
 
-  if (!officeId && !departmentId) {
+  if (!officeId && !departmentId && (!schoolYearId || !semesterId)) {
     return res
       .status(400)
-      .json({ message: "Office ID or Department ID is required" });
+      .json({
+        message:
+          "Office ID, Department ID, or School Year ID and Semester ID are required",
+      });
   }
 
   try {
-    const students = await prisma.student.findMany({
-      include: {
-        user: true,
-        clearances: {
-          include: {
-            steps: {
-              where: {
-                OR: [
-                  { officeId: officeId ? String(officeId) : undefined },
-                  {
-                    departmentId: departmentId
-                      ? String(departmentId)
-                      : undefined,
-                  },
-                ],
-              },
-              include: {
-                office: true,
-                department: true,
+    let students;
+
+    if (schoolYearId && semesterId) {
+      // Fetch students based on schoolYearId and semesterId
+      students = await prisma.student.findMany({
+        where: {
+          enrollmentYearId: String(schoolYearId),
+          enrollmentSemesterId: String(semesterId),
+        },
+        include: {
+          user: true,
+          program: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      });
+    } else {
+      // Fetch students based on officeId or departmentId
+      students = await prisma.student.findMany({
+        include: {
+          user: true,
+          clearances: {
+            include: {
+              steps: {
+                where: {
+                  OR: [
+                    { officeId: officeId ? String(officeId) : undefined },
+                    {
+                      departmentId: departmentId
+                        ? String(departmentId)
+                        : undefined,
+                    },
+                  ],
+                },
+                include: {
+                  office: true,
+                  department: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+    }
 
     res.status(200).json(students);
   } catch (error) {

@@ -6,7 +6,9 @@ export default function Page() {
   const { data: session } = useSession();
   const [students, setStudents] = useState([]);
   const [error, setError] = useState("");
+  const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
 
   useEffect(() => {
@@ -15,15 +17,34 @@ export default function Page() {
       session.user &&
       (session.user.officeId || session.user.departmentId)
     ) {
-      fetchSemesters();
+      fetchYears();
     } else {
       console.log("Session or officeId/departmentId not available:", session);
     }
   }, [session]);
 
-  const fetchSemesters = async () => {
+  const fetchYears = async () => {
     try {
-      const response = await fetch("/api/getSemesters");
+      const response = await fetch("/api/personnel/years");
+      if (response.ok) {
+        const data = await response.json();
+        setYears(data);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch years.");
+        console.error("Error fetching years:", errorData);
+      }
+    } catch (error) {
+      setError("Failed to fetch years.");
+      console.error("Error fetching years:", error);
+    }
+  };
+
+  const fetchSemesters = async (yearId) => {
+    try {
+      const response = await fetch(
+        `/api/personnel/semesters?schoolYearId=${yearId}`
+      );
       if (response.ok) {
         const data = await response.json();
         setSemesters(data);
@@ -138,6 +159,34 @@ export default function Page() {
       {error && <p className="text-red-500">{error}</p>}
       <div className="mb-4">
         <label
+          htmlFor="year"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Select Year
+        </label>
+        <select
+          id="year"
+          name="year"
+          value={selectedYear}
+          onChange={(e) => {
+            setSelectedYear(e.target.value);
+            setSelectedSemester("");
+            setSemesters([]);
+            setStudents([]);
+            fetchSemesters(e.target.value);
+          }}
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+        >
+          <option value="">Select a year</option>
+          {years.map((year) => (
+            <option key={year.id} value={year.id}>
+              {year.year}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-4">
+        <label
           htmlFor="semester"
           className="block text-sm font-medium text-gray-700"
         >
@@ -152,6 +201,7 @@ export default function Page() {
             fetchStudents(e.target.value);
           }}
           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          disabled={!selectedYear}
         >
           <option value="">Select a semester</option>
           {semesters.map((semester) => (
@@ -183,8 +233,14 @@ export default function Page() {
                 {students.map((student) => (
                   <tr key={student.id}>
                     <td className="border px-4 py-2">
-                      {student.user.firstName} {student.user.middleName}{" "}
-                      {student.user.lastName}
+                      {student.user ? (
+                        <>
+                          {student.user.firstName} {student.user.middleName}{" "}
+                          {student.user.lastName}
+                        </>
+                      ) : (
+                        "Unknown User"
+                      )}
                     </td>
                     <td className="border px-4 py-2">
                       {student.clearances.map((clearance) =>

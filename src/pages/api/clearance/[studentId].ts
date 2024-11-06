@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
 import prisma from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { studentId } = req.query;
+  const { studentId, year, semesterId } = req.query;
 
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -14,7 +13,11 @@ export default async function handler(
 
   try {
     const clearance = await prisma.clearance.findMany({
-      where: { studentId: String(studentId) },
+      where: {
+        studentId: String(studentId),
+        schoolYearId: String(year),
+        semesterId: String(semesterId),
+      },
       include: {
         steps: {
           include: {
@@ -25,7 +28,7 @@ export default async function handler(
       },
     });
 
-    if (!clearance) {
+    if (!clearance || clearance.length === 0) {
       return res.status(404).json({ message: "Clearance not found" });
     }
 

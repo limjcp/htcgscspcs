@@ -31,7 +31,7 @@ export default async function handler(
           }
           await prisma.user.update({
             where: { id: userId },
-            data: { role: { set: [role.staff] } },
+            data: { role: { push: "staff" } },
           });
         } else if (role === "signatory") {
           const signatory = await prisma.signatory.findUnique({
@@ -52,7 +52,7 @@ export default async function handler(
           }
           await prisma.user.update({
             where: { id: userId },
-            data: { role: { set: [role.signatory] } },
+            data: { role: { push: "signatory" } },
           });
         }
       } else if (type === "department") {
@@ -73,7 +73,7 @@ export default async function handler(
           }
           await prisma.user.update({
             where: { id: userId },
-            data: { role: { set: [role.staff] } },
+            data: { role: { push: "staff" } },
           });
         } else if (role === "signatory") {
           const signatory = await prisma.signatory.findUnique({
@@ -94,7 +94,7 @@ export default async function handler(
           }
           await prisma.user.update({
             where: { id: userId },
-            data: { role: { set: [role.signatory] } },
+            data: { role: { push: "signatory" } },
           });
         }
       }

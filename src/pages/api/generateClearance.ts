@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
-import { sendClearanceEmail } from "@/utils/emailService"; // Import the email sending function
-import { ClearanceStatus } from "@prisma/client"; // Import the ClearanceStatus enum
+import { sendClearanceEmail } from "@/utils/emailService";
+import { ClearanceStatus } from "@prisma/client";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { semesterId } = req.body;
@@ -11,7 +11,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    // Fetch the semester details including the associated school year
     const semester = await prisma.semester.findUnique({
       where: { id: semesterId },
       include: { schoolYear: true },
@@ -23,7 +22,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const schoolYearId = semester.schoolYear.id;
 
-    // Fetch all students who are not archived and are enrolled in the selected semester
     const students = await prisma.student.findMany({
       where: {
         archived: false,
@@ -41,16 +39,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("Fetched Students:", students);
 
-    // Fetch all offices including the departmentId field
     const offices = await prisma.office.findMany({
-      select: {
-        id: true,
-        name: true,
-        Department: true, // Ensure this field is included
+      include: {
+        Department: true,
       },
     });
 
-    // Generate clearance for all students
     const clearances = await Promise.all(
       students.map(async (student) => {
         const clearance = await prisma.clearance.create({
@@ -61,19 +55,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
-        // Create office steps with department-specific signatories if applicable
         for (const office of offices) {
-          if (office.Department) {
-            const departmentStep = {
-              clearanceId: clearance.id,
-              officeId: office.id,
-              departmentId: student.program.department?.id,
-              status: ClearanceStatus.PENDING,
-            };
+          if (office.Department && office.Department.length > 0) {
+            for (const department of office.Department) {
+              if (department.id === student.program.department?.id) {
+                const departmentStep = {
+                  clearanceId: clearance.id,
+                  departmentId: department.id,
+                  status: ClearanceStatus.PENDING,
+                };
 
-            await prisma.clearanceStep.create({
-              data: departmentStep,
-            });
+                await prisma.clearanceStep.create({
+                  data: departmentStep,
+                });
+              }
+            }
           } else {
             const officeStep = {
               clearanceId: clearance.id,
@@ -87,7 +83,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
         }
 
-        // Send email to the student about clearance availability
         try {
           await sendClearanceEmail(
             student.email,
@@ -107,7 +102,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log("Created Clearances:", clearances);
 
-    // Log the clearance generation
     const logEntry = await prisma.clearanceLog.create({
       data: {
         schoolYear: `${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,

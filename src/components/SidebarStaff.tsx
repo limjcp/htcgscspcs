@@ -1,16 +1,14 @@
-// src/components/Layout.tsx
 "use client";
+
 import React, { useState } from "react";
 import { Sidebar, useSidebar, Overlay, SidebarState } from "@rewind-ui/core";
 import Image from "next/image";
 import { Button } from "@rewind-ui/core";
-import { Check, LayoutDashboard, ListChecks, Settings } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useSession } from "next-auth/react";
+import { LayoutDashboard, Settings, NotebookPen } from "lucide-react";
 
-const AuthButton = dynamic(() => import("@/components/AuthButton.client"), {
-  ssr: false,
-});
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -22,6 +20,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href;
+
+  const NavItem = ({ icon, label, href, children, as }: any) => {
+    const active = isActive(href);
+    return (
+      <Sidebar.Nav.Section.Item
+        icon={icon}
+        label={label}
+        href={href}
+        as={as}
+        className={active ? "bg-green-950 text-white" : ""}
+      >
+        {children}
+      </Sidebar.Nav.Section.Item>
+    );
+  };
+  const router = useRouter();
+  const handleSignout = () => {
+    router.push("/api/auth/signout");
+  };
 
   return (
     <div className="relative flex flex-row w-full h-screen overflow-hidden bg-black">
@@ -54,32 +74,38 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Nav>
           <Sidebar.Nav.Section>
-            <Sidebar.Nav.Section.Item
+            <NavItem
               icon={<LayoutDashboard />}
-              label="Dashboard"
+              label="Home"
               href="/staff-dashboard"
             />
-            <Sidebar.Nav.Section.Item
-              icon={<ListChecks />}
+            <NavItem
+              icon={<NotebookPen />}
               label="Requirements"
               href="/staff-requirements"
             />
-            <Sidebar.Nav.Section.Item
-              icon={<Check />}
+            <NavItem
+              icon={<NotebookPen />}
               label="Approve"
               href="/staff-approve"
             />
-            <Sidebar.Nav.Section.Item
+
+            <NavItem
               icon={<Settings />}
               label="Settings"
-              href="/staff-settings"
+              href="/admin-settings"
             />
           </Sidebar.Nav.Section>
         </Sidebar.Nav>
 
         <Sidebar.Footer>
           <div className="flex flex-col justify-center items-center text-sm">
-            <AuthButton />
+            <Button
+              className="bg-white text-black hover:bg-red-800 hover:text-white"
+              onClick={handleSignout}
+            >
+              Sign Out
+            </Button>
           </div>
         </Sidebar.Footer>
       </Sidebar>

@@ -7,8 +7,11 @@ function ClearanceGenerationPage() {
   const [semesterId, setSemesterId] = useState("");
   const [schoolYears, setSchoolYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [students, setStudents] = useState([]);
   const [message, setMessage] = useState("");
   const [activityLog, setActivityLog] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     // Fetch the list of school years from the API
@@ -53,6 +56,29 @@ function ClearanceGenerationPage() {
   }, [schoolYearId]);
 
   useEffect(() => {
+    if (semesterId) {
+      // Fetch the list of students for the selected school year and semester from the API
+      const fetchStudents = async () => {
+        try {
+          const response = await fetch(
+            `/api/getStudents?schoolYearId=${schoolYearId}&semesterId=${semesterId}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setStudents(data);
+          } else {
+            setMessage("Failed to fetch students.");
+          }
+        } catch (error) {
+          setMessage("Failed to fetch students.");
+          console.error("Error fetching students:", error);
+        }
+      };
+      fetchStudents();
+    }
+  }, [semesterId]);
+
+  useEffect(() => {
     // Fetch the activity log from the API
     const fetchActivityLog = async () => {
       try {
@@ -74,6 +100,7 @@ function ClearanceGenerationPage() {
   const handleSchoolYearChange = (e) => {
     setSchoolYearId(e.target.value);
     setSemesterId(""); // Reset semester selection when school year changes
+    setStudents([]); // Reset students list when school year changes
   };
 
   const handleSemesterChange = (e) => {
@@ -113,6 +140,24 @@ function ClearanceGenerationPage() {
       console.error("Error generating clearance:", error);
     }
   };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredStudents = students.filter((student) =>
+    `${student.firstName} ${student.lastName}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -166,12 +211,23 @@ function ClearanceGenerationPage() {
             </div>
           )}
         </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Generate Clearance
-        </button>
+        <div className="flex mb-4">
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Generate Clearance
+          </button>
+          {students.length > 0 && (
+            <button
+              type="button"
+              onClick={handleOpenModal}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
+            >
+              Student List
+            </button>
+          )}
+        </div>
       </form>
       {message && <p className="text-red-500">{message}</p>}
       <div className="mt-6">
@@ -186,6 +242,57 @@ function ClearanceGenerationPage() {
           ))}
         </ul>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg w-3/4">
+            <h3 className="text-xl font-bold mb-4">Student List</h3>
+            <input
+              type="text"
+              placeholder="Search by name"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="mb-4 p-2 border rounded w-full"
+            />
+            <table className="min-w-full bg-white">
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 border-b">Student ID</th>
+                  <th className="py-2 px-4 border-b">First Name</th>
+                  <th className="py-2 px-4 border-b">Last Name</th>
+                  <th className="py-2 px-4 border-b">Email</th>
+                  <th className="py-2 px-4 border-b">Program</th>
+                  <th className="py-2 px-4 border-b">Department</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student) => (
+                  <tr key={student.id}>
+                    <td className="py-2 px-4 border-b">{student.studentId}</td>
+                    <td className="py-2 px-4 border-b">{student.firstName}</td>
+                    <td className="py-2 px-4 border-b">{student.lastName}</td>
+                    <td className="py-2 px-4 border-b">{student.email}</td>
+                    <td className="py-2 px-4 border-b">
+                      {student.program?.name}
+                    </td>
+                    <td className="py-2 px-4 border-b">
+                      {student.program?.department?.name}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleCloseModal}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

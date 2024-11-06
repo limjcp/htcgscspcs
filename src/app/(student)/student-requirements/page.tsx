@@ -1,31 +1,52 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import "tailwindcss/tailwind.css";
 
 const StudentRequirements = () => {
   const [requirements, setRequirements] = useState([]);
+  const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("");
 
   useEffect(() => {
-    const fetchSemesters = async () => {
+    const fetchYears = async () => {
       try {
-        const response = await fetch("/api/getSemesters");
+        const response = await fetch("/api/student/years");
         const data = await response.json();
-        setSemesters(data);
+        setYears(data);
       } catch (error) {
-        console.error("Error fetching semesters:", error);
+        console.error("Error fetching years:", error);
       }
     };
 
-    fetchSemesters();
+    fetchYears();
   }, []);
 
   useEffect(() => {
-    if (selectedSemester) {
+    if (selectedYear) {
+      const fetchSemesters = async () => {
+        try {
+          const response = await fetch(
+            `/api/student/semesters?year=${selectedYear}`
+          );
+          const data = await response.json();
+          setSemesters(data);
+        } catch (error) {
+          console.error("Error fetching semesters:", error);
+        }
+      };
+
+      fetchSemesters();
+    }
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (selectedYear && selectedSemester) {
       const fetchRequirements = async () => {
         try {
           const response = await fetch(
-            `/api/requirements?semesterId=${selectedSemester}`
+            `/api/student/requirements?year=${selectedYear}&semesterId=${selectedSemester}`
           );
           const data = await response.json();
           setRequirements(data);
@@ -36,26 +57,41 @@ const StudentRequirements = () => {
 
       fetchRequirements();
     }
-  }, [selectedSemester]);
+  }, [selectedYear, selectedSemester]);
+
+  const groupedRequirements = requirements.reduce((acc, requirement) => {
+    const key =
+      requirement.office?.name || requirement.department?.name || "Others";
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(requirement);
+    return acc;
+  }, {});
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Student Requirements</h1>
+    <div className="p-4">
       <div className="mb-4">
-        <label
-          htmlFor="semester"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Select Semester
-        </label>
         <select
-          id="semester"
-          name="semester"
-          value={selectedSemester}
-          onChange={(e) => setSelectedSemester(e.target.value)}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          onChange={(e) => setSelectedYear(e.target.value)}
+          value={selectedYear}
+          className="p-2 border rounded"
         >
-          <option value="">Select a semester</option>
+          <option value="">Select Year</option>
+          {years.map((year) => (
+            <option key={year.id} value={year.id}>
+              {year.year}
+            </option>
+          ))}
+        </select>
+
+        <select
+          onChange={(e) => setSelectedSemester(e.target.value)}
+          value={selectedSemester}
+          disabled={!selectedYear}
+          className="p-2 border rounded ml-2"
+        >
+          <option value="">Select Semester</option>
           {semesters.map((semester) => (
             <option key={semester.id} value={semester.id}>
               {semester.name}
@@ -63,22 +99,20 @@ const StudentRequirements = () => {
           ))}
         </select>
       </div>
-      {requirements.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {requirements.map(({ description, id, name, office, department }) => (
-            <div key={id} className="bg-white shadow-md rounded-lg p-4">
-              <h2 className="text-xl font-semibold mb-2">
-                {office ? office.name : department ? department.name : ""}
-              </h2>
-              <p className="text-gray-700">
-                <strong>{name}</strong> - {description}
-              </p>
-            </div>
-          ))}
+
+      {Object.keys(groupedRequirements).map((key) => (
+        <div key={key} className="mb-4">
+          <h2 className="text-xl font-bold mb-2">{key}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupedRequirements[key].map((requirement) => (
+              <div key={requirement.id} className="p-4 border rounded shadow">
+                <h3 className="text-lg font-semibold">{requirement.name}</h3>
+                <p className="text-sm">{requirement.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <p>No requirements found.</p>
-      )}
+      ))}
     </div>
   );
 };
