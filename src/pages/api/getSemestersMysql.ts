@@ -1,5 +1,5 @@
-import mysqlPrisma from "@/lib/prisma-mysql";
 import { NextApiRequest, NextApiResponse } from "next";
+import db from "@/utils/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,19 +12,10 @@ export default async function handler(
   }
 
   try {
-    const semesters = await mysqlPrisma.semester.findMany({
-      where: {
-        schoolYear: {
-          year: year as string,
-        },
-      },
-      select: {
-        id: true,
-        semester: true,
-        schoolYearId: true,
-      },
-    });
-
+    const [semesters] = await db.execute(
+      "SELECT id, semester, schoolYearId FROM Semester WHERE schoolYearId = (SELECT id FROM SchoolYear WHERE year = ?)",
+      [year]
+    );
     res.status(200).json(semesters);
   } catch (error) {
     console.error("Error fetching semesters:", error);

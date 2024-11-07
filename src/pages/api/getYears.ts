@@ -1,17 +1,14 @@
-import mysqlPrisma from "@/lib/prisma-mysql";
 import { NextApiRequest, NextApiResponse } from "next";
+import db from "@/utils/db";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
-    const years = await mysqlPrisma.schoolYear.findMany({
-      select: {
-        year: true,
-      },
-    });
-
+    console.log("Connecting to MySQL...");
+    const [years] = await db.execute("SELECT year FROM SchoolYear");
+    console.log("Fetched years from MySQL:", years);
     res.status(200).json(years);
   } catch (error) {
     console.error("Error fetching years:", error);
