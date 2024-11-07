@@ -1,8 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
-import { PrismaClient as MySQLPrismaClient } from "../../../generated/mysql-client";
-
-const mysqlPrisma = new MySQLPrismaClient();
+import db from "@/utils/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,9 +23,12 @@ export default async function handler(
     );
 
     // Fetch the school year from MySQL
-    const mysqlSchoolYear = await mysqlPrisma.schoolYear.findFirst({
-      where: { year: year as string },
-    });
+    const [mysqlSchoolYearRows] = await db.execute(
+      "SELECT * FROM SchoolYear WHERE year = ?",
+      [year]
+    );
+
+    const mysqlSchoolYear = mysqlSchoolYearRows[0];
 
     if (!mysqlSchoolYear) {
       return res.status(404).json({ error: "School year not found in MySQL" });
@@ -36,12 +37,12 @@ export default async function handler(
     console.log("Found school year in MySQL:", mysqlSchoolYear);
 
     // Fetch the semester from MySQL
-    const mysqlSemester = await mysqlPrisma.semester.findFirst({
-      where: {
-        semester: semester as string,
-        schoolYearId: mysqlSchoolYear.id,
-      },
-    });
+    const [mysqlSemesterRows] = await db.execute(
+      "SELECT * FROM Semester WHERE semester = ? AND schoolYearId = ?",
+      [semester, mysqlSchoolYear.id]
+    );
+
+    const mysqlSemester = mysqlSemesterRows[0];
 
     if (!mysqlSemester) {
       return res.status(404).json({ error: "Semester not found in MySQL" });
@@ -90,13 +91,11 @@ export default async function handler(
     console.log("Using schoolYear.id:", schoolYear.id);
     console.log("Using schoolSemester.id:", schoolSemester.id);
 
-    // Fetch students from MySQL using Prisma
-    const mysqlStudents = await mysqlPrisma.student.findMany({
-      where: {
-        enrollmentYearId: mysqlSchoolYear.id,
-        enrollmentSemesterId: mysqlSemester.id,
-      },
-    });
+    // Fetch students from MySQL using mysql2
+    const [mysqlStudents] = await db.execute(
+      "SELECT * FROM Student WHERE enrollmentYearId = ? AND enrollmentSemesterId = ?",
+      [mysqlSchoolYear.id, mysqlSemester.id]
+    );
 
     console.log("Fetched students from MySQL:", mysqlStudents);
 
