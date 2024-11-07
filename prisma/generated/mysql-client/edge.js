@@ -32,12 +32,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 5.21.1
- * Query Engine version: bf0e5e8a04cada8225617067eaa03d041e2bba36
+ * Prisma Client JS version: 5.22.0
+ * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
  */
 Prisma.prismaVersion = {
-  client: "5.21.1",
-  engine: "bf0e5e8a04cada8225617067eaa03d041e2bba36"
+  client: "5.22.0",
+  engine: "605197351a3c8bdd595af2d2a9bc3025bca48ea2"
 }
 
 Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
@@ -174,6 +174,14 @@ const config = {
       {
         "fromEnvVar": null,
         "value": "rhel-openssl-3.0.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl"
       }
     ],
     "previewFeatures": [],
@@ -181,12 +189,12 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../..",
-  "clientVersion": "5.21.1",
-  "engineVersion": "bf0e5e8a04cada8225617067eaa03d041e2bba36",
+  "clientVersion": "5.22.0",
+  "engineVersion": "605197351a3c8bdd595af2d2a9bc3025bca48ea2",
   "datasourceNames": [
     "db"
   ],
@@ -200,8 +208,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/mysql-client\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"SCHOOL_DB_URL\")\n}\n\nenum Gender {\n  MALE\n  FEMALE\n}\n\nenum StudentStatus {\n  ENROLLED\n  GRADUATED\n  DROPPED\n  SUSPENDED\n}\n\nmodel Student {\n  id                   String        @id @default(cuid())\n  studentId            String        @unique\n  firstName            String\n  middleName           String?\n  lastName             String\n  email                String\n  phone                String\n  address              String?\n  dateOfBirth          DateTime?\n  gender               Gender\n  enrollmentYear       SchoolYear    @relation(fields: [enrollmentYearId], references: [id])\n  enrollmentYearId     String\n  enrollmentSemester   Semester      @relation(fields: [enrollmentSemesterId], references: [id])\n  enrollmentSemesterId String\n  status               StudentStatus\n  program              String\n}\n\nmodel SchoolYear {\n  id        String    @id @default(cuid())\n  year      String\n  startDate DateTime?\n  endDate   DateTime?\n\n  Semester Semester[]\n\n  Student Student[]\n}\n\nmodel Semester {\n  id           String     @id @default(cuid())\n  semester     String\n  startDate    DateTime?\n  endDate      DateTime?\n  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])\n  schoolYearId String\n\n  Student Student[]\n}\n",
-  "inlineSchemaHash": "a82a184bbb9b7f54b0d74c62e32310dc334c920f9f87fa360f4b654b934f1df0",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/mysql-client\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\", \"debian-openssl-3.0.x\", \"linux-musl\"]\n}\n\ndatasource db {\n  provider = \"mysql\"\n  url      = env(\"SCHOOL_DB_URL\")\n}\n\nenum Gender {\n  MALE\n  FEMALE\n}\n\nenum StudentStatus {\n  ENROLLED\n  GRADUATED\n  DROPPED\n  SUSPENDED\n}\n\nmodel Student {\n  id                   String        @id @default(cuid())\n  studentId            String        @unique\n  firstName            String\n  middleName           String?\n  lastName             String\n  email                String\n  phone                String\n  address              String?\n  dateOfBirth          DateTime?\n  gender               Gender\n  enrollmentYear       SchoolYear    @relation(fields: [enrollmentYearId], references: [id])\n  enrollmentYearId     String\n  enrollmentSemester   Semester      @relation(fields: [enrollmentSemesterId], references: [id])\n  enrollmentSemesterId String\n  status               StudentStatus\n  program              String\n}\n\nmodel SchoolYear {\n  id        String    @id @default(cuid())\n  year      String\n  startDate DateTime?\n  endDate   DateTime?\n\n  Semester Semester[]\n\n  Student Student[]\n}\n\nmodel Semester {\n  id           String     @id @default(cuid())\n  semester     String\n  startDate    DateTime?\n  endDate      DateTime?\n  schoolYear   SchoolYear @relation(fields: [schoolYearId], references: [id])\n  schoolYearId String\n\n  Student Student[]\n}\n",
+  "inlineSchemaHash": "ed6e9b501c1fc5602506454eedd6b26d92ac445dfeb65b7bcf29f303bf199eb7",
   "copyEngine": true
 }
 config.dirname = '/'
