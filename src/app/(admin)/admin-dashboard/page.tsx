@@ -53,7 +53,7 @@ const Page = () => {
     <div className="min-h-screen p-4 md:p-6 bg-gray-100">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-0">
-          Student Clearance System Dashboard
+          Student Clearance System Dashboard.
         </h1>
         <div className="flex items-center">
           <label htmlFor="semester-select" className="mr-2 text-gray-700">
