@@ -28,15 +28,16 @@ export default async function handler(
     for (const student of students) {
       const hashedPassword = await bcrypt.hash("123", 10);
 
-      // Extract the program, surname, and initials
-      const program = student.program.name.toLowerCase();
-      const surname = student.lastName.toLowerCase();
-      const initials =
-        student.firstName.charAt(0).toLowerCase() +
-        (student.middleName ? student.middleName.charAt(0).toLowerCase() : "");
+      // Extract the program, surname, and firstname
+      const program = student.program.name.toLowerCase().replace(/\s+/g, "");
+      const surname = student.lastName.toLowerCase().replace(/\s+/g, "");
+      const firstname = (
+        student.firstName.toLowerCase() +
+        (student.middleName ? student.middleName.toLowerCase() : "")
+      ).replace(/\s+/g, "");
 
       // Construct the username
-      const username = `${program}_${surname}${initials}`;
+      const username = `${program}_${surname}${firstname}`;
 
       await prisma.user.create({
         data: {

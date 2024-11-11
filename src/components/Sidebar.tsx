@@ -18,6 +18,7 @@ import {
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import AuthButton from "./AuthButton.client";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -110,6 +111,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   label="Office"
                   href="/admin-offices"
                 />
+                <NavItem
+                  icon={<span className="w-1 h-1 rounded bg-green-600" />}
+                  label="Position"
+                  href="/admin-positions"
+                />
               </Sidebar.Nav.Section>
             </NavItem>
             <NavItem icon={<Settings2 />} label="Assign" as="button">
@@ -197,12 +203,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Footer>
           <div className="flex flex-col justify-center items-center text-sm">
-            <Button
+            <AuthButton />
+            {/* <Button
               className="bg-white text-black hover:bg-red-800 hover:text-white"
               onClick={handleSignout}
             >
               Sign Out
-            </Button>
+            </Button> */}
           </div>
         </Sidebar.Footer>
       </Sidebar>

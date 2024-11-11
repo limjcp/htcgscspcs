@@ -19,6 +19,7 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session } = useSession();
   const userName = session?.user?.firstName || "Guest";
+  const greetings = session?.user?.greeting || "Welcome to HTCGSC";
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();
@@ -54,11 +55,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Nav>
           <Sidebar.Nav.Section>
-            <Sidebar.Nav.Section.Item
+            {/* <Sidebar.Nav.Section.Item
               icon={<LayoutDashboard />}
               label="Dashboard"
               href="/signatory-dashboard"
-            />
+            /> */}
             <Sidebar.Nav.Section.Item
               icon={<Signature />}
               label="Sign"
@@ -94,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
         <header className="flex flex-row sticky top-0 px-8 items-center bg-green-950 border-b border-b-gray-100 w-full shadow-sm min-h-[4rem]">
-          <span className={"text-white"}>GoodHoly, {userName}!</span>
+          <span className={"text-white"}>{greetings}</span>
 
           <Button
             onClick={() => {

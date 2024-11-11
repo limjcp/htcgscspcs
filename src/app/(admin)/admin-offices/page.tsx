@@ -28,6 +28,9 @@ export default function Office() {
   const [offices, setOffices] = useState<Office[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [personnel, setPersonnel] = useState<User[]>([]);
+  const [positions, setPositions] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [currentOffice, setCurrentOffice] = useState<Office | null>(null);
   const [name, setName] = useState("");
@@ -36,11 +39,16 @@ export default function Office() {
   const [currentSignatory, setCurrentSignatory] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDepartmentBased, setIsDepartmentBased] = useState(false);
+  const [staffPosition, setStaffPosition] = useState<string | null>(null);
+  const [signatoryPosition, setSignatoryPosition] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     fetchOffices();
     fetchDepartments();
     fetchPersonnel();
+    fetchPositions(); // Fetch positions from the database
   }, []);
 
   const fetchOffices = async () => {
@@ -78,10 +86,25 @@ export default function Office() {
     try {
       const response = await fetch("/api/users?role=personnel");
       const data = await response.json();
-      setPersonnel(Array.isArray(data) ? data : []);
+      // Filter users to include only those with a single role of 'personnel'
+      const filteredData = data.filter(
+        (user: any) => user.role.length === 1 && user.role[0] === "personnel"
+      );
+      setPersonnel(Array.isArray(filteredData) ? filteredData : []);
     } catch (error) {
       console.error("Failed to fetch personnel:", error);
       setPersonnel([]);
+    }
+  };
+
+  const fetchPositions = async () => {
+    try {
+      const response = await fetch("/api/admin/positions");
+      const data = await response.json();
+      setPositions(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch positions:", error);
+      setPositions([]);
     }
   };
 
@@ -146,11 +169,17 @@ export default function Office() {
         ? office.signatory[0].user.id
         : null
     );
+    setStaffPosition(null); // Reset staff position
+    setSignatoryPosition(null); // Reset signatory position
     setIsModalOpen(true);
   };
 
   const handleAssignPersonnel = async () => {
-    const assignOrUpdate = async (type: string, userId: string) => {
+    const assignOrUpdate = async (
+      type: string,
+      userId: string,
+      position?: string
+    ) => {
       const response = await fetch(`/api/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -159,6 +188,7 @@ export default function Office() {
           officeOrDepartmentId: currentOffice?.id,
           type: "office",
           role: type,
+          position,
         }),
       });
 
@@ -169,10 +199,14 @@ export default function Office() {
 
     try {
       if (currentStaff) {
-        await assignOrUpdate("staff", currentStaff);
+        await assignOrUpdate("staff", currentStaff, staffPosition || undefined);
       }
       if (currentSignatory) {
-        await assignOrUpdate("signatory", currentSignatory);
+        await assignOrUpdate(
+          "signatory",
+          currentSignatory,
+          signatoryPosition || undefined
+        );
       }
       alert("Personnel assigned successfully!");
       fetchOffices();
@@ -251,7 +285,7 @@ export default function Office() {
         body: JSON.stringify({
           userId,
           officeOrDepartmentId: currentOffice?.id,
-          type: "office",
+          type,
         }),
       });
 
@@ -260,13 +294,30 @@ export default function Office() {
       }
     };
 
+    const updateUserRole = async (userId: string, role: string) => {
+      const response = await fetch(`/api/update-user-role`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          role,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update user role to ${role}`);
+      }
+    };
+
     try {
       if (currentStaff) {
         await removePersonnel("staff", currentStaff);
+        await updateUserRole(currentStaff, "personnel");
         setCurrentStaff(null);
       }
       if (currentSignatory) {
         await removePersonnel("signatory", currentSignatory);
+        await updateUserRole(currentSignatory, "personnel");
         setCurrentSignatory(null);
       }
 
@@ -328,22 +379,22 @@ export default function Office() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <table className="min-w-full bg-white">
+        <table className="min-w-full bg-white border-collapse border border-gray-300">
           <thead>
             <tr>
-              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Office
               </th>
-              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Departments
               </th>
-              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Staff
               </th>
-              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Signatories
               </th>
-              <th className="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border border-gray-300 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -351,29 +402,29 @@ export default function Office() {
           <tbody>
             {offices.map((office) => (
               <tr key={office.id}>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                <td className="px-6 py-4 border border-gray-300">
                   {office.name}
                 </td>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                <td className="px-6 py-4 border border-gray-300">
                   {office.departments
                     ?.map((department) => department.name)
-                    .join(", ") || "No departments assigned"}
+                    .join(", ") || " "}
                 </td>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                <td className="px-6 py-4 border border-gray-300">
                   {office.staff
                     ?.map(({ user }) =>
                       user ? `${user.firstName} ${user.lastName}` : "No user"
                     )
-                    .join(", ") || "No staff assigned"}
+                    .join(", ") || " "}
                 </td>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                <td className="px-6 py-4 border border-gray-300">
                   {office.signatory
                     ?.map(({ user }) =>
                       user ? `${user.firstName} ${user.lastName}` : "No user"
                     )
-                    .join(", ") || "No signatories assigned"}
+                    .join(", ") || " "}
                 </td>
-                <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-300">
+                <td className="px-6 py-4 border border-gray-300">
                   <button
                     onClick={() => handleEdit(office)}
                     className="text-indigo-600 hover:text-indigo-900 mr-4"
@@ -483,10 +534,31 @@ export default function Office() {
                         }
                         className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                       >
-                        <option value="">Select staff</option>
+                        <option value="">Select staff (optional)</option>
                         {personnel.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.firstName} {p.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="staffPosition"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Staff Position
+                      </label>
+                      <select
+                        id="staffPosition"
+                        value={staffPosition || ""}
+                        onChange={(e) => setStaffPosition(e.target.value)}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      >
+                        <option value="">Select position</option>
+                        {positions.map((position) => (
+                          <option key={position.id} value={position.id}>
+                            {position.name}
                           </option>
                         ))}
                       </select>
@@ -505,6 +577,27 @@ export default function Office() {
                         {personnel.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.firstName} {p.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mb-4">
+                      <label
+                        htmlFor="signatoryPosition"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Signatory Position
+                      </label>
+                      <select
+                        id="signatoryPosition"
+                        value={signatoryPosition || ""}
+                        onChange={(e) => setSignatoryPosition(e.target.value)}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      >
+                        <option value="">Select position</option>
+                        {positions.map((position) => (
+                          <option key={position.id} value={position.id}>
+                            {position.name}
                           </option>
                         ))}
                       </select>

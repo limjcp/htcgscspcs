@@ -9,6 +9,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           user: true,
           program: true,
           department: true,
+          clearances: {
+            include: {
+              steps: {
+                include: {
+                  office: {
+                    include: {
+                      Department: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
       res.status(200).json(students);

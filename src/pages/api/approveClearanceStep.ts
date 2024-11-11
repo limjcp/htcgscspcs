@@ -1,12 +1,17 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "../../lib/prisma";
+// pages/api/approveClearanceStep.ts
 
-export default async function approveClearanceStep(
+import { NextApiRequest, NextApiResponse } from "next";
+import prisma from "@/lib/prisma"; // Adjust the import path based on your project structure
+
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    res.setHeader("Allow", "POST");
+    return res
+      .status(405)
+      .json({ message: `Method ${req.method} not allowed.` });
   }
 
   const { studentId, stepId, officeId, departmentId, staffName } = req.body;
@@ -21,7 +26,9 @@ export default async function approveClearanceStep(
   try {
     const whereClause: any = {
       id: stepId,
-      status: "PENDING",
+      status: {
+        in: ["PENDING", "REJECTED"],
+      },
       clearance: {
         studentId: studentId,
       },
@@ -39,6 +46,7 @@ export default async function approveClearanceStep(
         status: "APPROVED",
         signedAt: new Date(),
         signedBy: staffName,
+        comments: null, // Clear any existing comments
       },
     });
 
@@ -50,7 +58,6 @@ export default async function approveClearanceStep(
 
     res.status(200).json({ message: "Clearance step approved successfully" });
   } catch (error) {
-    console.error("Error approving clearance step:", error);
-    res.status(500).json({ message: "Error approving clearance step", error });
+    return res.status(500).json({ message: "Internal server error." });
   }
 }

@@ -9,6 +9,7 @@ import { LayoutDashboard, Settings, NotebookPen } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import AuthButton from "./AuthButton.client";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session } = useSession();
   const userName = session?.user?.firstName || "Guest";
+  const greetings = session?.user?.greeting || "Welcome to HTCGSC";
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();
@@ -75,19 +77,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Sidebar.Nav>
           <Sidebar.Nav.Section>
             <NavItem
-              icon={<LayoutDashboard />}
-              label="Home"
-              href="/staff-dashboard"
+              icon={<NotebookPen />}
+              label="Approve"
+              href="/staff-approve"
             />
             <NavItem
               icon={<NotebookPen />}
               label="Requirements"
               href="/staff-requirements"
-            />
-            <NavItem
-              icon={<NotebookPen />}
-              label="Approve"
-              href="/staff-approve"
             />
 
             <NavItem
@@ -100,12 +97,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Footer>
           <div className="flex flex-col justify-center items-center text-sm">
-            <Button
+            <AuthButton />
+            {/* <Button
               className="bg-white text-black hover:bg-red-800 hover:text-white"
               onClick={handleSignout}
             >
               Sign Out
-            </Button>
+            </Button> */}
           </div>
         </Sidebar.Footer>
       </Sidebar>
@@ -125,7 +123,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
         <header className="flex flex-row sticky top-0 px-8 items-center bg-green-950 border-b border-b-gray-100 w-full shadow-sm min-h-[4rem]">
-          <span className={"text-white"}>GoodHoly, {userName}!</span>
+          <span className={"text-white"}> {greetings}</span>
 
           <Button
             onClick={() => {

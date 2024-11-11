@@ -40,6 +40,7 @@ enum ClearanceStatus {
   CLEARED
   REJECTED
   SIGNED
+  COMPLETED
 }
 
 enum SemesterStatus {
@@ -126,7 +127,10 @@ model Staff {
   officeId     String?
   departmentId String?
 
-  Department Department[]
+  Department  Department[]
+  Appointment Appointment[]
+  Position    Position?     @relation(fields: [positionId], references: [id])
+  positionId  String?
 }
 
 model Signatory {
@@ -142,6 +146,18 @@ model Signatory {
   isProgramHead Boolean @default(false) // Mark as Program Head for a department
 
   Department Department[] @relation(name: "ProgramHead")
+
+  Position    Position?     @relation(fields: [positionId], references: [id])
+  positionId  String?
+  Appointment Appointment[]
+}
+
+model Position {
+  id   String @id @default(cuid())
+  name String @unique
+
+  signatory Signatory[]
+  staff     Staff[]
 }
 
 model Program {
@@ -312,6 +328,8 @@ model Appointment {
   user       User        @relation(fields: [userId], references: [id])
   office     Office?     @relation(fields: [officeId], references: [id])
   department Department? @relation(fields: [departmentId], references: [id])
+  Staff      Staff[]
+  Signatory  Signatory[]
 
   @@unique([userId, officeId, departmentId]) // Ensures unique appointment per office/department
 }

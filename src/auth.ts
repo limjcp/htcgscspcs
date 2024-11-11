@@ -36,9 +36,29 @@ const authOptions: NextAuthConfig = {
             username: credentials.username as string,
           },
           include: {
-            student: true,
-            staff: true,
-            signatory: true,
+            student: {
+              include: {
+                program: {
+                  include: {
+                    department: true,
+                  },
+                },
+              },
+            },
+            staff: {
+              include: {
+                office: true,
+                Department: true,
+                Position: true,
+              },
+            },
+            signatory: {
+              include: {
+                office: true,
+                Department: true,
+                Position: true,
+              },
+            },
           },
         });
 
@@ -59,17 +79,38 @@ const authOptions: NextAuthConfig = {
         }
 
         let departmentId = null;
-        if (user.staff) {
+        let departmentName = null;
+        if (user.staff?.Department?.length) {
           departmentId = user.staff.departmentId;
-        } else if (user.signatory) {
+          departmentName = user.staff.Department[0].name;
+        } else if (user.signatory?.Department?.length) {
           departmentId = user.signatory.departmentId;
+          departmentName = user.signatory.Department[0].name;
+        } else if (user.student?.program?.department) {
+          departmentId = user.student.program.department.id;
+          departmentName = user.student.program.department.name;
         }
 
         let officeId = null;
-        if (user.staff) {
+        let officeName = null;
+        if (user.staff?.office) {
           officeId = user.staff.officeId;
-        } else if (user.signatory) {
+          officeName = user.staff.office.name;
+        } else if (user.signatory?.office) {
           officeId = user.signatory.officeId;
+          officeName = user.signatory.office.name;
+        }
+
+        let programName = null;
+        if (user.student?.program) {
+          programName = user.student.program.name;
+        }
+
+        let position = null;
+        if (user.staff?.Position) {
+          position = user.staff.Position.name;
+        } else if (user.signatory?.Position) {
+          position = user.signatory.Position.name;
         }
 
         // Update lastLogin
@@ -78,7 +119,15 @@ const authOptions: NextAuthConfig = {
           data: { lastLogin: new Date() },
         });
 
-        return { ...user, officeId, departmentId };
+        return {
+          ...user,
+          officeId,
+          officeName,
+          departmentId,
+          departmentName,
+          programName,
+          position,
+        };
       },
     }),
   ],
@@ -95,11 +144,23 @@ const authOptions: NextAuthConfig = {
       session.user.staffId = token.staffId || null;
       session.user.signatoryId = token.signatoryId || null;
       session.user.officeId = token.officeId || null;
+      session.user.officeName = token.officeName || null;
       session.user.departmentId = token.departmentId || null;
+      session.user.departmentName = token.departmentName || null;
+      session.user.programName = token.programName || null;
       session.user.firstName = token.firstName || null;
       session.user.middleName = token.middleName || null;
       session.user.lastName = token.lastName || null;
       session.user.lastLogin = token.lastLogin || null;
+      session.user.position = token.position || null;
+
+      session.user.greeting = `Goodholy! ${token.firstName} ${
+        token.lastName
+      },  ${
+        token.officeName ? token.officeName + " " : token.departmentName + " "
+      }`;
+
+      session.user.greetingsStudent = `Goodholy ${token.firstName} ${token.lastName}, ${token.programName} ${token.departmentName}`;
 
       return session;
     },
@@ -111,11 +172,15 @@ const authOptions: NextAuthConfig = {
         token.staffId = user.staff?.id || null;
         token.signatoryId = user.signatory?.id || null;
         token.officeId = user.officeId || null;
+        token.officeName = user.officeName || null;
         token.departmentId = user.departmentId || null;
+        token.departmentName = user.departmentName || null;
+        token.programName = user.programName || null;
         token.firstName = user.firstName;
         token.middleName = user.middleName;
         token.lastName = user.lastName;
         token.lastLogin = user.lastLogin;
+        token.position = user.position || null;
       }
       return token;
     },

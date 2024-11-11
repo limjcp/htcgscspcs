@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { userId, role, officeOrDepartmentId, type } = req.body;
+    const { userId, role, officeOrDepartmentId, type, position } = req.body;
 
     if (!userId || !role || !officeOrDepartmentId || !type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -19,13 +19,14 @@ export default async function handler(
           if (staff) {
             await prisma.staff.update({
               where: { userId },
-              data: { officeId: officeOrDepartmentId },
+              data: { officeId: officeOrDepartmentId, positionId: position },
             });
           } else {
             await prisma.staff.create({
               data: {
                 userId,
                 officeId: officeOrDepartmentId,
+                positionId: position,
               },
             });
           }
@@ -40,13 +41,14 @@ export default async function handler(
           if (signatory) {
             await prisma.signatory.update({
               where: { userId },
-              data: { officeId: officeOrDepartmentId },
+              data: { officeId: officeOrDepartmentId, positionId: position },
             });
           } else {
             await prisma.signatory.create({
               data: {
                 userId,
                 officeId: officeOrDepartmentId,
+                positionId: position,
               },
             });
           }
@@ -61,13 +63,17 @@ export default async function handler(
           if (staff) {
             await prisma.staff.update({
               where: { userId },
-              data: { departmentId: officeOrDepartmentId },
+              data: {
+                departmentId: officeOrDepartmentId,
+                positionId: position,
+              },
             });
           } else {
             await prisma.staff.create({
               data: {
                 userId,
                 departmentId: officeOrDepartmentId,
+                positionId: position,
               },
             });
           }
@@ -82,13 +88,17 @@ export default async function handler(
           if (signatory) {
             await prisma.signatory.update({
               where: { userId },
-              data: { departmentId: officeOrDepartmentId },
+              data: {
+                departmentId: officeOrDepartmentId,
+                positionId: position,
+              },
             });
           } else {
             await prisma.signatory.create({
               data: {
                 userId,
                 departmentId: officeOrDepartmentId,
+                positionId: position,
               },
             });
           }

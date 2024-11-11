@@ -3,7 +3,13 @@ import prisma from "@/lib/prisma";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
-    const { departmentId, programHeadId, programPresidentId } = req.body;
+    const {
+      departmentId,
+      programHeadId,
+      programPresidentId,
+      programHeadPositionId,
+      programPresidentPositionId,
+    } = req.body;
 
     console.log("Request body:", req.body);
 
@@ -31,13 +37,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               firstName: user.firstName,
               middleName: user.middleName,
               lastName: user.lastName,
+              positionId: programHeadPositionId,
             },
           });
         } else {
-          // Update the department for the existing signatory
+          // Update the department and position for the existing signatory
           await prisma.signatory.update({
             where: { userId: programHeadId },
-            data: { departmentId },
+            data: { departmentId, positionId: programHeadPositionId },
           });
         }
 
@@ -89,13 +96,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               firstName: user.firstName,
               middleName: user.middleName,
               lastName: user.lastName,
+              positionId: programPresidentPositionId,
             },
           });
         } else {
-          // Update the department for the existing staff
+          // Update the department and position for the existing staff
           await prisma.staff.update({
             where: { userId: programPresidentId },
-            data: { departmentId },
+            data: { departmentId, positionId: programPresidentPositionId },
           });
         }
 

@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../lib/prisma";
+import { RequirementStatus } from "@prisma/client";
 
 export default async function handler(
   req: NextApiRequest,
@@ -41,6 +42,26 @@ export default async function handler(
           schoolYearId,
         },
       });
+
+      // Fetch students enrolled in the selected year and semester
+      const students = await prisma.student.findMany({
+        where: {
+          enrollmentYearId: schoolYearId,
+          enrollmentSemesterId: semesterId,
+        },
+      });
+
+      // Create StudentRequirement entries for each student
+      const studentRequirements = students.map((student) => ({
+        studentId: student.id,
+        requirementId: requirement.id,
+        status: "PENDING" as RequirementStatus,
+      }));
+
+      await prisma.studentRequirement.createMany({
+        data: studentRequirements,
+      });
+
       res.status(200).json(requirement);
     } catch (error) {
       res.status(500).json({ error: "Error creating requirement" });

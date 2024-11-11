@@ -9,14 +9,25 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendClearanceEmail = async (
-  studentEmail: string,
-  semester: string
+  email: string,
+  semester: string,
+  recipientType: "student" | "staff"
 ) => {
+  let subject, text;
+
+  if (recipientType === "student") {
+    subject = `Clearance Available for ${semester}`;
+    text = `Dear student, the clearance process for ${semester} is now available. Please log in to the system to start the process.`;
+  } else if (recipientType === "staff") {
+    subject = `Clearance Signing Required for ${semester}`;
+    text = `Dear staff/signatory, the clearance process for ${semester} is now available. Please log in to the system to sign the clearances.`;
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: studentEmail,
-    subject: `Clearance Available for ${semester}`,
-    text: `Dear student, the clearance process for ${semester} is now available. Please log in to the system to start the process.`,
+    to: email,
+    subject: subject,
+    text: text,
   };
 
   try {
