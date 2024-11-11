@@ -6,7 +6,16 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { userId, role, officeOrDepartmentId, type, position } = req.body;
+    const {
+      userId,
+      role,
+      officeOrDepartmentId,
+      type,
+      position,
+      firstName,
+      middleName,
+      lastName,
+    } = req.body;
 
     if (!userId || !role || !officeOrDepartmentId || !type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -27,6 +36,9 @@ export default async function handler(
                 userId,
                 officeId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           }
@@ -49,6 +61,9 @@ export default async function handler(
                 userId,
                 officeId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           }
@@ -66,6 +81,9 @@ export default async function handler(
               data: {
                 departmentId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           } else {
@@ -74,6 +92,9 @@ export default async function handler(
                 userId,
                 departmentId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           }
@@ -91,6 +112,9 @@ export default async function handler(
               data: {
                 departmentId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           } else {
@@ -99,6 +123,9 @@ export default async function handler(
                 userId,
                 departmentId: officeOrDepartmentId,
                 positionId: position,
+                firstName,
+                middleName,
+                lastName,
               },
             });
           }

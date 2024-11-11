@@ -12,6 +12,7 @@ interface Department {
 interface User {
   id: string;
   firstName: string;
+  middleName: string;
   lastName: string;
 }
 
@@ -180,6 +181,7 @@ export default function Office() {
       userId: string,
       position?: string
     ) => {
+      const user = personnel.find((p) => p.id === userId);
       const response = await fetch(`/api/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -189,6 +191,9 @@ export default function Office() {
           type: "office",
           role: type,
           position,
+          firstName: user?.firstName,
+          middleName: user?.middleName,
+          lastName: user?.lastName,
         }),
       });
 

@@ -155,6 +155,7 @@ export default async function handler(
         await prisma.student.create({
           data: {
             firstName: mysqlStudent.firstName,
+            middleName: mysqlStudent.middleName || "", // Provide a default value
             lastName: mysqlStudent.lastName,
             email: mysqlStudent.email,
             programId: program.id,

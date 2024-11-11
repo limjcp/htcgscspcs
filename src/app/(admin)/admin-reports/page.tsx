@@ -1,294 +1,315 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import React from "react";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function Reports() {
-  const [reports, setReports] = useState([]);
+export default function AdminReportsPage() {
+  const [year, setYear] = useState("");
+  const [semester, setSemester] = useState("");
+  const [departmentId, setDepartmentId] = useState("all");
+  const [clearanceStatus, setClearanceStatus] = useState("all");
+  const [students, setStudents] = useState([]);
   const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
-
-  const fetchReports = async () => {
-    try {
-      const response = await fetch("/api/reports");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setReports(data);
-      } else {
-        console.error("API response is not an array:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-    }
-  };
-
-  const fetchYears = async () => {
-    try {
-      const response = await fetch("/api/years");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setYears(data);
-      } else {
-        console.error("API response is not an array:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching years:", error);
-    }
-  };
-
-  const fetchSemesters = async (year) => {
-    try {
-      const response = await fetch(`/api/studentsemesters?year=${year}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setSemesters(data);
-      } else {
-        console.error("API response is not an array:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching semesters:", error);
-    }
-  };
-
-  const fetchStudents = async () => {
-    try {
-      const response = await fetch("/api/students");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setStudents(data);
-      } else {
-        console.error("API response is not an array:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching students:", error);
-    }
-  };
+  const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
-    fetchReports();
-    fetchYears();
-    fetchStudents();
+    const fetchData = async () => {
+      try {
+        const [yearsRes, departmentsRes] = await Promise.all([
+          axios.get("/api/reports/years"),
+          axios.get("/api/reports/departments"),
+        ]);
+        setYears(yearsRes.data);
+        setDepartments(departmentsRes.data);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
-    if (selectedYear) {
-      fetchSemesters(selectedYear);
+    const fetchSemesters = async () => {
+      if (year) {
+        try {
+          const response = await axios.get(
+            `/api/reports/semesters?year=${year}`
+          );
+          setSemesters(response.data);
+        } catch (error) {
+          console.error("Failed to fetch semesters", error);
+        }
+      } else {
+        setSemesters([]);
+      }
+    };
+    fetchSemesters();
+  }, [year]);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.post("/api/reports", {
+        year,
+        semester,
+        departmentId,
+        clearanceStatus,
+      });
+      setStudents(response.data);
+    } catch (error) {
+      console.error("Failed to fetch students", error);
     }
-  }, [selectedYear]);
-
-  const generateReport = (semesterId) => {
-    const semester = semesters.find((s) => s.id === semesterId);
-    const semesterName = semester ? semester.name : "Unknown Semester";
-
-    const clearedStudentsList = students.filter(
-      (student) => student.status === "cleared"
-    );
-    const notClearedStudentsList = students.filter(
-      (student) => student.status !== "cleared"
-    );
-
-    const formatStudentName = (student) => {
-      return `${student.firstName} ${
-        student.middleName ? student.middleName : ""
-      } ${student.lastName}`.trim();
-    };
-
-    const newReport = {
-      id: Date.now(),
-      semesterId,
-      semesterName,
-      totalStudents: students.length,
-      clearedStudents: clearedStudentsList.length,
-      notClearedStudents: notClearedStudentsList.length,
-      clearedStudentsList: clearedStudentsList.map(formatStudentName),
-      notClearedStudentsList: notClearedStudentsList.map(formatStudentName),
-    };
-
-    setReports([...reports, newReport]);
   };
 
-  const handlePrint = (report) => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
-    doc.text(`Report for Semester: ${report.semesterName}`, 10, 10);
-    doc.autoTable({
-      head: [["Total Students", "Cleared Students", "Not Cleared Students"]],
-      body: [
-        [
-          report.totalStudents,
-          report.clearedStudents,
-          report.notClearedStudents,
-        ],
-      ],
-    });
-    doc.autoTable({
-      head: [["Cleared Students"]],
-      body: report.clearedStudentsList.map((name) => [name]),
-    });
-    doc.autoTable({
-      head: [["Not Cleared Students"]],
-      body: report.notClearedStudentsList.map((name) => [name]),
-    });
-    doc.save(`report_${report.semesterId}.pdf`);
-  };
+    const img = new Image();
+    img.src = "/htc-new-seal.png";
+    img.onload = () => {
+      // Add logo
+      doc.addImage(img, "PNG", 10, 10, 30, 30);
 
-  const filteredReports = reports.filter(
-    (report) => report.semesterId === selectedSemester
-  );
+      // Add title and subtitle
+      doc.setFontSize(18);
+      doc.setTextColor(0, 0, 128); // Dark blue color
+      doc.text("Holy Trinity College of General Santos City", 50, 20);
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text(
+        `Clearance Report for Year: ${year}, Semester: ${semester}`,
+        50,
+        30
+      );
+
+      // Add date
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 50, 40);
+
+      const formatName = (student) => {
+        const middleInitial = student.middleName
+          ? ` ${student.middleName.charAt(0)}.`
+          : "";
+        return `${student.lastName}, ${student.firstName}${middleInitial}`;
+      };
+
+      const clearedStudents = students
+        .filter((student) =>
+          student.clearances.some((clearance) => clearance.status === "CLEARED")
+        )
+        .sort((a, b) => a.lastName.localeCompare(b.lastName));
+
+      const notClearedStudents = students
+        .filter(
+          (student) =>
+            !student.clearances.some(
+              (clearance) => clearance.status === "CLEARED"
+            )
+        )
+        .sort((a, b) => a.lastName.localeCompare(b.lastName));
+
+      const createTable = (title, data, startY) => {
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 128); // Dark blue color
+        doc.text(title, 10, startY);
+        doc.autoTable({
+          startY: startY + 10,
+          head: [["Name", "Program", "Department"]],
+          body: data.map((student) => [
+            formatName(student),
+            student.program.name,
+            student.program.department
+              ? student.program.department.name
+              : "N/A",
+          ]),
+          headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [240, 240, 255] },
+        });
+      };
+
+      if (clearanceStatus === "all" || clearanceStatus === "cleared") {
+        createTable("Cleared Students", clearedStudents, 50);
+      }
+
+      if (clearanceStatus === "all" || clearanceStatus === "not_cleared") {
+        const startY =
+          clearanceStatus === "all" ? doc.autoTable.previous.finalY + 20 : 50;
+        createTable("Not Cleared Students", notClearedStudents, startY);
+      }
+
+      // Add summary
+      const totalStudents = students.length;
+      const clearedCount = clearedStudents.length;
+      const notClearedCount = notClearedStudents.length;
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text(
+        `Total Students: ${totalStudents}`,
+        10,
+        doc.autoTable.previous.finalY + 20
+      );
+      doc.text(
+        `Cleared Students: ${clearedCount}`,
+        10,
+        doc.autoTable.previous.finalY + 30
+      );
+      doc.text(
+        `Not Cleared Students: ${notClearedCount}`,
+        10,
+        doc.autoTable.previous.finalY + 40
+      );
+
+      doc.save("clearance_report.pdf");
+    };
+  };
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Reports</h1>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Generate Report</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-4">
-            <Select onValueChange={setSelectedYear} value={selectedYear}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year.id} value={year.id}>
-                    {year.year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              onValueChange={setSelectedSemester}
-              value={selectedSemester}
-              disabled={!selectedYear}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Admin Reports</h1>
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          fetchStudents();
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Year:
+            </label>
+            <select
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Semester" />
-              </SelectTrigger>
-              <SelectContent>
-                {semesters.map((semester) => (
-                  <SelectItem key={semester.id} value={semester.id}>
-                    {semester.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => generateReport(selectedSemester)}
-              disabled={!selectedSemester}
-            >
-              Generate Report
-            </Button>
+              <option value="">Select Year</option>
+              {years.map((y) => (
+                <option key={y.year} value={y.year}>
+                  {y.year}
+                </option>
+              ))}
+            </select>
           </div>
-        </CardContent>
-      </Card>
-
-      {filteredReports.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Report Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="summary">
-              <TabsList>
-                <TabsTrigger value="summary">Summary</TabsTrigger>
-                <TabsTrigger value="cleared">Cleared Students</TabsTrigger>
-                <TabsTrigger value="notCleared">
-                  Not Cleared Students
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="summary">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Total Students</TableHead>
-                      <TableHead>Cleared Students</TableHead>
-                      <TableHead>Not Cleared Students</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>{report.totalStudents}</TableCell>
-                        <TableCell>{report.clearedStudents}</TableCell>
-                        <TableCell>{report.notClearedStudents}</TableCell>
-                        <TableCell>
-                          <Button
-                            onClick={() => handlePrint(report)}
-                            variant="outline"
-                          >
-                            Print PDF
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-              <TabsContent value="cleared">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Cleared Students</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredReports[0]?.clearedStudentsList.map(
-                      (student, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{student}</TableCell>
-                        </TableRow>
-                      )
-                    )}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-              <TabsContent value="notCleared">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Not Cleared Students</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredReports[0]?.notClearedStudentsList.map(
-                      (student, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{student}</TableCell>
-                        </TableRow>
-                      )
-                    )}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Semester:
+            </label>
+            <select
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+            >
+              <option value="">Select Semester</option>
+              {semesters.map((s) => (
+                <option key={s.name} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Department:
+            </label>
+            <select
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+            >
+              <option value="all">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Clearance Status:
+            </label>
+            <select
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={clearanceStatus}
+              onChange={(e) => setClearanceStatus(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="cleared">Cleared</option>
+              <option value="not_cleared">Not Cleared</option>
+            </select>
+          </div>
+        </div>
+        <button
+          type="submit"
+          className="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Fetch Students
+        </button>
+      </form>
+      {students.length > 0 && (
+        <>
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Students</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-blue-500 tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-blue-500 tracking-wider">
+                      Program
+                    </th>
+                    <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-blue-500 tracking-wider">
+                      Department
+                    </th>
+                    <th className="px-6 py-3 border-b-2 border-gray-300 text-left leading-4 text-blue-500 tracking-wider">
+                      Clearance Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {students.map((student, index) => (
+                    <tr
+                      key={student.id}
+                      className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                    >
+                      <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                        {student.firstName} {student.lastName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                        {student.program.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                        {student.program.department
+                          ? student.program.department.name
+                          : "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-no-wrap border-b border-gray-500">
+                        {student.clearances.some(
+                          (clearance) => clearance.status === "CLEARED"
+                        )
+                          ? "Cleared"
+                          : "Not Cleared"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <button
+            onClick={generatePDF}
+            className="mt-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Generate PDF
+          </button>
+        </>
       )}
     </div>
   );

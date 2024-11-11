@@ -229,7 +229,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
         <header className="flex flex-row sticky top-0 px-8 items-center bg-green-950 border-b border-b-gray-100 w-full shadow-sm min-h-[4rem]">
-          <span className={"text-white"}>GoodHoly, {userName}!</span>
+          <span className={"text-white"}>GoodHoly, {userName}! Admin</span>
 
           <Button
             onClick={() => {

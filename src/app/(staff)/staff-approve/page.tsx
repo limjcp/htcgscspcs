@@ -12,6 +12,7 @@ export default function Page() {
   const [selectedSemester, setSelectedSemester] = useState("");
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchCategory, setSearchCategory] = useState("student");
 
   useEffect(() => {
     fetchYears();
@@ -82,7 +83,7 @@ export default function Page() {
 
   const approveClearanceStep = async (studentId, stepId) => {
     try {
-      const staffPosition = session?.user?.position || "Unknown Position";
+      const staffPosition = session?.user?.position || "Staff";
       const response = await fetch("/api/approveClearanceStep", {
         method: "POST",
         headers: {
@@ -193,7 +194,9 @@ export default function Page() {
 
   const handleSelectAll = (event) => {
     if (event.target.checked) {
-      const allSelectableStudentIds = students.map((student) => student.id);
+      const allSelectableStudentIds = filteredStudents.map(
+        (student) => student.id
+      );
       setSelectedStudents(allSelectableStudentIds);
     } else {
       setSelectedStudents([]);
@@ -204,10 +207,25 @@ export default function Page() {
     setSearchTerm(event.target.value);
   };
 
+  const handleSearchCategoryChange = (event) => {
+    setSearchCategory(event.target.value);
+  };
+
   const filteredStudents = students.filter((student) => {
     const fullName =
       `${student.user?.firstName} ${student.user?.middleName} ${student.user?.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase());
+    const programName = student.program?.name.toLowerCase() || "";
+    const departmentName =
+      student.program?.department?.name.toLowerCase() || "";
+
+    if (searchCategory === "student") {
+      return fullName.includes(searchTerm.toLowerCase());
+    } else if (searchCategory === "program") {
+      return programName.includes(searchTerm.toLowerCase());
+    } else if (searchCategory === "department") {
+      return departmentName.includes(searchTerm.toLowerCase());
+    }
+    return false;
   });
 
   const handleRejectClick = (studentId, stepId) => {
@@ -275,10 +293,29 @@ export default function Page() {
             <div className="flex flex-col md:flex-row items-center w-full md:w-auto">
               <div className="w-full md:w-64 mb-2 md:mb-0 md:mr-4">
                 <label
+                  htmlFor="searchCategory"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Search By
+                </label>
+                <select
+                  id="searchCategory"
+                  name="searchCategory"
+                  value={searchCategory}
+                  onChange={handleSearchCategoryChange}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                >
+                  <option value="student">Student</option>
+                  <option value="program">Program</option>
+                  <option value="department">Department</option>
+                </select>
+              </div>
+              <div className="w-full md:w-64 mb-2 md:mb-0 md:mr-4">
+                <label
                   htmlFor="search"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Search Student
+                  Search
                 </label>
                 <input
                   type="text"
@@ -287,7 +324,7 @@ export default function Page() {
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                  placeholder="Search by student name"
+                  placeholder={`Search by ${searchCategory}`}
                 />
               </div>
               <button
