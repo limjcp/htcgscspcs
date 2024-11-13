@@ -1,8 +1,9 @@
 "use client";
+import { withAuth } from "@/withAuth";
 import { useState, useEffect } from "react";
 import React from "react";
 
-export default function AppointmentsPage() {
+function AppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
   const [data, setData] = useState({ users: [], offices: [], departments: [] });
   const [form, setForm] = useState({
@@ -19,6 +20,12 @@ export default function AppointmentsPage() {
   });
   const [error, setError] = useState("");
   const [appointTo, setAppointTo] = useState(""); // New state to track whether appointing to office or department
+  const [filter, setFilter] = useState({
+    officeId: "",
+    startDate: "",
+    endDate: "",
+  });
+  const [showFilter, setShowFilter] = useState(false);
 
   useEffect(() => {
     fetch("/api/appointments")
@@ -36,6 +43,10 @@ export default function AppointmentsPage() {
 
   const handleResignChange = (e) => {
     setResignForm({ ...resignForm, [e.target.name]: e.target.value });
+  };
+
+  const handleFilterChange = (e) => {
+    setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -93,13 +104,82 @@ export default function AppointmentsPage() {
     }
   };
 
+  const filteredAppointments = appointments.filter((appointment) => {
+    const matchesOffice = filter.officeId
+      ? appointment.office?.id === filter.officeId
+      : true;
+    const matchesDateRange =
+      filter.startDate && filter.endDate
+        ? new Date(appointment.appointmentDate) >= new Date(filter.startDate) &&
+          new Date(appointment.appointmentDate) <= new Date(filter.endDate)
+        : true;
+
+    return matchesOffice && matchesDateRange;
+  });
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Appointments</h1>
+      <button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        onClick={() => {
+          setAppointTo(""); // Reset appointTo state
+          setModalIsOpen(true);
+        }}
+      >
+        Add Appointment
+      </button>
+      <button
+        className="mt-4 ml-4 px-4 py-2 bg-gray-500 text-white rounded"
+        onClick={() => setShowFilter(!showFilter)}
+      >
+        {showFilter ? "Hide Filter" : "Show Filter"}
+      </button>
+      {showFilter && (
+        <div className="mb-4">
+          <h2 className="text-xl font-bold mb-4">Filter Appointments</h2>
+          <div className="mb-4">
+            <label className="block text-gray-700">Select Office</label>
+            <select
+              name="officeId"
+              value={filter.officeId}
+              onChange={handleFilterChange}
+              className="w-full mt-2 p-2 border border-gray-300 rounded"
+            >
+              <option value="">All Offices</option>
+              {data.offices.map((office) => (
+                <option key={office.id} value={office.id}>
+                  {office.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Start Date</label>
+            <input
+              type="date"
+              name="startDate"
+              value={filter.startDate}
+              onChange={handleFilterChange}
+              className="w-full mt-2 p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">End Date</label>
+            <input
+              type="date"
+              name="endDate"
+              value={filter.endDate}
+              onChange={handleFilterChange}
+              className="w-full mt-2 p-2 border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+      )}
       <table className="min-w-full bg-white border border-gray-200">
         <thead>
           <tr>
-            <th className="py-2 px-4 border-b">User</th>
+            <th className="py-2 px-4 border-b">Personnel</th>
             <th className="py-2 px-4 border-b">Appointed To</th>
             <th className="py-2 px-4 border-b">Appointment Date</th>
             <th className="py-2 px-4 border-b">Resignation Date</th>
@@ -107,7 +187,7 @@ export default function AppointmentsPage() {
           </tr>
         </thead>
         <tbody>
-          {appointments.map((appointment) => (
+          {filteredAppointments.map((appointment) => (
             <tr key={appointment.id}>
               <td className="py-2 px-4 border-b">
                 {appointment.user?.firstName} {appointment.user?.lastName}
@@ -143,7 +223,9 @@ export default function AppointmentsPage() {
               </td>
               <td className="py-2 px-4 border-b">
                 <button
-                  className="px-4 py-2 bg-red-500 text-white rounded"
+                  className={`px-4 py-2 rounded ${
+                    appointment.resignationDate ? "bg-gray-500" : "bg-red-500"
+                  } text-white`}
                   onClick={() => {
                     setResignForm({
                       appointmentId: appointment.id,
@@ -151,24 +233,15 @@ export default function AppointmentsPage() {
                     });
                     setResignModalIsOpen(true);
                   }}
+                  disabled={!!appointment.resignationDate} // Disable button if resignation date exists
                 >
-                  Resign
+                  {appointment.resignationDate ? "Resigned" : "Resign"}
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      <button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        onClick={() => {
-          setAppointTo(""); // Reset appointTo state
-          setModalIsOpen(true);
-        }}
-      >
-        Add Appointment
-      </button>
 
       {modalIsOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -315,3 +388,4 @@ export default function AppointmentsPage() {
     </div>
   );
 }
+export default withAuth(AppointmentsPage, ["admin"]);

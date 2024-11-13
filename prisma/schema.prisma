@@ -41,6 +41,7 @@ enum ClearanceStatus {
   REJECTED
   SIGNED
   COMPLETED
+  PARTIALLY_COMPLETED
 }
 
 enum SemesterStatus {

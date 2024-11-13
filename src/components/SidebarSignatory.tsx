@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import { Sidebar, useSidebar, Overlay, SidebarState } from "@rewind-ui/core";
 import Image from "next/image";
 import { Button } from "@rewind-ui/core";
-import { LayoutDashboard, Settings, Signature } from "lucide-react";
+import {
+  CheckCheck,
+  LayoutDashboard,
+  ListChecks,
+  NotebookPen,
+  Settings,
+  Signature,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 
@@ -65,6 +72,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               label="Sign"
               href="/signatory-sign"
             />
+            <Sidebar.Nav.Section.Item
+              icon={<CheckCheck />}
+              label="Approve"
+              href="/signatory-approve"
+            />
+            <Sidebar.Nav.Section.Item
+              icon={<ListChecks />}
+              label="Requirements"
+              href="/signatory-requirements"
+            />
+
             <Sidebar.Nav.Section.Item
               icon={<Settings />}
               label="Settings"

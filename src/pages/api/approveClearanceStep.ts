@@ -27,7 +27,7 @@ export default async function handler(
     const whereClause: any = {
       id: stepId,
       status: {
-        in: ["PENDING", "REJECTED"],
+        in: ["PENDING", "REJECTED", "PARTIALLY_COMPLETED"],
       },
       clearance: {
         studentId: studentId,

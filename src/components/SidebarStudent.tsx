@@ -75,12 +75,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Nav>
           <Sidebar.Nav.Section>
-            <NavItem
-              icon={<LayoutDashboard />}
-              label="Home"
-              href="/student-dashboard"
-            />
-
             <NavItem icon={<NotebookPen />} label="Clearance" as="button">
               <Sidebar.Nav.Section className="bg-inherit" isChild>
                 <NavItem

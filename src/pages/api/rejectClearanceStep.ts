@@ -25,7 +25,7 @@ export default async function handler(
     await prisma.clearanceStep.update({
       where: { id: stepId },
       data: {
-        status: "REJECTED",
+        status: "PARTIALLY_COMPLETED",
         comments: comments || null,
         signedAt: new Date(),
         signedBy: staffName,
@@ -34,7 +34,7 @@ export default async function handler(
 
     return res
       .status(200)
-      .json({ message: "Clearance step rejected successfully." });
+      .json({ message: "Clearance step remark successfully." });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error." });
   }

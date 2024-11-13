@@ -114,7 +114,6 @@ export default function Page() {
 
   const rejectClearanceStep = async (studentId, stepId, comment) => {
     try {
-      const staffPosition = session?.user?.position || "Staff";
       const response = await fetch("/api/rejectClearanceStep", {
         method: "POST",
         headers: {
@@ -125,7 +124,7 @@ export default function Page() {
           stepId,
           officeId: session.user.officeId,
           departmentId: session.user.departmentId,
-          staffName: `${session?.user?.firstName} ${session?.user?.lastName} - ${staffPosition}`,
+          staffName: `${session?.user?.firstName} ${session?.user?.lastName}`,
           comments: comment,
         }),
       });

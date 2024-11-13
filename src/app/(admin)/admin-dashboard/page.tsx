@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { withAuth } from "@/withAuth";
 
 const Page = () => {
   const [semesters, setSemesters] = useState([]);
@@ -143,4 +144,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default withAuth(Page, ["admin"]);

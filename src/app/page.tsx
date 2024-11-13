@@ -11,9 +11,9 @@ export default async function UserPage() {
     // Role-based redirects when accessing the root path "/"
     const roleDashboardMap: Record<string, string> = {
       admin: "/admin-dashboard",
-      staff: "/staff-dashboard",
-      signatory: "/signatory-dashboard",
-      student: "/student-dashboard",
+      staff: "/staff-approve",
+      signatory: "/signatory-sign",
+      student: "/student-clearance",
     };
 
     // Check the user's roles and redirect to the appropriate dashboard

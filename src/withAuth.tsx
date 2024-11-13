@@ -34,9 +34,9 @@ export function withAuth(
         if (router.pathname === "/") {
           const roleDashboardMap: Record<string, string> = {
             admin: "/admin-dashboard",
-            staff: "/staff-dashboard",
-            signatory: "/signatory-dashboard",
-            student: "/student-dashboard",
+            staff: "/staff-approve",
+            signatory: "/signatory-sign",
+            student: "/student-clearance",
           };
 
           for (const role of userRoles) {
