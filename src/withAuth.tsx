@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 const fetchSession = async () => {
   const response = await fetch("/api/auth/session");

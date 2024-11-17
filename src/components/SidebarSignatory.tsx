@@ -72,11 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               label="Sign"
               href="/signatory-sign"
             />
-            <Sidebar.Nav.Section.Item
-              icon={<CheckCheck />}
-              label="Approve"
-              href="/signatory-approve"
-            />
+
             <Sidebar.Nav.Section.Item
               icon={<ListChecks />}
               label="Requirements"
