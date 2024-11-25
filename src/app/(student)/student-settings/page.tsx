@@ -1,3 +1,4 @@
+"use client";
 import ChangePassword from "@/components/ChangePassword";
 import { withAuth } from "@/withAuth";
 
