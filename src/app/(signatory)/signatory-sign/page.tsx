@@ -517,71 +517,71 @@ export default function StaffApprovalAndSigningPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-gray-50">
-                    <td className="border px-4 py-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedStudents.includes(student.id)}
-                        onChange={() => handleCheckboxChange(student.id)}
-                        disabled={!canSign(student) && isFullyApproved(student)}
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      {student.user ? (
-                        <>
-                          {student.user.firstName} {student.user.middleName}{" "}
-                          {student.user.lastName}
-                        </>
-                      ) : (
-                        "Unknown User"
-                      )}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {student.program
-                        ? student.program.name
-                        : "Unknown Program"}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {student.program && student.program.department
-                        ? student.program.department.name
-                        : "Unknown Department"}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {student.clearances.map((clearance) =>
-                        clearance.steps.map((step) => (
-                          <div key={step.id} className="mb-2">
-                            <span className="font-semibold">
-                              {step.office
-                                ? step.office.name
-                                : step.department.name}
-                            </span>{" "}
-                            - {step.status}
-                          </div>
-                        ))
-                      )}
-                    </td>
-                    <td className="border px-4 py-2">
-                      <Button
-                        onClick={() => handleView(student)}
-                        disabled={isFullyApproved(student)}
-                        className="mr-2"
+                {filteredStudents.map((student) =>
+                  student.clearances.map((clearance) =>
+                    clearance.steps.map((step) => (
+                      <tr
+                        key={`${student.id}-${step.id}`}
+                        className="hover:bg-gray-50"
                       >
-                        View
-                      </Button>
-                      {canSign(student) && (
-                        <Button
-                          onClick={() =>
-                            signSelectedClearanceSteps([student.id])
-                          }
-                          className="bg-blue-500 text-white"
-                        >
-                          Sign
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        <td className="border px-4 py-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.includes(student.id)}
+                            onChange={() => handleCheckboxChange(student.id)}
+                            disabled={
+                              !canSign(student) && isFullyApproved(student)
+                            }
+                          />
+                        </td>
+                        <td className="border px-4 py-2">
+                          {student.user ? (
+                            <>
+                              {student.user.firstName} {student.user.middleName}{" "}
+                              {student.user.lastName}
+                            </>
+                          ) : (
+                            "Unknown User"
+                          )}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {student.program
+                            ? student.program.name
+                            : "Unknown Program"}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {student.program && student.program.department
+                            ? student.program.department.name
+                            : "Unknown Department"}
+                        </td>
+                        <td className="border px-4 py-2">
+                          <span className="font-semibold">
+                            {step.office ? step.office.name : "Unknown Office"}
+                          </span>{" "}
+                          - {step.status}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {step.status === "APPROVED" && (
+                            <Button
+                              onClick={() =>
+                                signClearanceStep(student.id, step.id)
+                              }
+                              className="bg-blue-500 text-white mr-2"
+                            >
+                              Sign
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => handleView(student)}
+                            disabled={isFullyApproved(student)}
+                          >
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )
+                )}
               </tbody>
             </table>
           </div>
