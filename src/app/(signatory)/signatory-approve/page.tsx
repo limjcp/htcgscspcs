@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { withAuth } from "@/withAuth";
 
-export default function Page() {
+function Page() {
   const { data: session } = useSession();
   const [students, setStudents] = useState([]);
   const [error, setError] = useState("");
@@ -442,3 +443,4 @@ export default function Page() {
     </div>
   );
 }
+export default withAuth(Page, ["signatory"]);

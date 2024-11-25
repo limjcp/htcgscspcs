@@ -1,3 +1,10 @@
+import ChangePassword from "@/components/ChangePassword";
+
 export default function Page() {
-  return <h1>Staff Settings</h1>;
+  return (
+    <div>
+      <h1>Settings</h1>
+      <ChangePassword />
+    </div>
+  );
 }

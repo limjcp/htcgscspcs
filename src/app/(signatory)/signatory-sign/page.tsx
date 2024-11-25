@@ -22,8 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { withAuth } from "@/withAuth";
 
-export default function StaffApprovalAndSigningPage() {
+function StaffApprovalAndSigningPage() {
   const { data: session } = useSession();
   const [students, setStudents] = useState([]);
   const [error, setError] = useState("");
@@ -640,3 +641,4 @@ export default function StaffApprovalAndSigningPage() {
     </div>
   );
 }
+export default withAuth(StaffApprovalAndSigningPage, ["signatory"]);

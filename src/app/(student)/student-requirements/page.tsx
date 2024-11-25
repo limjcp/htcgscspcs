@@ -1,4 +1,5 @@
 "use client";
+import { withAuth } from "@/withAuth";
 import React, { useEffect, useState } from "react";
 import "tailwindcss/tailwind.css";
 
@@ -117,4 +118,4 @@ const StudentRequirements = () => {
   );
 };
 
-export default StudentRequirements;
+export default withAuth(StudentRequirements, ["student"]);

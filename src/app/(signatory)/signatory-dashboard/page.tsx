@@ -3,8 +3,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import React from "react";
 import { useSession } from "next-auth/react";
+import { withAuth } from "@/withAuth";
 
-export default function Home() {
+function Home() {
   const { data: session } = useSession();
   const [counts, setCounts] = useState({
     allStudents: 0,
@@ -61,3 +62,4 @@ export default function Home() {
     </div>
   );
 }
+export default withAuth(Home, ["signatory"]);

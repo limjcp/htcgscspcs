@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import React from "react";
 import { useSession } from "next-auth/react";
+import { withAuth } from "@/withAuth";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -123,4 +124,4 @@ const ClearancePage = () => {
   );
 };
 
-export default ClearancePage;
+export default withAuth(ClearancePage, ["student"]);

@@ -54,7 +54,7 @@ export function withAuth(
         );
 
         if (requiredRoles.length > 0 && !hasRequiredRole) {
-          router.push("/unauthorized"); // Redirect to unauthorized page if user doesn't have the required role
+          router.push("/"); // Redirect to unauthorized page if user doesn't have the required role
           return;
         }
 

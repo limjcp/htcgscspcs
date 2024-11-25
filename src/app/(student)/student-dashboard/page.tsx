@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { withAuth } from "@/withAuth";
 
 const StudentDashboard = () => {
   const { data: session } = useSession();
@@ -12,7 +13,7 @@ const StudentDashboard = () => {
       if (session?.user?.id) {
         try {
           const response = await fetch(
-            `/api/clearance?userId=${session.user.id}`,
+            `/api/clearance?userId=${session.user.id}`
           );
           const data = await response.json();
 
@@ -48,4 +49,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard;
+export default withAuth(StudentDashboard, ["student"]);

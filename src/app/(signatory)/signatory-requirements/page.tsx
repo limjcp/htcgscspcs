@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import React from "react";
 import axios from "axios";
+import { withAuth } from "@/withAuth";
 
 const CreateRequirementPage = () => {
   const { data: session } = useSession();
@@ -277,4 +278,4 @@ const CreateRequirementPage = () => {
   );
 };
 
-export default CreateRequirementPage;
+export default withAuth(CreateRequirementPage, ["signatory"]);
