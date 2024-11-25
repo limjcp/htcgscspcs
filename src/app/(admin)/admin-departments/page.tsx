@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { withAuth } from "@/withAuth";
 
 const DepartmentPage = () => {
   const [name, setName] = useState("");
@@ -304,4 +305,4 @@ const DepartmentPage = () => {
   );
 };
 
-export default DepartmentPage;
+export default withAuth(DepartmentPage, ["admin"]);

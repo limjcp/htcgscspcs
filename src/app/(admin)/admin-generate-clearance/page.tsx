@@ -1,4 +1,5 @@
 "use client";
+import { withAuth } from "@/withAuth";
 import { useState, useEffect } from "react";
 import React from "react";
 
@@ -297,4 +298,4 @@ function ClearanceGenerationPage() {
   );
 }
 
-export default ClearanceGenerationPage;
+export default withAuth(ClearanceGenerationPage, ["admin"]);

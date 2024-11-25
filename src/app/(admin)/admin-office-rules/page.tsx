@@ -1,3 +1,4 @@
+import { withAuth } from "@/withAuth";
 import React from "react";
 
 const AdminOfficeRulesPage: React.FC = () => {
@@ -8,4 +9,4 @@ const AdminOfficeRulesPage: React.FC = () => {
   );
 };
 
-export default AdminOfficeRulesPage;
+export default withAuth(AdminOfficeRulesPage, ["admin"]);

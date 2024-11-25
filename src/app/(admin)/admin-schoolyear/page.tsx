@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import axios from "axios";
+import { withAuth } from "@/withAuth";
 
 interface Semester {
   id: number;
@@ -231,4 +232,4 @@ const RegisterSchoolYear: React.FC = () => {
   );
 };
 
-export default RegisterSchoolYear;
+export default withAuth(RegisterSchoolYear, ["admin"]);

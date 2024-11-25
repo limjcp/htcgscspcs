@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import axios from "axios";
 import AssignModal from "./AssignModal"; // Adjust the import path as needed
+import { withAuth } from "@/withAuth";
 
 interface Staff {
   id: string;
@@ -293,4 +294,4 @@ const OfficesDepartmentsPage = () => {
   );
 };
 
-export default OfficesDepartmentsPage;
+export default withAuth(OfficesDepartmentsPage, ["admin"]);

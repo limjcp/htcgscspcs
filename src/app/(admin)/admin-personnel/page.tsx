@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import PersonnelList from "./PersonnelList"; // Import the new component
+import { withAuth } from "@/withAuth";
 
 const RegisterStaffSignatory: React.FC = () => {
   return (
@@ -10,4 +11,4 @@ const RegisterStaffSignatory: React.FC = () => {
   );
 };
 
-export default RegisterStaffSignatory;
+export default withAuth(RegisterStaffSignatory, ["admin"]);

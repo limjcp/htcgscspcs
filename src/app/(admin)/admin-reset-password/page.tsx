@@ -1,4 +1,5 @@
 "use client";
+import { withAuth } from "@/withAuth";
 import UserList from "./UserList";
 
 const AdminPage: React.FC = () => {
@@ -9,4 +10,4 @@ const AdminPage: React.FC = () => {
   );
 };
 
-export default AdminPage;
+export default withAuth(AdminPage, ["admin"]);

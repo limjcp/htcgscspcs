@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import axios from "axios";
 import AssignProgramRolesModal from "./AssignProgramRolesModal"; // Adjust the import path as needed
+import { withAuth } from "@/withAuth";
 
 interface Staff {
   id: string;
@@ -143,4 +144,4 @@ const AssignProgramRolesPage = () => {
   );
 };
 
-export default AssignProgramRolesPage;
+export default withAuth(AssignProgramRolesPage, ["admin"]);

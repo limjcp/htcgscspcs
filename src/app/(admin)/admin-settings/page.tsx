@@ -1,6 +1,7 @@
 import ChangePassword from "@/components/ChangePassword";
+import { withAuth } from "@/withAuth";
 
-export default function Settings() {
+function Settings() {
   return (
     <div>
       <h1>Settings</h1>
@@ -8,3 +9,4 @@ export default function Settings() {
     </div>
   );
 }
+export default withAuth(Settings, ["admin"]);

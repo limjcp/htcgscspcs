@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { withAuth } from "@/withAuth";
 
 interface Department {
   id: string;
@@ -24,7 +25,7 @@ interface Office {
   signatory: { user: User }[];
 }
 
-export default function Office() {
+function Office() {
   const router = useRouter();
   const [offices, setOffices] = useState<Office[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -639,3 +640,5 @@ export default function Office() {
     </div>
   );
 }
+
+export default withAuth(Office, ["admin"]);

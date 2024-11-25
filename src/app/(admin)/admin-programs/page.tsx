@@ -1,6 +1,8 @@
 import React from "react";
 import RegisterProgram from "./register";
+import { withAuth } from "@/withAuth";
 
-export default function Page() {
+function Page() {
   return <RegisterProgram />;
 }
+export default withAuth(Page, ["admin"]);

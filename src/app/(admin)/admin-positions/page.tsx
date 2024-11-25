@@ -3,6 +3,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { withAuth } from "@/withAuth";
 
 interface Signatory {
   id: string;
@@ -16,7 +17,7 @@ interface Position {
   signatory: Signatory[];
 }
 
-export default function PositionsPage() {
+function PositionsPage() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPositionName, setNewPositionName] = useState("");
@@ -111,3 +112,5 @@ export default function PositionsPage() {
     </div>
   );
 }
+
+export default withAuth(PositionsPage, ["admin"]);

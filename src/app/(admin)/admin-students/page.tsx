@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "tailwindcss/tailwind.css";
+import { withAuth } from "@/withAuth";
 
 type Department = {
   id: number;
@@ -33,7 +34,7 @@ type Semester = {
   schoolYearId: string;
 };
 
-export default function Students() {
+function Students() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>("");
@@ -296,3 +297,4 @@ export default function Students() {
     </div>
   );
 }
+export default withAuth(Students, ["admin"]);

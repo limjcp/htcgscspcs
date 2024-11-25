@@ -4,8 +4,9 @@ import axios from "axios";
 import React from "react";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import { withAuth } from "@/withAuth";
 
-export default function AdminReportsPage() {
+function AdminReportsPage() {
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
   const [departmentId, setDepartmentId] = useState("all");
@@ -314,3 +315,4 @@ export default function AdminReportsPage() {
     </div>
   );
 }
+export default withAuth(AdminReportsPage, ["admin"]);

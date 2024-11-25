@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { getOfficesWithDependencies } from "@/pages/api/officeService";
 import EditDependenciesModal from "./EditDependenciesModal";
+import { withAuth } from "@/withAuth";
 
 interface Office {
   id: string;
@@ -96,4 +97,4 @@ const AdminDependencyPage: React.FC = () => {
   );
 };
 
-export default AdminDependencyPage;
+export default withAuth(AdminDependencyPage, ["admin"]);
