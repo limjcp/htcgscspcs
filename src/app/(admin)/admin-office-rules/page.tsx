@@ -1,3 +1,4 @@
+"use client";
 import { withAuth } from "@/withAuth";
 import React from "react";
 
