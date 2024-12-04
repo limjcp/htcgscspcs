@@ -43,7 +43,7 @@ export default async function handler(
     const clearanceStep = await prisma.clearanceStep.updateMany({
       where: whereClause,
       data: {
-        status: "APPROVED",
+        status: "COMPLETED",
         signedAt: new Date(),
         signedBy: staffName,
         comments: null, // Clear any existing comments
