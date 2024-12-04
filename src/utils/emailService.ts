@@ -1,3 +1,4 @@
+// emailService.ts
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
@@ -35,7 +36,7 @@ export const sendClearanceEmail = async (
     console.log("Email sent: " + info.response);
     return info;
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Could not send email");
+    console.error("Error sending email to", email, ":", error);
+    // Do not throw an error; continue the process
   }
 };
