@@ -22,7 +22,7 @@ export default async function handler(
           id: step.stepId,
         },
         data: {
-          status: "APPROVED",
+          status: "COMPLETED",
         },
       })
     );
