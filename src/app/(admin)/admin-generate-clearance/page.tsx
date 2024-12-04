@@ -119,7 +119,7 @@ function ClearanceGenerationPage() {
         },
         body: JSON.stringify({ semesterId }),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         const schoolYear = schoolYears.find((year) => year.id === schoolYearId);
@@ -133,7 +133,7 @@ function ClearanceGenerationPage() {
         setMessage("Clearance generated successfully!");
       } else {
         const errorText = await response.text();
-        console.error("Error response text:", errorText);
+        console.error(`Error ${response.status}:`, errorText);
         setMessage("Failed to generate clearance.");
       }
     } catch (error) {
