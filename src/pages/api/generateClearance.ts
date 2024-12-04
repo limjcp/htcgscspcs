@@ -1,3 +1,4 @@
+// generateClearance.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { sendClearanceEmail } from "@/utils/emailService";
@@ -45,64 +46,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
-    const clearances = await Promise.all(
-      students.map(async (student) => {
-        const clearance = await prisma.clearance.create({
-          data: {
-            studentId: student.id,
-            semesterId,
-            schoolYearId,
-          },
-        });
+    const clearances = [];
 
-        for (const office of offices) {
-          if (office.Department && office.Department.length > 0) {
-            // Office is assigned to departments
-            const studentDepartmentId = student.program.department?.id;
-            const matchingDepartment = office.Department.find(
-              (department) => department.id === studentDepartmentId
-            );
+    for (const student of students) {
+      const clearance = await prisma.clearance.create({
+        data: {
+          studentId: student.id,
+          semesterId,
+          schoolYearId,
+        },
+      });
 
-            if (matchingDepartment) {
-              // Create clearance step with officeId and departmentId
-              await prisma.clearanceStep.create({
-                data: {
-                  clearanceId: clearance.id,
-                  officeId: office.id,
-                  departmentId: matchingDepartment.id,
-                  status: ClearanceStatus.PENDING,
-                },
-              });
+      for (const office of offices) {
+        if (office.Department && office.Department.length > 0) {
+          const studentDepartmentId = student.program.department?.id;
+          const matchingDepartment = office.Department.find(
+            (department) => department.id === studentDepartmentId
+          );
 
-              // Fetch signatories for this office and department
-              const signatories = await prisma.signatory.findMany({
-                where: {
-                  officeId: office.id,
-                  departmentId: matchingDepartment.id,
-                },
-                include: { user: true },
-              });
-
-              for (const signatory of signatories) {
-                await sendClearanceEmail(
-                  signatory.user.email,
-                  `${semester.name} ${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,
-                  "staff"
-                );
-              }
-            }
-          } else {
-            // Office is not assigned to departments
+          if (matchingDepartment) {
             await prisma.clearanceStep.create({
               data: {
                 clearanceId: clearance.id,
                 officeId: office.id,
+                departmentId: matchingDepartment.id,
                 status: ClearanceStatus.PENDING,
               },
             });
 
             const signatories = await prisma.signatory.findMany({
-              where: { officeId: office.id },
+              where: {
+                officeId: office.id,
+                departmentId: matchingDepartment.id,
+              },
               include: { user: true },
             });
 
@@ -114,26 +90,40 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               );
             }
           }
-        }
+        } else {
+          await prisma.clearanceStep.create({
+            data: {
+              clearanceId: clearance.id,
+              officeId: office.id,
+              status: ClearanceStatus.PENDING,
+            },
+          });
 
-        // Send email to student
-        try {
-          await sendClearanceEmail(
-            student.email,
-            `${semester.name} ${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,
-            "student"
-          );
-          console.log(`Email sent to ${student.email}`);
-        } catch (emailError) {
-          console.error(
-            `Failed to send email to ${student.email}:`,
-            emailError
-          );
-        }
+          const signatories = await prisma.signatory.findMany({
+            where: { officeId: office.id },
+            include: { user: true },
+          });
 
-        return clearance;
-      })
-    );
+          for (const signatory of signatories) {
+            await sendClearanceEmail(
+              signatory.user.email,
+              `${semester.name} ${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,
+              "staff"
+            );
+          }
+        }
+      }
+
+      // Send email to student without stopping the process if it fails
+      await sendClearanceEmail(
+        student.email,
+        `${semester.name} ${semester.schoolYear.startYear}-${semester.schoolYear.endYear}`,
+        "student"
+      );
+      console.log(`Processed student ${student.email}`);
+
+      clearances.push(clearance);
+    }
 
     console.log("Created Clearances:", clearances);
 
