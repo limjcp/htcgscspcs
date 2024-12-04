@@ -63,7 +63,7 @@ export default async function handler(
     const clearanceStep = await prisma.clearanceStep.findFirst({
       where: {
         id: stepId,
-        status: ClearanceStatus.APPROVED,
+        status: ClearanceStatus.COMPLETED,
       },
       include: {
         clearance: true,
