@@ -562,7 +562,7 @@ function StaffApprovalAndSigningPage() {
                           - {step.status}
                         </td>
                         <td className="border px-4 py-2">
-                          {step.status === "APPROVED" && (
+                          {step.status === "COMPLETED" && (
                             <Button
                               onClick={() =>
                                 signClearanceStep(student.id, step.id)
