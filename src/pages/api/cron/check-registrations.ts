@@ -1,14 +1,11 @@
 // src/pages/api/cron/check-resignations.ts
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Verify the request is from Vercel Cron
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET_KEY}`) {
-    return res.status(401).json({ error: "Unauthorized" });
+export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET_KEY}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -91,11 +88,14 @@ export default async function handler(
       });
     }
 
-    res.status(200).json({
-      message: `Successfully processed ${expiredAppointments.length} resignations`,
+    return NextResponse.json({
+      message: `Successfully processed resignations`,
     });
   } catch (error) {
     console.error("Error processing resignations:", error);
-    res.status(500).json({ error: "Failed to process resignations" });
+    return NextResponse.json(
+      { error: "Failed to process resignations" },
+      { status: 500 }
+    );
   }
 }
