@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const AuthButton = dynamic(() => import("@/components/AuthButton.client"), {
   ssr: false,
@@ -30,6 +31,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [mobile, setMobile] = useState<boolean>(false);
   const sidebar = useSidebar();
+
+  const router = useRouter();
+  const handleSignout = () => {
+    router.push("/api/auth/signout");
+  };
 
   return (
     <div className="relative flex flex-row w-full h-screen overflow-hidden bg-black">
@@ -89,7 +95,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Sidebar.Footer>
           <div className="flex flex-col justify-center items-center text-sm">
-            <AuthButton />
+            {/* <AuthButton /> */}
+            <Button
+              className="bg-white text-black hover:bg-red-800 hover:text-white"
+              onClick={handleSignout}
+            >
+              Sign Out
+            </Button>
           </div>
         </Sidebar.Footer>
       </Sidebar>

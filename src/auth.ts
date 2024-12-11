@@ -156,8 +156,8 @@ const authOptions: NextAuthConfig = {
 
       session.user.greeting = `Goodholy! ${token.firstName} ${
         token.lastName
-      },  ${
-        token.officeName ? token.officeName + " " : token.departmentName + " "
+      }, ${token.officeName ? token.officeName : token.departmentName}${
+        token.position ? ", " + token.position : ""
       }`;
 
       session.user.greetingsStudent = `Goodholy ${token.firstName} ${token.lastName}, ${token.programName} ${token.departmentName}`;

@@ -39,6 +39,7 @@ function StaffApprovalPage() {
   const [comment, setComment] = useState("");
   const [requirements, setRequirements] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedRequirements, setSelectedRequirements] = useState([]);
 
   useEffect(() => {
     fetchYears();
@@ -251,7 +252,8 @@ function StaffApprovalPage() {
           rejectClearanceStep(activeStudent.id, step.id, comment);
         });
       });
-      setComment("");
+      // Clear selections after remarks
+      setSelectedRequirements([]);
     }
   };
 
@@ -306,6 +308,30 @@ function StaffApprovalPage() {
         (step) => step.status === "APPROVED" || step.status === "SIGNED"
       )
     );
+  };
+
+  useEffect(() => {
+    if (selectedRequirements.length > 0) {
+      const selected = requirements.filter((req) =>
+        selectedRequirements.includes(req.id)
+      );
+      const commentText = selected
+        .map((req) => `Missing Requirement: ${req.name}, ${req.description}`)
+        .join("\n");
+      setComment(commentText);
+    } else {
+      setComment("");
+    }
+  }, [selectedRequirements, requirements]);
+
+  const handleRequirementSelection = (requirementId) => {
+    setSelectedRequirements((prevSelected) => {
+      if (prevSelected.includes(requirementId)) {
+        return prevSelected.filter((id) => id !== requirementId);
+      } else {
+        return [...prevSelected, requirementId];
+      }
+    });
   };
 
   return (
@@ -480,8 +506,8 @@ function StaffApprovalPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {activeStudent?.user?.firstName} {activeStudent?.user?.lastName} -
-              Clearance Requirements
+              {activeStudent?.user?.firstName} {activeStudent?.user?.middleName}{" "}
+              {activeStudent?.user?.lastName} - Clearance Requirements
             </DialogTitle>
             <DialogDescription>
               Review the requirements and approve or add remarks.
@@ -489,37 +515,44 @@ function StaffApprovalPage() {
           </DialogHeader>
           <div className="py-4">
             <h3 className="font-semibold mb-2">Requirements:</h3>
-            <ul className="list-disc pl-5">
+            <ul className="list-none pl-0">
               {requirements.map((requirement) => (
-                <li key={requirement.id}>
-                  <span className="font-semibold">{requirement.name}</span>
-                  <p>{requirement.description}</p>
+                <li key={requirement.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedRequirements.includes(requirement.id)}
+                    onChange={() => handleRequirementSelection(requirement.id)}
+                    className="mr-2"
+                  />
+                  <label>
+                    {requirement.name}: {requirement.description}
+                  </label>
                 </li>
               ))}
             </ul>
           </div>
           <DialogFooter className="sm:justify-start">
             <div className="flex flex-col w-full gap-4">
-              <div className="flex justify-between">
-                <Button onClick={handleApprove} className="w-1/2 mr-2">
+              {/* Display comments in a read-only Textarea */}
+              <Textarea
+                placeholder="Comments generated from selected requirements"
+                value={comment}
+                readOnly
+              />
+              {/* Approve and Remarks buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleApprove}
+                  disabled={selectedRequirements.length > 0}
+                >
                   Approve
                 </Button>
                 <Button
                   onClick={handleRemarks}
-                  className="w-1/2 ml-2"
-                  variant="outline"
+                  disabled={selectedRequirements.length === 0}
                 >
                   Remarks
                 </Button>
-              </div>
-              <div>
-                <Label htmlFor="comment">Comment</Label>
-                <Textarea
-                  id="comment"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Enter your remarks here..."
-                />
               </div>
             </div>
           </DialogFooter>
