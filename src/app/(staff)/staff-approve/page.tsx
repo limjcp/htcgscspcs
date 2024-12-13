@@ -316,7 +316,7 @@ function StaffApprovalPage() {
         selectedRequirements.includes(req.id)
       );
       const commentText = selected
-        .map((req) => `Missing Requirement: ${req.name}, ${req.description}`)
+        .map((req) => ` ${req.description}`)
         .join("\n");
       setComment(commentText);
     } else {
@@ -332,6 +332,16 @@ function StaffApprovalPage() {
         return [...prevSelected, requirementId];
       }
     });
+  };
+
+  const groupRequirementsByTitle = (requirements) => {
+    return requirements.reduce((acc, req) => {
+      if (!acc[req.name]) {
+        acc[req.name] = [];
+      }
+      acc[req.name].push(req);
+      return acc;
+    }, {});
   };
 
   return (
@@ -515,21 +525,38 @@ function StaffApprovalPage() {
           </DialogHeader>
           <div className="py-4">
             <h3 className="font-semibold mb-2">Requirements:</h3>
-            <ul className="list-none pl-0">
-              {requirements.map((requirement) => (
-                <li key={requirement.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedRequirements.includes(requirement.id)}
-                    onChange={() => handleRequirementSelection(requirement.id)}
-                    className="mr-2"
-                  />
-                  <label>
-                    {requirement.name}: {requirement.description}
-                  </label>
-                </li>
-              ))}
-            </ul>
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="py-3 px-4 border-b">Requirement Title</th>
+                  <th className="py-3 px-4 border-b">Descriptions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(groupRequirementsByTitle(requirements)).map(
+                  ([title, reqs]) => (
+                    <tr key={title} className="hover:bg-gray-50">
+                      <td className="border px-4 py-2">{title}</td>
+                      <td className="border px-4 py-2">
+                        {reqs.map((req) => (
+                          <div key={req.id} className="flex items-center mb-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedRequirements.includes(req.id)}
+                              onChange={() =>
+                                handleRequirementSelection(req.id)
+                              }
+                              className="mr-2"
+                            />
+                            <label>{req.description}</label>
+                          </div>
+                        ))}
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
           </div>
           <DialogFooter className="sm:justify-start">
             <div className="flex flex-col w-full gap-4">
