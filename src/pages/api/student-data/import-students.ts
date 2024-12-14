@@ -11,7 +11,7 @@ export const config = {
 };
 
 const TIMEOUT_MS = 20000; // Set timeout to 20 seconds
-const BATCH_SIZE = 100; // Process 100 records at a time
+const BATCH_SIZE = 1; // Process 100 records at a time
 
 async function processBatch(dataBatch, db) {
   for (const record of dataBatch) {
