@@ -1,4 +1,3 @@
-// pages/api/import-students.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import xlsx from "xlsx";
@@ -11,15 +10,20 @@ export const config = {
   },
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const TIMEOUT_MS = 20000; // Set timeout to 20 seconds
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const startTime = Date.now();
   const form = formidable({});
+
+  const timeoutHandler = setTimeout(() => {
+    res.status(504).json({ error: "Request timed out" });
+  }, TIMEOUT_MS);
 
   form.parse(req, async (err, fields, files) => {
     if (err || !files.file) {
       console.error(err);
+      clearTimeout(timeoutHandler);
       res.status(400).json({ error: "File upload error" });
       return;
     }
@@ -56,7 +60,6 @@ export default async function handler(
         try {
           await connection.beginTransaction();
 
-          // Handle SchoolYear
           let enrollmentYearId = null;
           if (enrollmentYear) {
             const [rows]: any = await connection.execute(
@@ -75,7 +78,6 @@ export default async function handler(
             }
           }
 
-          // Handle Semester
           let enrollmentSemesterId = null;
           if (enrollmentSemester && enrollmentYearId) {
             const [rows]: any = await connection.execute(
@@ -85,7 +87,7 @@ export default async function handler(
             if (rows.length > 0) {
               enrollmentSemesterId = rows[0].id;
             } else {
-              const newSemesterId = cuid(); // Generate unique ID
+              const newSemesterId = cuid();
               await connection.execute(
                 "INSERT INTO Semester (id, semester, schoolYearId) VALUES (?, ?, ?)",
                 [newSemesterId, enrollmentSemester, enrollmentYearId]
@@ -94,12 +96,10 @@ export default async function handler(
             }
           }
 
-          // Prepare dateOfBirth for database (if not null)
           const dateOfBirthFormatted = dateOfBirth
             ? dateOfBirth.toISOString().slice(0, 19).replace("T", " ")
             : null;
 
-          // Check if student exists
           const [studentRows]: any = await connection.execute(
             "SELECT id FROM Student WHERE studentId = ? OR email = ?",
             [studentId, email]
@@ -186,8 +186,12 @@ export default async function handler(
         }
       }
 
+      clearTimeout(timeoutHandler);
+      const endTime = Date.now();
+      console.log(`Execution time: ${endTime - startTime} ms`);
       res.status(200).json({ message: "Data imported successfully" });
     } catch (error) {
+      clearTimeout(timeoutHandler);
       console.error(error);
       res.status(500).json({ error: "Import failed" });
     }
