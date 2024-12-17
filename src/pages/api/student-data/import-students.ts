@@ -12,6 +12,8 @@ export const config = {
 
 const CHUNK_SIZE = 100; // Process 100 records at a time
 
+let importProgress = 0;
+
 async function processBatch(dataBatch: any[], db: any) {
   for (const record of dataBatch) {
     const studentId = record.studentId ?? null;
@@ -187,7 +189,7 @@ async function updateImportProgress(
   progress: number,
   isComplete: boolean = false
 ) {
-  // Implement this function to update progress in your database or send to a webhook
+  importProgress = progress;
   console.log(
     `Import progress: ${progress}%${isComplete ? " (Complete)" : ""}`
   );
@@ -200,6 +202,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (req.method === "GET") {
+    return res.status(200).json({ progress: importProgress });
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

@@ -16,6 +16,7 @@ import { Upload, Search } from "lucide-react";
 export default function Page() {
   const [students, setStudents] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [importProgress, setImportProgress] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/student-data/student")
@@ -23,6 +24,19 @@ export default function Page() {
       .then((data) => setStudents(data))
       .catch((error) => console.error(error));
   }, []);
+
+  useEffect(() => {
+    if (importProgress !== null && importProgress < 100) {
+      const interval = setInterval(() => {
+        fetch("/api/student-data/import-students")
+          .then((res) => res.json())
+          .then((data) => setImportProgress(data.progress))
+          .catch((error) => console.error(error));
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [importProgress]);
 
   const handleImport = () => {
     document.getElementById("fileInput")?.click();
@@ -42,6 +56,7 @@ export default function Page() {
       });
 
       if (res.ok) {
+        setImportProgress(0);
         fetch("/api/student-data/student")
           .then((res) => res.json())
           .then((data) => setStudents(data));
@@ -93,6 +108,19 @@ export default function Page() {
               />
             </div>
           </div>
+          {importProgress !== null && (
+            <>
+              <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+                <div
+                  className="bg-blue-600 h-4 rounded-full"
+                  style={{ width: `${importProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-center mb-4">
+                {importProgress < 100 ? "Importing..." : "Import done"}
+              </p>
+            </>
+          )}
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
