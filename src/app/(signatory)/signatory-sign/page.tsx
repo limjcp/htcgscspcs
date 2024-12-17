@@ -261,11 +261,55 @@ function StaffApprovalAndSigningPage() {
   const handleView = (student) => {
     setActiveStudent(student);
     setIsModalOpen(true);
-    fetchRequirements(
-      session.user.officeId,
-      session.user.departmentId,
-      selectedSemester
-    );
+
+    fetchStudentRequirements(student.id, selectedSemester).then((response) => {
+      const studentRequirements = response.data;
+      // Filter out completed requirements
+      const filteredRequirements = studentRequirements.filter(
+        (req) => req.status !== "COMPLETED"
+      );
+      setRequirements(filteredRequirements);
+    });
+  };
+
+  const fetchStudentRequirements = async (studentId, semesterId) => {
+    try {
+      const response = await axios.get(
+        `/api/studentRequirements?studentId=${studentId}&semesterId=${semesterId}`
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching student requirements:", error);
+      setError("Failed to fetch student requirements.");
+      return null;
+    }
+  };
+
+  const updateStudentRequirement = async (
+    studentRequirementId,
+    status,
+    comments
+  ) => {
+    try {
+      const response = await axios.post("/api/updateStudentRequirement", {
+        studentRequirementId,
+        status,
+        comments,
+      });
+
+      if (response.status === 200) {
+        // Refresh the requirements list
+        fetchStudentRequirements(activeStudent.id, selectedSemester).then(
+          (response) => {
+            const studentRequirements = response.data;
+            setRequirements(studentRequirements);
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error updating student requirement:", error);
+      setError("Failed to update student requirement.");
+    }
   };
 
   const handleApprove = () => {
@@ -284,13 +328,29 @@ function StaffApprovalAndSigningPage() {
     if (activeStudent && activeStudent.clearances && comment) {
       activeStudent.clearances.forEach((clearance) => {
         clearance.steps.forEach((step) => {
-          rejectClearanceStep(activeStudent.id, step.id, comment);
+          rejectClearanceStep(
+            activeStudent.id,
+            step.id,
+            comment,
+            selectedRequirements // Pass selectedRequirements
+          );
         });
       });
+
+      // Update the status of selected student requirements to REJECTED
+      selectedRequirements.forEach((requirementId) => {
+        updateStudentRequirement(requirementId, "REJECTED", comment);
+      });
+
+      // Update the status of unselected student requirements to COMPLETED
+      requirements.forEach((requirement) => {
+        if (!selectedRequirements.includes(requirement.id)) {
+          updateStudentRequirement(requirement.id, "COMPLETED", "");
+        }
+      });
+
       // Clear selections after remarks
       setSelectedRequirements([]);
-      // Close modal after remarks
-      setIsModalOpen(false);
     }
   };
 
@@ -394,7 +454,10 @@ function StaffApprovalAndSigningPage() {
   const isFullyApproved = (student) => {
     return student.clearances.every((clearance) =>
       clearance.steps.every(
-        (step) => step.status === "APPROVED" || step.status === "SIGNED"
+        (step) =>
+          step.status === "APPROVED" ||
+          step.status === "SIGNED" ||
+          step.status === "COMPLETED"
       )
     );
   };
@@ -412,7 +475,7 @@ function StaffApprovalAndSigningPage() {
         selectedRequirements.includes(req.id)
       );
       const commentText = selected
-        .map((req) => `Missing Requirement: ${req.name}, ${req.description}`)
+        .map((req) => `${req.requirement.description}`)
         .join("\n");
       setComment(commentText);
     } else {
@@ -429,6 +492,16 @@ function StaffApprovalAndSigningPage() {
         return [...prevSelected, requirementId];
       }
     });
+  };
+
+  const groupRequirementsByTitle = (requirements) => {
+    return requirements.reduce((acc, req) => {
+      if (!acc[req.requirement.name]) {
+        acc[req.requirement.name] = [];
+      }
+      acc[req.requirement.name].push(req);
+      return acc;
+    }, {});
   };
 
   return (
@@ -634,21 +707,69 @@ function StaffApprovalAndSigningPage() {
           </DialogHeader>
           <div className="py-4">
             <h3 className="font-semibold mb-2">Requirements:</h3>
-            <ul className="list-none pl-0">
-              {requirements.map((requirement) => (
-                <li key={requirement.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedRequirements.includes(requirement.id)}
-                    onChange={() => handleRequirementSelection(requirement.id)}
-                    className="mr-2"
-                  />
-                  <label>
-                    {requirement.name}: {requirement.description}
-                  </label>
-                </li>
-              ))}
-            </ul>
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="py-3 px-4 border-b">Requirement Title</th>
+                  <th className="py-3 px-4 border-b">Descriptions</th>
+                  <th className="py-3 px-4 border-b">Status</th>
+                  <th className="py-3 px-4 border-b">Select</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(groupRequirementsByTitle(requirements)).map(
+                  ([title, reqs]) => (
+                    <tr key={title} className="hover:bg-gray-50">
+                      <td className="border px-4 py-2" rowSpan={reqs.length}>
+                        {title}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {reqs.map((req, index) => (
+                          <div
+                            key={req.id}
+                            className={`mb-2 ${
+                              index > 0 ? "border-t border-gray-200 pt-2" : ""
+                            }`}
+                          >
+                            {req.requirement.description}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {reqs.map((req, index) => (
+                          <div
+                            key={req.id}
+                            className={`mb-2 ${
+                              index > 0 ? "border-t border-gray-200 pt-2" : ""
+                            }`}
+                          >
+                            {req.status}
+                          </div>
+                        ))}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {reqs.map((req, index) => (
+                          <div
+                            key={req.id}
+                            className={`mb-2 ${
+                              index > 0 ? "border-t border-gray-200 pt-2" : ""
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedRequirements.includes(req.id)}
+                              onChange={() =>
+                                handleRequirementSelection(req.id)
+                              }
+                            />
+                          </div>
+                        ))}
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
           </div>
           <DialogFooter className="sm:justify-start">
             <div className="flex flex-col w-full gap-4">
