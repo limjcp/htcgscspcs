@@ -10,10 +10,9 @@ export const config = {
   },
 };
 
-const TIMEOUT_MS = 20000; // Set timeout to 20 seconds
-const BATCH_SIZE = 1; // Process 100 records at a time
+const CHUNK_SIZE = 100; // Process 100 records at a time
 
-async function processBatch(dataBatch, db) {
+async function processBatch(dataBatch: any[], db: any) {
   for (const record of dataBatch) {
     const studentId = record.studentId ?? null;
     const firstName = record.firstName ?? null;
@@ -167,20 +166,50 @@ async function processBatch(dataBatch, db) {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const startTime = Date.now();
-  const form = formidable({});
+async function processDataInBackground(data: any[]) {
+  for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+    const chunk = data.slice(i, i + CHUNK_SIZE);
+    await processBatch(chunk, db);
 
-  const timeoutHandler = setTimeout(() => {
-    res.status(504).json({ error: "Request timed out" });
-  }, TIMEOUT_MS);
+    // Update progress
+    const progress = Math.min(
+      100,
+      Math.round(((i + CHUNK_SIZE) / data.length) * 100)
+    );
+    await updateImportProgress(progress);
+  }
+
+  // Mark import as complete
+  await updateImportProgress(100, true);
+}
+
+async function updateImportProgress(
+  progress: number,
+  isComplete: boolean = false
+) {
+  // Implement this function to update progress in your database or send to a webhook
+  console.log(
+    `Import progress: ${progress}%${isComplete ? " (Complete)" : ""}`
+  );
+  // You might want to store this progress in a database or send it to a webhook
+  // For example:
+  // await db.execute('UPDATE ImportStatus SET progress = ?, isComplete = ? WHERE id = ?', [progress, isComplete, importId]);
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const form = formidable({});
 
   form.parse(req, async (err, fields, files) => {
     if (err || !files.file) {
       console.error(err);
-      clearTimeout(timeoutHandler);
-      res.status(400).json({ error: "File upload error" });
-      return;
+      return res.status(400).json({ error: "File upload error" });
     }
 
     try {
@@ -189,17 +218,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const sheetName = workbook.SheetNames[0];
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-      for (let i = 0; i < data.length; i += BATCH_SIZE) {
-        const dataBatch = data.slice(i, i + BATCH_SIZE);
-        await processBatch(dataBatch, db);
-      }
+      // Instead of processing all data at once, return the total count
+      res.status(200).json({ totalRecords: data.length });
 
-      clearTimeout(timeoutHandler);
-      const endTime = Date.now();
-      console.log(`Execution time: ${endTime - startTime} ms`);
-      res.status(200).json({ message: "Data imported successfully" });
+      // Process data in background
+      processDataInBackground(data);
     } catch (error) {
-      clearTimeout(timeoutHandler);
       console.error(error);
       res.status(500).json({ error: "Import failed" });
     }
